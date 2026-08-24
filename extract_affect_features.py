@@ -7,6 +7,21 @@ import json
 import os
 from pathlib import Path
 
+# Python 3.8 compatibility shim for BooleanOptionalAction
+if not hasattr(argparse, "BooleanOptionalAction"):
+    class _BooleanOptionalAction(argparse.Action):
+        def __init__(self, option_strings, dest, default=None, required=False, help=None, metavar=None):
+            _option_strings = []
+            for option_string in option_strings:
+                _option_strings.append(option_string)
+                if option_string.startswith('--'):
+                    _option_strings.append('--no-' + option_string[2:])
+            super().__init__(option_strings=_option_strings, dest=dest, nargs=0, default=default, required=required, help=help)
+        def __call__(self, parser, namespace, values, option_string=None):
+            if option_string in self.option_strings:
+                setattr(namespace, self.dest, not option_string.startswith('--no-'))
+    argparse.BooleanOptionalAction = _BooleanOptionalAction
+
 import numpy as np
 import torch
 from tqdm import tqdm
