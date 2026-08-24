@@ -7,7 +7,7 @@ class PureBehavioralAttentionClassifier(nn.Module):
     
     Fuses:
       • Branch 1 (Interaction): 32-dim YOLO spatial layout & student posture -> 48-dim
-      • Branch 2 (Affect):       8-dim facial emotion probabilities -> 48-dim
+      • Branch 2 (Affect):       7 expression probabilities + reliability -> 48-dim
     Total Fused Dimension: 48 + 48 = 96 dimensions per frame.
     """
     def __init__(
@@ -68,7 +68,7 @@ class PureBehavioralAttentionClassifier(nn.Module):
         # Input shape: (batch, 8, 40)
         # Slices:
         # [0:32]  -> Interaction features
-        # [32:40] -> Affect emotion features
+        # [32:40] -> 7 affect probabilities + affect reliability
         
         x_inter = x[:, :, 0:self.dim_inter]
         x_affect = x[:, :, self.dim_inter:self.dim_inter + self.dim_affect]

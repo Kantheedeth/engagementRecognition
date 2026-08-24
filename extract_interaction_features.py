@@ -1,145 +1,223 @@
-import os
-import numpy as np
-from ultralytics import YOLO
-from tqdm import tqdm
+"""Extract the branch's 32-dimensional YOLO interaction descriptor."""
 
-# VFOA "Instructional Zone" geometric boundary configs (left-most 27%)
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import cv2
+import numpy as np
+import torch
+from tqdm import tqdm
+from ultralytics import YOLO
+
+from feature_schema import INTERACTION_FEATURE_SCHEMA
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_INPUT_DIR = SCRIPT_DIR / "preprocessed_data" / "yolov5_640x640"
+DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "preprocessed_features" / "interaction_features"
+
+# VFOA "instructional zone" geometric boundary.
 ZONE_X_MIN = 0.0
 ZONE_X_MAX = 0.27
 ZONE_Y_MIN = 0.0
 ZONE_Y_MAX = 1.0
-
 MAX_STUDENTS_TRACKED = 5
 
-def extract_frame_interaction_descriptor(boxes):
-    """
-    Extracts a rich 32-dimensional interaction descriptor from YOLO person detections:
-      1. Global Classroom Geometry (7 dims):
-         - Total person count (normalized / 10.0)
-         - In-zone person count (normalized / 10.0)
-         - VFOA facing ratio (in_zone / total)
-         - Student centroid mean (cx_mean, cy_mean in [0, 1])
-         - Student spatial spread/dispersion (std_x, std_y in [0, 1])
-      2. Top-5 Student States (5 students x 5 dims = 25 dims):
-         - For each student (sorted by bbox area): [cx, cy, w, h, in_zone_flag]
-         - Zero-padded if fewer than 5 students detected.
-      Total: 7 + 25 = 32 dimensions.
-    """
+
+def extract_frame_interaction_descriptor(boxes) -> np.ndarray:
+    """Return 7 group geometry + 5x5 area-sorted person-state values."""
     persons = []
-    
     for box in boxes:
-        cls_id = int(box.cls[0])
-        if cls_id != 0:  # Class 0 is person
+        if int(box.cls[0]) != 0:
             continue
-            
-        xyxy = box.xyxy[0].cpu().numpy()
-        x1, y1, x2, y2 = xyxy
-        
+        x1, y1, x2, y2 = box.xyxy[0].detach().cpu().numpy()
         cx = ((x1 + x2) / 2.0) / 640.0
         cy = ((y1 + y2) / 2.0) / 640.0
-        w = (x2 - x1) / 640.0
-        h = (y2 - y1) / 640.0
-        area = w * h
-        
-        in_zone = 1.0 if (ZONE_X_MIN <= cx <= ZONE_X_MAX and ZONE_Y_MIN <= cy <= ZONE_Y_MAX) else 0.0
-        persons.append((area, cx, cy, w, h, in_zone))
-        
-    num_persons = len(persons)
-    
-    if num_persons == 0:
-        # Fallback baseline when no people detected
+        width = (x2 - x1) / 640.0
+        height = (y2 - y1) / 640.0
+        area = width * height
+        in_zone = float(
+            ZONE_X_MIN <= cx <= ZONE_X_MAX and ZONE_Y_MIN <= cy <= ZONE_Y_MAX
+        )
+        persons.append((area, cx, cy, width, height, in_zone))
+
+    person_count = len(persons)
+    if person_count == 0:
+        # Zero means no detected interaction evidence, not an engagement label.
         return np.zeros(32, dtype=np.float32)
-        
-    in_zone_count = sum(p[5] for p in persons)
-    vfoa_ratio = in_zone_count / num_persons
-    
-    cxs = [p[1] for p in persons]
-    cys = [p[2] for p in persons]
-    
-    cx_mean = float(np.mean(cxs))
-    cy_mean = float(np.mean(cys))
-    std_x = float(np.std(cxs)) if num_persons > 1 else 0.0
-    std_y = float(np.std(cys)) if num_persons > 1 else 0.0
-    
-    # 7 Global geometry features
+
+    in_zone_count = sum(person[5] for person in persons)
+    centers_x = [person[1] for person in persons]
+    centers_y = [person[2] for person in persons]
     global_features = [
-        num_persons / 10.0,
+        person_count / 10.0,
         in_zone_count / 10.0,
-        vfoa_ratio,
-        cx_mean,
-        cy_mean,
-        std_x,
-        std_y
+        in_zone_count / person_count,
+        float(np.mean(centers_x)),
+        float(np.mean(centers_y)),
+        float(np.std(centers_x)) if person_count > 1 else 0.0,
+        float(np.std(centers_y)) if person_count > 1 else 0.0,
     ]
-    
-    # Sort detected students by area (largest / closest first)
-    persons.sort(key=lambda p: p[0], reverse=True)
-    
-    # 25 Top-5 Student states (5 * 5 = 25)
-    student_features = []
-    for i in range(MAX_STUDENTS_TRACKED):
-        if i < num_persons:
-            _, cx, cy, w, h, in_zone = persons[i]
-            student_features.extend([cx, cy, w, h, in_zone])
+
+    persons.sort(key=lambda person: person[0], reverse=True)
+    person_features = []
+    for index in range(MAX_STUDENTS_TRACKED):
+        if index < person_count:
+            _, cx, cy, width, height, in_zone = persons[index]
+            person_features.extend([cx, cy, width, height, in_zone])
         else:
-            student_features.extend([0.0, 0.0, 0.0, 0.0, 0.0])
-            
-    descriptor = np.array(global_features + student_features, dtype=np.float32)
+            person_features.extend([0.0] * 5)
+    descriptor = np.asarray(global_features + person_features, dtype=np.float32)
+    if descriptor.shape != (32,) or not np.isfinite(descriptor).all():
+        raise ValueError(f"Invalid interaction descriptor: {descriptor}")
     return descriptor
 
-def main():
-    print("=" * 60)
-    print("Extracting Rich 32-dim Interaction Descriptors (YOLOv8)...")
-    print(f"Instruction Zone Bounds: X ∈ [{ZONE_X_MIN}, {ZONE_X_MAX}]")
-    print("=" * 60)
 
-    # Output directory
-    output_base = os.path.join("preprocessed_features", "interaction_features")
-    os.makedirs(output_base, exist_ok=True)
+def select_device(requested: str) -> str:
+    if requested != "auto":
+        return requested
+    if torch.cuda.is_available():
+        return "0"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
 
-    # Load YOLOv8n model
-    model = YOLO("yolov8n.pt")
 
-    splits = ["train", "val", "test"]
-    categories = ["low", "mid", "high"]
-
-    # Collect all tasks
+def collect_inputs(input_dir: Path) -> list[tuple[str, str, Path]]:
     tasks = []
-    for split in splits:
-        for cat in categories:
-            src_dir = os.path.join("preprocessed_data", "yolov5_640x640", split, cat)
-            if os.path.exists(src_dir):
-                files = [f for f in os.listdir(src_dir) if f.endswith(".npz")]
-                for f in files:
-                    tasks.append((split, cat, f))
+    for split in ("train", "val", "test"):
+        for category in ("low", "mid", "high"):
+            directory = input_dir / split / category
+            if directory.is_dir():
+                tasks.extend(
+                    (split, category, path) for path in sorted(directory.glob("*.npz"))
+                )
+    return tasks
 
-    print(f"Found {len(tasks)} videos to process.")
 
-    # Process all files
-    for split, cat, fname in tqdm(tasks, desc="Extracting 32-dim Interaction Features"):
-        vname = os.path.splitext(fname)[0]
-        
-        # Source path
-        src_path = os.path.join("preprocessed_data", "yolov5_640x640", split, cat, fname)
-        
-        # Destination path
-        dest_dir = os.path.join(output_base, split, cat)
-        os.makedirs(dest_dir, exist_ok=True)
-        dest_path = os.path.join(dest_dir, f"{vname}.npy")
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input_dir", type=Path, default=DEFAULT_INPUT_DIR)
+    parser.add_argument("--output_dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--model", default="yolov8n.pt")
+    parser.add_argument("--confidence", type=float, default=0.25)
+    parser.add_argument("--device", default="auto", help="auto, cpu, mps, or CUDA index")
+    parser.add_argument("--max_videos", type=int)
+    parser.add_argument("--overwrite", action="store_true")
+    return parser.parse_args()
 
-        # Load the preprocessed uint8 frames: (8, 640, 640, 3)
-        data = np.load(src_path)
-        frames = data['frames']
-        
-        # Batch inference on all 8 frames
-        results = model.predict(source=list(frames), conf=0.25, device='mps', verbose=False)
-        
-        descriptors = [extract_frame_interaction_descriptor(res.boxes) for res in results]
-        descriptors_arr = np.array(descriptors, dtype=np.float32)  # Shape: (8, 32)
-        np.save(dest_path, descriptors_arr)
 
-    print("32-dim Interaction feature extraction complete.")
-    print("=" * 60)
+def main() -> None:
+    args = parse_args()
+    input_dir = args.input_dir.expanduser().resolve()
+    output_dir = args.output_dir.expanduser().resolve()
+    if not 0.0 < args.confidence <= 1.0:
+        raise ValueError("--confidence must be in (0, 1]")
+    tasks = collect_inputs(input_dir)
+    if args.max_videos is not None:
+        if args.max_videos <= 0:
+            raise ValueError("--max_videos must be positive")
+        tasks = tasks[: args.max_videos]
+    if not tasks:
+        raise FileNotFoundError(f"No preprocessed .npz files found under {input_dir}")
+
+    device = select_device(args.device)
+    print("=" * 72)
+    print("Extracting 32-Dimensional Interaction Features")
+    print(f"YOLO model: {args.model} | device: {device} | confidence: {args.confidence}")
+    print(f"Instruction zone: x=[{ZONE_X_MIN}, {ZONE_X_MAX}], y=[{ZONE_Y_MIN}, {ZONE_Y_MAX}]")
+    print(f"Found {len(tasks)} videos")
+    print("=" * 72)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = output_dir / "extraction_manifest.json"
+    model = YOLO(args.model)
+    processed = 0
+    skipped = 0
+    failures = []
+
+    for split, category, source_path in tqdm(tasks, desc="Extracting interaction"):
+        destination_dir = output_dir / split / category
+        destination_dir.mkdir(parents=True, exist_ok=True)
+        destination_path = destination_dir / f"{source_path.stem}.npy"
+        if destination_path.is_file() and not args.overwrite:
+            existing = np.load(destination_path, allow_pickle=False)
+            if existing.shape == (8, 32) and np.isfinite(existing).all():
+                skipped += 1
+                continue
+            print(f"Replacing incompatible existing feature: {destination_path}")
+
+        try:
+            with np.load(source_path, allow_pickle=False) as archive:
+                frames_rgb = archive["frames"]
+            if frames_rgb.shape != (8, 640, 640, 3) or frames_rgb.dtype != np.uint8:
+                raise ValueError(
+                    f"frames are {frames_rgb.shape}/{frames_rgb.dtype}; expected "
+                    "(8, 640, 640, 3)/uint8"
+                )
+            # Ultralytics treats numpy-array sources as OpenCV BGR images.
+            frames_bgr = [
+                cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR) for frame_rgb in frames_rgb
+            ]
+            results = model.predict(
+                source=frames_bgr,
+                conf=args.confidence,
+                device=device,
+                verbose=False,
+            )
+            descriptors = np.stack(
+                [extract_frame_interaction_descriptor(result.boxes) for result in results]
+            ).astype(np.float32)
+            if descriptors.shape != (8, 32) or not np.isfinite(descriptors).all():
+                raise ValueError(f"Invalid output matrix {descriptors.shape}")
+            np.save(destination_path, descriptors)
+            processed += 1
+        except Exception as exc:
+            failures.append(f"{source_path}: {type(exc).__name__}: {exc}")
+
+    summary = {
+        "input_videos": len(tasks),
+        "processed_videos": processed,
+        "skipped_existing_videos": skipped,
+        "failed_videos": len(failures),
+    }
+    print(json.dumps(summary, indent=2))
+    if failures:
+        manifest_path.unlink(missing_ok=True)
+        for failure in failures[:20]:
+            print(f"  - {failure}")
+        raise RuntimeError(
+            f"Interaction extraction failed for {len(failures)} videos; no "
+            "descriptors were silently fabricated."
+        )
+
+    if args.max_videos is None:
+        manifest = {
+            "format_version": 1,
+            "feature_schema": INTERACTION_FEATURE_SCHEMA,
+            "shape_per_video": [8, 32],
+            "model": args.model,
+            "confidence": args.confidence,
+            "input_color": "RGB",
+            "ultralytics_numpy_color": "BGR",
+            "instruction_zone": {
+                "x_min": ZONE_X_MIN,
+                "x_max": ZONE_X_MAX,
+                "y_min": ZONE_Y_MIN,
+                "y_max": ZONE_Y_MAX,
+            },
+            "max_person_states": MAX_STUDENTS_TRACKED,
+            "summary": summary,
+        }
+        with manifest_path.open("w", encoding="utf-8") as file:
+            json.dump(manifest, file, indent=2)
+        print(f"Saved interaction provenance manifest: {manifest_path}")
+    else:
+        print("Diagnostic subset run: full-dataset manifest was not replaced.")
+
 
 if __name__ == "__main__":
     main()

@@ -2,11 +2,17 @@ import os
 import argparse
 import numpy as np
 import torch
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 from torch.utils.data import DataLoader
 from model_behavioral import PureBehavioralAttentionClassifier
-from dataset import EngagementDataset
+from dataset import EngagementDataset, load_feature_manifest
+from feature_schema import BEHAVIORAL_FEATURE_SCHEMA
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def plot_confusion_matrix(cm, classes, filename="confusion_matrix_behavioral.png"):
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -44,12 +50,20 @@ def evaluate(args):
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Using device: {device}")
 
+    expected_shape = (8, args.dim_inter + args.dim_affect)
+    feature_manifest = load_feature_manifest(
+        args.data_dir,
+        expected_schema=BEHAVIORAL_FEATURE_SCHEMA,
+        expected_shape=expected_shape,
+    )
     test_dir = os.path.join(args.data_dir, "test")
     if not os.path.exists(test_dir):
         print(f"Error: Test dataset directory '{test_dir}' not found!")
         return
 
-    test_dataset = EngagementDataset(test_dir)
+    test_dataset = EngagementDataset(test_dir, expected_shape=expected_shape)
+    if not test_dataset:
+        raise RuntimeError(f"No test matrices found under {test_dir}")
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
     print(f"Loaded {len(test_dataset)} test samples.")
 
@@ -61,12 +75,18 @@ def evaluate(args):
         num_classes=3
     ).to(device)
 
-    weights_path = os.path.join(args.checkpoint_dir, "model_weights_behavioral.pth")
-    if not os.path.exists(weights_path):
-        print(f"Error: Model weights not found at '{weights_path}'! Train the model first.")
+    checkpoint_path = os.path.join(args.checkpoint_dir, "best_model_behavioral.pth")
+    if not os.path.exists(checkpoint_path):
+        print(f"Error: Model checkpoint not found at '{checkpoint_path}'! Train the model first.")
         return
 
-    model.load_state_dict(torch.load(weights_path, map_location=device))
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    if checkpoint.get("feature_manifest") != feature_manifest:
+        raise ValueError(
+            "Checkpoint feature provenance does not match the current behavioral "
+            "matrices. Rebuild, retrain, and then evaluate."
+        )
+    model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
     y_true = []
@@ -94,7 +114,11 @@ def evaluate(args):
     print("\n" + "-" * 55)
     print("CLASSIFICATION METRICS REPORT (PURE BEHAVIORAL FEATURES)")
     print("-" * 55)
-    print(classification_report(y_true, y_pred, target_names=class_names))
+    print(
+        classification_report(
+            y_true, y_pred, target_names=class_names, zero_division=0
+        )
+    )
     print(f"Model Macro-F1 Score:     {model_f1*100:.2f}%")
     print(f"Baseline (Always Low) F1:  {baseline_f1*100:.2f}%")
     print("-" * 55 + "\n")
@@ -104,14 +128,14 @@ def evaluate(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="feature_matrices_behavioral")
-    parser.add_argument("--checkpoint_dir", default="checkpoints")
+    parser.add_argument("--data_dir", default=os.path.join(SCRIPT_DIR, "feature_matrices_behavioral"))
+    parser.add_argument("--checkpoint_dir", default=os.path.join(SCRIPT_DIR, "checkpoints"))
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)
     parser.add_argument("--branch_dim", type=int, default=48)
     parser.add_argument("--num_heads", type=int, default=4)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--output_cm_file", default="confusion_matrix_behavioral.png")
+    parser.add_argument("--output_cm_file", default=os.path.join(SCRIPT_DIR, "confusion_matrix_behavioral.png"))
     
     args = parser.parse_args()
     evaluate(args)

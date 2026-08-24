@@ -7,7 +7,10 @@ from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from model import MultiBranchTemporalAttentionClassifier
-from dataset import EngagementDataset
+from dataset import EngagementDataset, load_feature_manifest
+from feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class DummyAutocast:
     def __enter__(self): return None
@@ -31,6 +34,8 @@ def calculate_class_weights(dataset):
         labels.append(y.item())
         
     classes, counts = np.unique(labels, return_counts=True)
+    if classes.tolist() != [0, 1, 2]:
+        raise ValueError(f"Training split must contain classes 0, 1, and 2; got {classes}")
     total = len(labels)
     num_classes = len(classes)
     
@@ -57,9 +62,21 @@ def train(args):
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Using device: {device}")
 
-    # Initialize Datasets and Loaders
-    train_dataset = EngagementDataset(os.path.join(args.data_dir, "train"))
-    val_dataset = EngagementDataset(os.path.join(args.data_dir, "val"))
+    # Initialize Datasets and Loaders only after validating matrix provenance.
+    expected_shape = (8, args.dim_scene + args.dim_inter + args.dim_affect)
+    feature_manifest = load_feature_manifest(
+        args.data_dir,
+        expected_schema=MULTI_BRANCH_FEATURE_SCHEMA,
+        expected_shape=expected_shape,
+    )
+    train_dataset = EngagementDataset(
+        os.path.join(args.data_dir, "train"), expected_shape=expected_shape
+    )
+    val_dataset = EngagementDataset(
+        os.path.join(args.data_dir, "val"), expected_shape=expected_shape
+    )
+    if not train_dataset or not val_dataset:
+        raise RuntimeError("Training and validation splits must both contain matrices")
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
@@ -165,9 +182,19 @@ def train(args):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_loss': best_val_loss,
-                'val_acc': epoch_val_acc
+                'val_acc': epoch_val_acc,
+                'feature_manifest': feature_manifest,
+                'model_config': {
+                    'dim_scene': args.dim_scene,
+                    'dim_inter': args.dim_inter,
+                    'dim_affect': args.dim_affect,
+                    'scene_branch_dim': args.scene_branch_dim,
+                    'inter_branch_dim': args.inter_branch_dim,
+                    'affect_branch_dim': args.affect_branch_dim,
+                    'num_heads': args.num_heads,
+                    'dropout': args.dropout,
+                },
             }, best_model_path)
-            torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, "model_weights.pth"))
         else:
             patience_counter += 1
 
@@ -181,8 +208,8 @@ def train(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="feature_matrices")
-    parser.add_argument("--checkpoint_dir", default="checkpoints")
+    parser.add_argument("--data_dir", default=os.path.join(SCRIPT_DIR, "feature_matrices"))
+    parser.add_argument("--checkpoint_dir", default=os.path.join(SCRIPT_DIR, "checkpoints"))
     parser.add_argument("--dim_scene", type=int, default=576)
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)

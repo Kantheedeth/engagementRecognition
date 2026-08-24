@@ -1,13 +1,13 @@
 # Multi-Modal Student Engagement Recognition in Classroom Videos
 
-A lightweight, real-time deep learning pipeline designed to recognize student engagement levels (**Low**, **Mid**, **High**) from 10-second classroom video clips using multi-modal feature extraction, multi-branch balanced attention, and standalone pure-behavioral modeling.
+A research pipeline for recognizing student engagement levels (**Low**, **Mid**, **High**) from 10-second classroom video clips using offline multi-modal feature extraction, multi-branch balanced attention, and standalone pure-behavioral modeling.
 
 ---
 
 ## 📌 Architectures & Pipelines
 
 This repository supports two execution modes:
-1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and Affect (HSEmotion/YuNet) while allocating **80% of embedding representation to behavioral signals**.
+1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and track-aware Affect (RetinaFace + ByteTrack + PyTorch FER) while allocating **80% of embedding representation to behavioral signals**.
 2. **Pure Behavioral Pipeline** (Zero Scene Shortcut): Strips away visual background features entirely, relying **100% on student body posture, spatial density, and facial expressions**.
 
 ```text
@@ -20,8 +20,8 @@ This repository supports two execution modes:
   │ (160x160)                                      │ (640x640)                        │ (640x640)
   ▼                                                ▼                                  ▼
 ┌──────────────────┐               ┌───────────────────────────────┐  ┌───────────────────────────────┐
-│ MobileNetV3      │               │ YOLOv8 32-dim Interaction     │  │ OpenCV YuNet + HSEmotion      │
-│ Small (576-dim)  │               │ Geometry & Density (32-dim)   │  │ Emotion Probabilities (8-dim) │
+│ MobileNetV3      │               │ YOLOv8 32-dim Interaction     │  │ RetinaFace + ByteTrack        │
+│ Small (576-dim)  │               │ Geometry & Density (32-dim)   │  │ PyTorch FER (7 + reliability) │
 └────────┬─────────┘               └───────────────┬───────────────┘  └───────────────┬───────────────┘
          │                                         │                                  │
          ▼                                         ▼                                  ▼
@@ -51,40 +51,18 @@ This repository supports two execution modes:
 ========================================================================================
  YOLO Interaction (32-dim) ──► Linear(32, 48) ──┐
                                                 ├──► [ 96-dim ] ──► Temporal Attention ──► Output
- HSEmotion Affect (8-dim)  ──► Linear(8,  48) ──┘
+ Track-Aware Affect (8-dim) ─► Linear(8,  48) ──┘
  (Zero Scene Features / Zero Background Memorization)
 ```
 
 ---
 
-## 📊 Benchmark & Evaluation Results
+## 📊 Benchmark Status
 
-Evaluated on the unseen test split (132 video clips):
-
-### 1. Classification Metrics Summary
-
-| Evaluation Setup | Modalities Used | Fused Dimensions | Test Accuracy | Macro-F1 Score |
-| :--- | :--- | :---: | :---: | :---: |
-| **Multi-Branch Balanced Fusion** | Scene (16) + Interaction (32) + Affect (32) | **80-dim** | **100.00%** | **100.00%** |
-| **Pure Behavioral (Zero Scene)** | Interaction (48) + Affect (48) | **96-dim** | **73.00%** | **71.65%** |
-| **Majority Class Baseline** | Always predicts Low | — | 54.54% | **23.53%** |
-
-### 2. Detailed Breakdown: Pure Behavioral Model (No Scene Shortcut)
-
-```text
-              precision    recall  f1-score   support
-
-         Low       0.81      0.72      0.76        72
-         Mid       0.66      0.84      0.74        25
-        High       0.64      0.66      0.65        35
-
-    accuracy                           0.73       132
-   macro avg       0.70      0.74      0.72       132
-weighted avg       0.74      0.73      0.73       132
-
-Model Macro-F1 Score:     71.65%
-Baseline (Always Low) F1:  23.53%
-```
+The previously committed accuracy and confusion matrices were produced with the
+retired YuNet/HSEmotion affect schema. They are not results for this revised
+track-aware pipeline. Re-extract all affect features, rebuild both matrix
+datasets, retrain, and evaluate before reporting new accuracy or Macro-F1.
 
 ---
 
@@ -102,7 +80,8 @@ conda create -n slowfast python=3.8 -y
 conda activate slowfast
 
 # 3. Install dependencies
-pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib ultralytics emotiefflib timm onnx onnxruntime
+pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib ultralytics
+pip install -r requirements-affect.txt
 ```
 
 ---
@@ -117,6 +96,10 @@ python preprocess_frames.py
 python validate_preprocessing.py
 ```
 
+Paths are resolved relative to the script and detected dataset root. Missing or
+undecodable videos fail preprocessing; they are never replaced with a video
+from `Low` or with fabricated black frames.
+
 ### Phase 2: Feature Extraction
 Extract numerical vectors offline from the three modules:
 ```bash
@@ -126,9 +109,15 @@ python extract_scene_features.py
 # 2. Rich interaction features (YOLOv8 layout + student coordinates -> 32-dim)
 python extract_interaction_features.py
 
-# 3. Affect emotion features (YuNet + HSEmotion ONNX -> 8-dim)
-python extract_affect_features.py
+# 3. Track-aware affect (RetinaFace + ByteTrack + PyTorch FER -> 8-dim)
+python extract_affect_features.py --save_track_details
 ```
+
+The affect tensor remains `(8, 8)`, but its columns are now `anger, disgust,
+fear, happiness, sadness, surprise, neutral, affect_reliability`. Outputs are
+written to `preprocessed_features/affect_track_features`, preserving any old
+`affect_features` directory without using it. Missing faces produce zero
+evidence and zero reliability; there is no hard-coded neutral or Low fallback.
 
 ---
 
@@ -166,8 +155,14 @@ python evaluate_behavioral.py
 Visualizes the VFOA boundary overlaid on actual classroom frames:
 ```bash
 python audit_camera_drift.py
+
+# Visualize saved anonymous face tracks and affect estimates
+python create_affect_audit_view.py \
+  --track_json debug_validation/affect_tracks/train/low/view1000.json
 ```
-*(Annotated audit images are saved to `audit_outputs/`)*.
+
+The affect audit produces a contact sheet, annotated MP4, CSV table, and
+SHA-256 provenance summary without rerunning inference.
 
 ---
 
@@ -176,7 +171,7 @@ python audit_camera_drift.py
 ```text
 engagementRecognition/
 ├── audit_outputs/                 # Annotated frames from camera drift audit
-├── checkpoints/                   # Trained model weights (model_weights.pth, best_model_behavioral.pth)
+├── checkpoints/                   # Provenance-bearing best-model checkpoints
 │
 ├── dataset.py                     # PyTorch Dataset loader for feature matrices
 ├── model.py                       # Multi-Branch Balanced Attention architecture (16/32/32)
@@ -187,7 +182,11 @@ engagementRecognition/
 │
 ├── extract_scene_features.py      # Phase 2A: MobileNetV3 scene feature extraction (576-dim)
 ├── extract_interaction_features.py# Phase 2B: YOLOv8 rich interaction extraction (32-dim)
-├── extract_affect_features.py     # Phase 2C: YuNet + HSEmotion affect extraction (8-dim)
+├── affect_module.py               # RetinaFace + ByteTrack + FER aggregation
+├── extract_affect_features.py     # Phase 2C: track-aware affect extraction (8-dim)
+├── create_affect_audit_view.py    # Saved-track visual/CSV/provenance audit
+├── feature_schema.py              # Cross-stage feature contracts
+├── requirements-affect.txt        # Affect-specific dependencies
 │
 ├── build_feature_matrices.py      # Combines Scene + Interaction + Affect (616-dim)
 ├── build_behavioral_matrices.py   # Combines Interaction + Affect (40-dim, Zero Scene)
@@ -205,3 +204,17 @@ engagementRecognition/
 ├── .gitignore                     # Git exclusion rules for large datasets
 └── README.md                      # Complete project documentation
 ```
+
+## Affect interpretation and provenance
+
+- Track IDs are anonymous and reset for each video; they do not identify a
+  student across videos.
+- Eight uniformly sampled frames are sparse for ByteTrack. Inspect audit views
+  for ID fragmentation and compare against `--no-tracking` experimentally.
+- Facial-expression probabilities are model estimates, not verified internal
+  emotions or ground truth. Use them only as uncertain group-level evidence.
+- Both matrix builders require the revised interaction and affect extraction
+  manifests. They reject retired affect artifacts even though both affect
+  formats happen to have shape `(8, 8)`.
+- Training checkpoints embed the complete feature manifest. Evaluation refuses
+  a checkpoint built from different feature extraction settings.

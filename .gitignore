@@ -6,6 +6,7 @@ videos/
 preprocessed_data/
 preprocessed_features/
 feature_matrices/
+feature_matrices_behavioral/
 
 # Checkpoints and Model Weights (Large Binaries)
 checkpoints/

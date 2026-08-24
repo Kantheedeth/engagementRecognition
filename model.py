@@ -5,7 +5,8 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
     """
     Multi-Branch Balanced Feature Fusion Network.
     
-    Independently projects Scene (576-dim), Interaction (32-dim), and Affect (8-dim)
+    Independently projects Scene (576-dim), Interaction (32-dim), and track-aware
+    Affect (7 canonical expression probabilities + 1 reliability value)
     into customizable embedding branches (e.g. Scene: 16, Interaction: 32, Affect: 32)
     to prioritize behavioral features over visual scene background.
     """
