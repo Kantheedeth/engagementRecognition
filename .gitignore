@@ -1,0 +1,43 @@
+# Raw dataset & Videos
+cleanedDataset/
+videos/
+
+# Preprocessed Data & Intermediate Features
+preprocessed_data/
+preprocessed_features/
+feature_matrices/
+
+# Checkpoints and Model Weights (Large Binaries)
+checkpoints/
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# Visual Debug and Audit Outputs
+debug_validation/
+audit_outputs/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+.venv_backup/
+env/
+venv/
+ENV/
+
+# System & IDE
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.cache/
+.vscode/
