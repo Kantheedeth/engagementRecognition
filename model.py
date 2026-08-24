@@ -6,15 +6,17 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
     Multi-Branch Balanced Feature Fusion Network.
     
     Independently projects Scene (576-dim), Interaction (32-dim), and Affect (8-dim)
-    into equal-sized embedding branches (32-dim each) to prevent the high-dimensional 
-    scene features from overwhelming behavioral signals.
+    into customizable embedding branches (e.g. Scene: 16, Interaction: 32, Affect: 32)
+    to prioritize behavioral features over visual scene background.
     """
     def __init__(
         self, 
         dim_scene=576, 
         dim_inter=32, 
         dim_affect=8, 
-        branch_dim=32, 
+        scene_branch_dim=16, 
+        inter_branch_dim=32, 
+        affect_branch_dim=32, 
         num_heads=4, 
         num_classes=3, 
         dropout=0.1
@@ -25,34 +27,35 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
         self.dim_inter = dim_inter
         self.dim_affect = dim_affect
         
-        # Branch A: Scene Projection (576 -> 32)
+        # Branch A: Scene Projection (576 -> scene_branch_dim)
         self.branch_scene = nn.Sequential(
-            nn.Linear(dim_scene, branch_dim),
-            nn.LayerNorm(branch_dim),
+            nn.Linear(dim_scene, scene_branch_dim),
+            nn.LayerNorm(scene_branch_dim),
             nn.ReLU(),
             nn.Dropout(dropout)
         )
         
-        # Branch B: Interaction Projection (32 -> 32)
+        # Branch B: Interaction Projection (32 -> inter_branch_dim)
         self.branch_inter = nn.Sequential(
-            nn.Linear(dim_inter, branch_dim),
-            nn.LayerNorm(branch_dim),
+            nn.Linear(dim_inter, inter_branch_dim),
+            nn.LayerNorm(inter_branch_dim),
             nn.ReLU(),
             nn.Dropout(dropout)
         )
         
-        # Branch C: Affect Projection (8 -> 32)
+        # Branch C: Affect Projection (8 -> affect_branch_dim)
         self.branch_affect = nn.Sequential(
-            nn.Linear(dim_affect, branch_dim),
-            nn.LayerNorm(branch_dim),
+            nn.Linear(dim_affect, affect_branch_dim),
+            nn.LayerNorm(affect_branch_dim),
             nn.ReLU(),
             nn.Dropout(dropout)
         )
         
-        # Balanced fused dimension: 32 + 32 + 32 = 96
-        fused_dim = branch_dim * 3
+        # Total fused dimension: e.g. 16 + 32 + 32 = 80
+        fused_dim = scene_branch_dim + inter_branch_dim + affect_branch_dim
+        assert fused_dim % num_heads == 0, f"fused_dim ({fused_dim}) must be divisible by num_heads ({num_heads})"
         
-        # Multi-Head Self-Attention over the sequence of 8 frames
+        # Multi-Head Self-Attention over sequence of 8 frames
         self.attn = nn.MultiheadAttention(
             embed_dim=fused_dim, 
             num_heads=num_heads, 
@@ -68,11 +71,6 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
         
     def forward(self, x):
         # Input shape: (batch, 8, 616)
-        # Feature slices:
-        # [0:576]   -> MobileNetV3 Scene
-        # [576:608] -> YOLOv8 32-dim Interaction
-        # [608:616] -> HSEmotion 8-dim Affect
-        
         s_end = self.dim_scene
         i_end = s_end + self.dim_inter
         a_end = i_end + self.dim_affect
@@ -81,12 +79,12 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
         x_inter = x[:, :, s_end:i_end]
         x_affect = x[:, :, i_end:a_end]
         
-        feat_scene = self.branch_scene(x_scene)    # (batch, 8, 32)
-        feat_inter = self.branch_inter(x_inter)    # (batch, 8, 32)
-        feat_affect = self.branch_affect(x_affect)  # (batch, 8, 32)
+        feat_scene = self.branch_scene(x_scene)    # (batch, 8, scene_branch_dim)
+        feat_inter = self.branch_inter(x_inter)    # (batch, 8, inter_branch_dim)
+        feat_affect = self.branch_affect(x_affect)  # (batch, 8, affect_branch_dim)
         
-        # Balanced Concatenation (Exactly 33.3% representation per modality)
-        fused = torch.cat([feat_scene, feat_inter, feat_affect], dim=-1)  # (batch, 8, 96)
+        # Concatenate into fused state: (batch, 8, fused_dim)
+        fused = torch.cat([feat_scene, feat_inter, feat_affect], dim=-1)
         
         # Temporal Multi-Head Self-Attention
         attn_out, _ = self.attn(fused, fused, fused)
@@ -95,7 +93,7 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
         out = self.dropout(out)
         
         # Mean pooling over 8 frames
-        pooled = out.mean(dim=1)  # (batch, 96)
+        pooled = out.mean(dim=1)  # (batch, fused_dim)
         
         # Logits output
         logits = self.fc(pooled)  # (batch, 3)
@@ -105,9 +103,9 @@ class MultiBranchTemporalAttentionClassifier(nn.Module):
 TemporalAttentionClassifier = MultiBranchTemporalAttentionClassifier
 
 if __name__ == "__main__":
-    model = MultiBranchTemporalAttentionClassifier()
+    model = MultiBranchTemporalAttentionClassifier(scene_branch_dim=16, inter_branch_dim=32, affect_branch_dim=32)
     dummy_input = torch.randn(2, 8, 616)
     out = model(dummy_input)
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Multi-Branch Attention Model output shape: {out.shape}")
+    print(f"Multi-Branch Attention Model (16/32/32) output shape: {out.shape}")
     print(f"Total trainable parameters: {num_params:,}")

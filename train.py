@@ -40,12 +40,16 @@ def calculate_class_weights(dataset):
     return torch.tensor(weights, dtype=torch.float32)
 
 def train(args):
+    fused_dim = args.scene_branch_dim + args.inter_branch_dim + args.affect_branch_dim
+    behavioral_pct = ((args.inter_branch_dim + args.affect_branch_dim) / fused_dim) * 100.0
+    scene_pct = (args.scene_branch_dim / fused_dim) * 100.0
+    
     print("=" * 60)
-    print("Multi-Branch Balanced Fusion Training")
-    print(f"  • Scene Branch       : {args.dim_scene} -> {args.branch_dim}")
-    print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
-    print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
-    print(f"  • Fused Embed Dim    : {args.branch_dim * 3} (Equal 33.3% per modality)")
+    print("Multi-Branch Feature Fusion Training")
+    print(f"  • Scene Branch       : {args.dim_scene} -> {args.scene_branch_dim} ({scene_pct:.1f}% of fused state)")
+    print(f"  • Interaction Branch : {args.dim_inter} -> {args.inter_branch_dim}")
+    print(f"  • Affect Branch      : {args.dim_affect} -> {args.affect_branch_dim}")
+    print(f"  • Total Fused Dim    : {fused_dim} (Behavioral makes up {behavioral_pct:.1f}%)")
     print("=" * 60)
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
@@ -72,7 +76,9 @@ def train(args):
         dim_scene=args.dim_scene,
         dim_inter=args.dim_inter,
         dim_affect=args.dim_affect,
-        branch_dim=args.branch_dim,
+        scene_branch_dim=args.scene_branch_dim,
+        inter_branch_dim=args.inter_branch_dim,
+        affect_branch_dim=args.affect_branch_dim,
         num_heads=args.num_heads,
         num_classes=3,
         dropout=args.dropout
@@ -180,7 +186,9 @@ if __name__ == "__main__":
     parser.add_argument("--dim_scene", type=int, default=576)
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)
-    parser.add_argument("--branch_dim", type=int, default=32)
+    parser.add_argument("--scene_branch_dim", type=int, default=16, help="Branch dimension for Scene (e.g. 16)")
+    parser.add_argument("--inter_branch_dim", type=int, default=32, help="Branch dimension for Interaction (e.g. 32)")
+    parser.add_argument("--affect_branch_dim", type=int, default=32, help="Branch dimension for Affect (e.g. 32)")
     parser.add_argument("--num_heads", type=int, default=4)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--batch_size", type=int, default=32)

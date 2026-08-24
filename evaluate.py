@@ -35,8 +35,14 @@ def plot_confusion_matrix(cm, classes, filename="confusion_matrix.png"):
     print(f"Confusion matrix plot successfully saved to {filename}")
 
 def evaluate(args):
+    fused_dim = args.scene_branch_dim + args.inter_branch_dim + args.affect_branch_dim
+    behavioral_pct = ((args.inter_branch_dim + args.affect_branch_dim) / fused_dim) * 100.0
+    scene_pct = (args.scene_branch_dim / fused_dim) * 100.0
+
     print("=" * 60)
     print("Running Multi-Branch Pipeline Evaluation Phase...")
+    print(f"  • Scene: {args.scene_branch_dim} ({scene_pct:.1f}%) | Interaction: {args.inter_branch_dim} | Affect: {args.affect_branch_dim} (Behavioral: {behavioral_pct:.1f}%)")
+    print(f"  • Total Fused State: {fused_dim}-dim")
     print("=" * 60)
 
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
@@ -57,7 +63,9 @@ def evaluate(args):
         dim_scene=args.dim_scene,
         dim_inter=args.dim_inter,
         dim_affect=args.dim_affect,
-        branch_dim=args.branch_dim,
+        scene_branch_dim=args.scene_branch_dim,
+        inter_branch_dim=args.inter_branch_dim,
+        affect_branch_dim=args.affect_branch_dim,
         num_heads=args.num_heads,
         num_classes=3
     ).to(device)
@@ -93,7 +101,7 @@ def evaluate(args):
     cm = confusion_matrix(y_true, y_pred)
     
     print("\n" + "-" * 50)
-    print("CLASSIFICATION METRICS REPORT (MULTI-BRANCH FUSION)")
+    print("CLASSIFICATION METRICS REPORT (MULTI-BRANCH 16/32/32)")
     print("-" * 50)
     print(classification_report(y_true, y_pred, target_names=class_names))
     print(f"Model Macro-F1 Score:     {model_f1*100:.2f}%")
@@ -110,7 +118,9 @@ if __name__ == "__main__":
     parser.add_argument("--dim_scene", type=int, default=576)
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)
-    parser.add_argument("--branch_dim", type=int, default=32)
+    parser.add_argument("--scene_branch_dim", type=int, default=16)
+    parser.add_argument("--inter_branch_dim", type=int, default=32)
+    parser.add_argument("--affect_branch_dim", type=int, default=32)
     parser.add_argument("--num_heads", type=int, default=4)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--output_cm_file", default="confusion_matrix.png")
