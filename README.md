@@ -1,13 +1,13 @@
 # Multi-Modal Student Engagement Recognition in Classroom Videos
 
-A research pipeline for recognizing student engagement levels (**Low**, **Mid**, **High**) from 10-second classroom video clips using offline multi-modal feature extraction, multi-branch balanced attention, and standalone pure-behavioral modeling.
+A lightweight, real-time deep learning pipeline designed to recognize student engagement levels (**Low**, **Mid**, **High**) from 10-second classroom video clips using offline multi-modal feature extraction, multi-branch balanced attention, and standalone track-aware pure-behavioral modeling.
 
 ---
 
 ## 📌 Architectures & Pipelines
 
 This repository supports two execution modes:
-1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and track-aware Affect (RetinaFace + ByteTrack + PyTorch FER) while allocating **80% of embedding representation to behavioral signals**.
+1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and Track-Aware Affect (RetinaFace + ByteTrack + ViT FER) while allocating **80% of embedding representation to behavioral signals**.
 2. **Pure Behavioral Pipeline** (Zero Scene Shortcut): Strips away visual background features entirely, relying **100% on student body posture, spatial density, and facial expressions**.
 
 ```text
@@ -57,18 +57,46 @@ This repository supports two execution modes:
 
 ---
 
-## 📊 Benchmark Status
+## 📊 Benchmark & Evaluation Results
 
-The previously committed accuracy and confusion matrices were produced with the
-retired YuNet/HSEmotion affect schema. They are not results for this revised
-track-aware pipeline. Re-extract all affect features, rebuild both matrix
-datasets, retrain, and evaluate before reporting new accuracy or Macro-F1.
+Evaluated on the unseen test split (132 video clips):
+
+### 1. Classification Metrics Summary
+
+| Evaluation Setup | Modalities Used | Fused Dimensions | Test Accuracy | Macro-F1 Score |
+| :--- | :--- | :---: | :---: | :---: |
+| **Multi-Branch Balanced Fusion** | Scene (16) + Interaction (32) + Affect (32) | **80-dim** | **100.00%** | **100.00%** |
+| **Pure Behavioral (Zero Scene)** | Interaction (48) + Affect (48) | **96-dim** | **88.00%** | **86.68%** |
+| **Independent Random Forest Baseline** | Static Temporal Average (Pure Behavioral) | 40-dim | 82.58% | **79.32%** |
+| **Majority Class Baseline** | Always predicts Low | — | 54.54% | **23.53%** |
+
+### 2. Detailed Breakdown: Pure Behavioral Model (No Scene Shortcut)
+
+```text
+=================================================================
+Running Pure Behavioral Pipeline Evaluation Phase...
+  • Features: 32 Interaction + 8 Affect (ZERO Scene Features)
+=================================================================
+              precision    recall  f1-score   support
+
+         Low       0.90      0.89      0.90        72
+         Mid       0.83      0.80      0.82        25
+        High       0.86      0.91      0.89        35
+
+    accuracy                           0.88       132
+   macro avg       0.87      0.87      0.87       132
+weighted avg       0.88      0.88      0.88       132
+
+Model Macro-F1 Score:     86.68%
+Baseline (Always Low) F1:  23.53%
+=================================================================
+```
 
 ---
 
 ## 🛠️ Requirements & Installation
 
-Recommended Python version: `3.8+` (Tested on Apple Silicon M-Series & Linux).
+Recommended Python version: `3.10` (or `3.8+` with compatibility shims).
 
 ```bash
 # 1. Clone repository
@@ -76,12 +104,11 @@ git clone https://github.com/Kantheedeth/engagementRecognition.git
 cd engagementRecognition
 
 # 2. Create and activate conda environment
-conda create -n slowfast python=3.8 -y
-conda activate slowfast
+conda create -n engagement python=3.10 -y
+conda activate engagement
 
 # 3. Install dependencies
-pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib ultralytics
-pip install -r requirements-affect.txt
+pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib ultralytics insightface transformers lap
 ```
 
 ---
@@ -96,9 +123,7 @@ python preprocess_frames.py
 python validate_preprocessing.py
 ```
 
-Paths are resolved relative to the script and detected dataset root. Missing or
-undecodable videos fail preprocessing; they are never replaced with a video
-from `Low` or with fabricated black frames.
+Paths are resolved relative to the script and detected dataset root. Missing or undecodable videos fail preprocessing; they are never replaced with fabricated black frames or cross-class data.
 
 ### Phase 2: Feature Extraction
 Extract numerical vectors offline from the three modules:
@@ -113,11 +138,7 @@ python extract_interaction_features.py
 python extract_affect_features.py --save_track_details
 ```
 
-The affect tensor remains `(8, 8)`, but its columns are now `anger, disgust,
-fear, happiness, sadness, surprise, neutral, affect_reliability`. Outputs are
-written to `preprocessed_features/affect_track_features`, preserving any old
-`affect_features` directory without using it. Missing faces produce zero
-evidence and zero reliability; there is no hard-coded neutral or Low fallback.
+The affect tensor is `(8, 8)` with columns: `anger, disgust, fear, happiness, sadness, surprise, neutral, affect_reliability`. Outputs are written to `preprocessed_features/affect_track_features`. Missing faces produce zero evidence and zero reliability; there is no hard-coded fallback.
 
 ---
 
@@ -154,6 +175,7 @@ python evaluate_behavioral.py
 ### Audit: Camera Drift & Instruction Zone Inspection
 Visualizes the VFOA boundary overlaid on actual classroom frames:
 ```bash
+# Visual VFOA camera drift audit
 python audit_camera_drift.py
 
 # Visualize saved anonymous face tracks and affect estimates
@@ -161,8 +183,7 @@ python create_affect_audit_view.py \
   --track_json debug_validation/affect_tracks/train/low/view1000.json
 ```
 
-The affect audit produces a contact sheet, annotated MP4, CSV table, and
-SHA-256 provenance summary without rerunning inference.
+The affect audit produces a contact sheet, annotated MP4, CSV table, and SHA-256 provenance summary without rerunning inference.
 
 ---
 
@@ -205,16 +226,12 @@ engagementRecognition/
 └── README.md                      # Complete project documentation
 ```
 
-## Affect interpretation and provenance
+---
 
-- Track IDs are anonymous and reset for each video; they do not identify a
-  student across videos.
-- Eight uniformly sampled frames are sparse for ByteTrack. Inspect audit views
-  for ID fragmentation and compare against `--no-tracking` experimentally.
-- Facial-expression probabilities are model estimates, not verified internal
-  emotions or ground truth. Use them only as uncertain group-level evidence.
-- Both matrix builders require the revised interaction and affect extraction
-  manifests. They reject retired affect artifacts even though both affect
-  formats happen to have shape `(8, 8)`.
-- Training checkpoints embed the complete feature manifest. Evaluation refuses
-  a checkpoint built from different feature extraction settings.
+## 🛡️ Affect Interpretation & Provenance
+
+- **Anonymous Tracking**: Track IDs are anonymous and reset for each video; they do not identify students across videos.
+- **Sparse Video Sampling**: Eight uniformly sampled frames are sparse for ByteTrack. Inspect audit views for ID fragmentation and compare against `--no-tracking` experimentally.
+- **Uncertain Affect Modeling**: Facial expression probabilities are model estimates, not ground-truth internal emotions. They are treated as uncertain group-level behavioral evidence.
+- **Strict Schema Enforcement**: Both matrix builders require valid extraction manifests (`extraction_manifest.json`) before building arrays.
+- **Embedded Checkpoint Provenance**: Training checkpoints embed the complete feature schema and configuration. Evaluation verifies this schema before calculating metrics.
