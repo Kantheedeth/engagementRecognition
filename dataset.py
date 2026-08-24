@@ -22,7 +22,7 @@ class EngagementDataset(Dataset):
         filename = os.path.basename(path)
         label = int(filename.split('_label')[-1].split('.npy')[0])
         
-        # Load the feature matrix: shape (8, 585), float32
+        # Load the feature matrix: shape (8, 616), float32
         matrix = np.load(path).astype(np.float32)
         
         # Convert to tensors
@@ -32,7 +32,6 @@ class EngagementDataset(Dataset):
         return x, y
 
 if __name__ == "__main__":
-    # Test dataset instantiation
     train_dir = os.path.join("feature_matrices", "train")
     if os.path.exists(train_dir):
         dataset = EngagementDataset(train_dir)

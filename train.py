@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from model import TemporalAttentionClassifier
+from model import MultiBranchTemporalAttentionClassifier
 from dataset import EngagementDataset
 
 class DummyAutocast:
@@ -25,7 +25,6 @@ def get_autocast_context(device):
         return DummyAutocast()
 
 def calculate_class_weights(dataset):
-    # Count frequency of each class in the dataset
     labels = []
     for i in range(len(dataset)):
         _, y = dataset[i]
@@ -35,7 +34,6 @@ def calculate_class_weights(dataset):
     total = len(labels)
     num_classes = len(classes)
     
-    # Calculate inverse frequency weights
     weights = total / (num_classes * counts)
     print(f"Class counts: {dict(zip(classes, counts))}")
     print(f"Calculated class weights: {weights}")
@@ -43,13 +41,15 @@ def calculate_class_weights(dataset):
 
 def train(args):
     print("=" * 60)
-    print("Starting Model Training Phase...")
+    print("Multi-Branch Balanced Fusion Training")
+    print(f"  • Scene Branch       : {args.dim_scene} -> {args.branch_dim}")
+    print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
+    print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
+    print(f"  • Fused Embed Dim    : {args.branch_dim * 3} (Equal 33.3% per modality)")
     print("=" * 60)
 
-    # Output directory for checkpoints
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
-    # Device selection
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Using device: {device}")
 
@@ -63,14 +63,16 @@ def train(args):
     print(f"Loaded {len(train_dataset)} training samples.")
     print(f"Loaded {len(val_dataset)} validation samples.")
 
-    # Calculate class weights for loss function to handle class imbalance
+    # Calculate class weights
     class_weights = calculate_class_weights(train_dataset).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-    # Instantiate model
-    model = TemporalAttentionClassifier(
-        input_dim=args.input_dim,
-        hidden_dim=args.hidden_dim,
+    # Multi-Branch Attention Model
+    model = MultiBranchTemporalAttentionClassifier(
+        dim_scene=args.dim_scene,
+        dim_inter=args.dim_inter,
+        dim_affect=args.dim_affect,
+        branch_dim=args.branch_dim,
         num_heads=args.num_heads,
         num_classes=3,
         dropout=args.dropout
@@ -80,8 +82,6 @@ def train(args):
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs)
     scaler = torch.amp.GradScaler("cuda") if device.type == "cuda" else None
-
-    # Autocast context
     autocast_ctx = get_autocast_context(device)
 
     best_val_loss = float("inf")
@@ -143,14 +143,13 @@ def train(args):
         epoch_val_loss = val_loss / val_total
         epoch_val_acc = val_correct / val_total
 
-        # Step scheduler
         scheduler.step()
 
         print(f"Epoch {epoch:02d}/{args.epochs} | "
               f"Train Loss: {epoch_train_loss:.4f} - Train Acc: {epoch_train_acc*100:.2f}% | "
               f"Val Loss: {epoch_val_loss:.4f} - Val Acc: {epoch_val_acc*100:.2f}%")
 
-        # Early Stopping & Best model checkpoint save
+        # Early Stopping & Model checkpoint save
         if epoch_val_loss < best_val_loss:
             best_val_loss = epoch_val_loss
             patience_counter = 0
@@ -162,7 +161,6 @@ def train(args):
                 'val_loss': best_val_loss,
                 'val_acc': epoch_val_acc
             }, best_model_path)
-            # Save raw model weights for simple evaluation loading
             torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, "model_weights.pth"))
         else:
             patience_counter += 1
@@ -179,8 +177,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", default="feature_matrices")
     parser.add_argument("--checkpoint_dir", default="checkpoints")
-    parser.add_argument("--input_dim", type=int, default=585)
-    parser.add_argument("--hidden_dim", type=int, default=128)
+    parser.add_argument("--dim_scene", type=int, default=576)
+    parser.add_argument("--dim_inter", type=int, default=32)
+    parser.add_argument("--dim_affect", type=int, default=8)
+    parser.add_argument("--branch_dim", type=int, default=32)
     parser.add_argument("--num_heads", type=int, default=4)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--batch_size", type=int, default=32)

@@ -4,18 +4,13 @@ from tqdm import tqdm
 
 def main():
     print("=" * 60)
-    print("Building Combined Feature Matrices...")
+    print("Building Combined Feature Matrices (616-dim: Scene 576 + Interaction 32 + Affect 8)...")
     print("=" * 60)
 
     # Output base directory
     output_base = os.path.join("feature_matrices")
     os.makedirs(output_base, exist_ok=True)
 
-    splits = ["train", "val", "test"]
-    categories = ["low", "mid", "high"]
-
-    # Gather tasks
-    # We will read splits from the CSV files
     csv_files = ["train.csv", "val.csv", "test.csv"]
     
     total_processed = 0
@@ -45,7 +40,7 @@ def main():
 
             # Load scene features (8, 576)
             scene_path = os.path.join("preprocessed_features", "scene_features", split_name, category, f"{vname}.npy")
-            # Load interaction features (8, 1)
+            # Load 32-dim interaction features (8, 32)
             inter_path = os.path.join("preprocessed_features", "interaction_features", split_name, category, f"{vname}.npy")
             # Load affect features (8, 8)
             affect_path = os.path.join("preprocessed_features", "affect_features", split_name, category, f"{vname}.npy")
@@ -58,8 +53,8 @@ def main():
             inter_feat = np.load(inter_path)
             affect_feat = np.load(affect_path)
 
-            # Concatenate to (8, 585)
-            combined_matrix = np.concatenate([scene_feat, inter_feat, affect_feat], axis=1)
+            # Concatenate to (8, 616): 576 Scene + 32 Interaction + 8 Affect
+            combined_matrix = np.concatenate([scene_feat, inter_feat, affect_feat], axis=1).astype(np.float32)
 
             # Destination filename format: feature_matrices/<split>/<video_name>_label<label>.npy
             dest_path = os.path.join(dest_split_dir, f"{vname}_label{label}.npy")
@@ -68,7 +63,7 @@ def main():
 
     print("\n" + "=" * 60)
     print("Feature Matrix Exporter Complete!")
-    print(f"  Successfully built: {total_processed} matrices")
+    print(f"  Successfully built: {total_processed} matrices (Shape: 8x616)")
     if total_missing > 0:
         print(f"  Missing raw features: {total_missing} videos")
     print("=" * 60)
