@@ -57,20 +57,24 @@ This repository supports two execution modes:
 
 ---
 
-## 📊 Benchmark & Evaluation Results
+## 📊 Reproducible Evaluation Status
 
-Evaluated on the unseen test split (132 video clips):
+The checkpoint currently available locally for the pure-behavioral model was
+evaluated against all 132 files in `feature_matrices_behavioral/test`. The
+checkpoint is ignored by Git, so these numbers are not reproducible from a
+fresh clone until that checkpoint is supplied or the model is retrained.
 
-### 1. Classification Metrics Summary
+| Evaluation Setup | Test Accuracy | Macro-F1 | Status |
+| :--- | :---: | :---: | :--- |
+| **Pure Behavioral (Zero Scene)** | **84.09%** | **82.69%** | Reproduced on the current 132-sample test matrices |
+| **Majority Class Baseline** | 54.55% | 23.53% | Computed from the same test labels |
+| **Multi-Branch Balanced Fusion** | — | — | No matching 616-D checkpoint is currently available for verification |
 
-| Evaluation Setup | Modalities Used | Fused Dimensions | Test Accuracy | Macro-F1 Score |
-| :--- | :--- | :---: | :---: | :---: |
-| **Multi-Branch Balanced Fusion** | Scene (16) + Interaction (32) + Affect (32) | **80-dim** | **100.00%** | **100.00%** |
-| **Pure Behavioral (Zero Scene)** | Interaction (48) + Affect (48) | **96-dim** | **88.00%** | **86.68%** |
-| **Independent Random Forest Baseline** | Static Temporal Average (Pure Behavioral) | 40-dim | 82.58% | **79.32%** |
-| **Majority Class Baseline** | Always predicts Low | — | 54.54% | **23.53%** |
+The previously documented 100% multi-branch and 88% behavioral results were
+not reproduced by the checkpoint and matrices currently present, so they are
+not reported as verified results here.
 
-### 2. Detailed Breakdown: Pure Behavioral Model (No Scene Shortcut)
+### Pure Behavioral Model: Current Checkpoint
 
 ```text
 =================================================================
@@ -79,17 +83,25 @@ Running Pure Behavioral Pipeline Evaluation Phase...
 =================================================================
               precision    recall  f1-score   support
 
-         Low       0.90      0.89      0.90        72
-         Mid       0.83      0.80      0.82        25
-        High       0.86      0.91      0.89        35
+         Low       0.91      0.83      0.87        72
+         Mid       0.72      0.84      0.78        25
+        High       0.81      0.86      0.83        35
 
-    accuracy                           0.88       132
-   macro avg       0.87      0.87      0.87       132
-weighted avg       0.88      0.88      0.88       132
+    accuracy                           0.84       132
+   macro avg       0.81      0.84      0.83       132
+weighted avg       0.85      0.84      0.84       132
 
-Model Macro-F1 Score:     86.68%
+Model Macro-F1 Score:     82.69%
 Baseline (Always Low) F1:  23.53%
 =================================================================
+```
+
+Confusion matrix (rows are true classes; columns are predictions):
+
+```text
+[[60, 6, 6],
+ [ 3,21, 1],
+ [ 3, 2,30]]
 ```
 
 ---

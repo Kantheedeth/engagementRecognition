@@ -237,6 +237,17 @@ def manifest_matches_args(manifest: dict, args: argparse.Namespace) -> bool:
     )
 
 
+def reusable_affect_output(path: Path) -> bool:
+    """Return whether an existing affect array satisfies the full data contract."""
+    if not path.is_file():
+        return False
+    try:
+        matrix = np.load(path, allow_pickle=False)
+    except (OSError, ValueError):
+        return False
+    return matrix.shape == (8, 8) and np.isfinite(matrix).all()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="RetinaFace + ByteTrack + PyTorch FER affect extraction"
@@ -345,6 +356,44 @@ def main() -> None:
         # A failed full overwrite must not leave an old manifest claiming that
         # the now-partially-replaced directory is internally consistent.
         manifest_path.unlink(missing_ok=True)
+
+    if not args.overwrite:
+        reusable_count = 0
+        for split, category, source_path in tasks:
+            destination_path = (
+                args.output_dir / split / category / f"{source_path.stem}.npy"
+            )
+            details_path = (
+                args.track_details_dir / split / category / f"{source_path.stem}.json"
+            )
+            details_available = not args.save_track_details or details_path.is_file()
+            if reusable_affect_output(destination_path) and details_available:
+                reusable_count += 1
+        if reusable_count == len(tasks):
+            previous_summary = (existing_manifest or {}).get("summary", {})
+            summary = {
+                "input_videos": len(tasks),
+                "processed_videos": 0,
+                "skipped_existing_videos": len(tasks),
+                "failed_videos": 0,
+                "mean_frame_reliability": previous_summary.get(
+                    "mean_frame_reliability"
+                ),
+                "zero_reliability_fraction": previous_summary.get(
+                    "zero_reliability_fraction"
+                ),
+            }
+            print(json.dumps(summary, indent=2))
+            if args.max_videos is None:
+                print(f"Preserved existing affect provenance manifest: {manifest_path}")
+            else:
+                print(
+                    "Diagnostic subset run: preserved the full-dataset extraction "
+                    "manifest."
+                )
+            print(f"Reused verified track-aware affect features under {args.output_dir}")
+            return
+
     module = build_affect_module(args)
 
     processed = 0
@@ -360,8 +409,10 @@ def main() -> None:
         )
         details_missing = args.save_track_details and not details_path.exists()
         if destination_path.exists() and not args.overwrite and not details_missing:
-            skipped += 1
-            continue
+            if reusable_affect_output(destination_path):
+                skipped += 1
+                continue
+            print(f"Replacing incompatible existing affect feature: {destination_path}")
         try:
             matrix, frame_reliability, frame_details = extract_video(module, source_path)
             np.save(destination_path, matrix)
@@ -417,7 +468,10 @@ def main() -> None:
             "feature matrices were not silently fabricated."
         )
     if args.max_videos is None:
-        write_manifest(args, args.output_dir, summary)
+        if processed == 0 and skipped == len(tasks) and existing_manifest is not None:
+            print(f"Preserved existing affect provenance manifest: {manifest_path}")
+        else:
+            write_manifest(args, args.output_dir, summary)
     else:
         print("Diagnostic subset run: preserved the full-dataset extraction manifest.")
     print(f"Saved track-aware affect features under {args.output_dir}")

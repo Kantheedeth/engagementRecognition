@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 from pathlib import Path
 from typing import Sequence
@@ -9,6 +10,42 @@ from typing import Sequence
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+
+from feature_schema import AFFECT_FEATURE_SCHEMA
+
+
+LEGACY_AFFECT_TRACKER_DEFAULTS = {
+    "new_track_threshold": 0.45,
+    "track_buffer": 8,
+}
+
+
+def normalize_feature_manifest_for_comparison(manifest: dict) -> dict:
+    """Fill only recorded legacy defaults before provenance comparison."""
+    normalized = deepcopy(manifest)
+    affect = normalized.get("affect_extraction")
+    if not isinstance(affect, dict):
+        return normalized
+    affect_schema = affect.get("feature_schema") or normalized.get("affect_schema")
+    tracker = affect.get("tracker")
+    if (
+        affect_schema == AFFECT_FEATURE_SCHEMA
+        and isinstance(tracker, dict)
+        and tracker.get("enabled") is True
+        and tracker.get("library") == "ultralytics-bytetrack"
+    ):
+        for key, value in LEGACY_AFFECT_TRACKER_DEFAULTS.items():
+            tracker.setdefault(key, value)
+    return normalized
+
+
+def feature_manifests_compatible(checkpoint_manifest: dict, data_manifest: dict) -> bool:
+    """Compare provenance while supporting the original track-aware manifest."""
+    if not isinstance(checkpoint_manifest, dict) or not isinstance(data_manifest, dict):
+        return False
+    return normalize_feature_manifest_for_comparison(
+        checkpoint_manifest
+    ) == normalize_feature_manifest_for_comparison(data_manifest)
 
 
 def load_feature_manifest(

@@ -9,7 +9,11 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 from torch.utils.data import DataLoader
 from model_behavioral import PureBehavioralAttentionClassifier
-from dataset import EngagementDataset, load_feature_manifest
+from dataset import (
+    EngagementDataset,
+    feature_manifests_compatible,
+    load_feature_manifest,
+)
 from feature_schema import BEHAVIORAL_FEATURE_SCHEMA
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -81,10 +85,16 @@ def evaluate(args):
         return
 
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
-    if checkpoint.get("feature_manifest") != feature_manifest:
+    checkpoint_manifest = checkpoint.get("feature_manifest")
+    if not feature_manifests_compatible(checkpoint_manifest, feature_manifest):
         raise ValueError(
             "Checkpoint feature provenance does not match the current behavioral "
             "matrices. Rebuild, retrain, and then evaluate."
+        )
+    if checkpoint_manifest != feature_manifest:
+        print(
+            "Accepted legacy affect provenance: omitted ByteTrack defaults were "
+            "verified as new_track_threshold=0.45 and track_buffer=8."
         )
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
