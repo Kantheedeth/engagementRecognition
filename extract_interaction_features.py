@@ -27,6 +27,58 @@ ZONE_Y_MAX = 1.0
 MAX_STUDENTS_TRACKED = 5
 
 
+def normalize_model_reference(value: str) -> str:
+    """Normalize local model paths before comparing extraction provenance."""
+    candidate = Path(value).expanduser()
+    if candidate.is_file():
+        return str(candidate.resolve())
+    script_relative = SCRIPT_DIR / candidate
+    if not candidate.is_absolute() and script_relative.is_file():
+        return str(script_relative.resolve())
+    return value
+
+
+def interaction_provenance(model: str, confidence: float) -> dict:
+    """Return the generation settings that must match for reusable features."""
+    return {
+        "format_version": 1,
+        "feature_schema": INTERACTION_FEATURE_SCHEMA,
+        "shape_per_video": [8, 32],
+        "model": normalize_model_reference(model),
+        "confidence": confidence,
+        "input_color": "RGB",
+        "ultralytics_numpy_color": "BGR",
+        "instruction_zone": {
+            "x_min": ZONE_X_MIN,
+            "x_max": ZONE_X_MAX,
+            "y_min": ZONE_Y_MIN,
+            "y_max": ZONE_Y_MAX,
+        },
+        "max_person_states": MAX_STUDENTS_TRACKED,
+    }
+
+
+def validate_reusable_provenance(existing: dict | None, requested: dict) -> None:
+    """Reject existing arrays whose recorded generation settings are unknown."""
+    if existing is None:
+        raise RuntimeError(
+            "Existing interaction features have no provenance manifest. Re-run with "
+            "--overwrite instead of silently reusing unverifiable arrays."
+        )
+
+    comparable_existing = dict(existing)
+    comparable_existing.pop("summary", None)
+    comparable_existing["model"] = normalize_model_reference(
+        str(comparable_existing.get("model", ""))
+    )
+    if comparable_existing != requested:
+        raise RuntimeError(
+            "Existing interaction features were generated with different or "
+            "incomplete settings. Re-run with --overwrite to replace the full set; "
+            "mixed-provenance features are not allowed."
+        )
+
+
 def extract_frame_interaction_descriptor(boxes) -> np.ndarray:
     """Return 7 group geometry + 5x5 area-sorted person-state values."""
     persons = []
@@ -134,6 +186,11 @@ def main() -> None:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = output_dir / "extraction_manifest.json"
+    requested_provenance = interaction_provenance(args.model, args.confidence)
+    existing_manifest = None
+    if manifest_path.is_file() and not args.overwrite:
+        with manifest_path.open(encoding="utf-8") as file:
+            existing_manifest = json.load(file)
     model = YOLO(args.model)
     processed = 0
     skipped = 0
@@ -146,6 +203,7 @@ def main() -> None:
         if destination_path.is_file() and not args.overwrite:
             existing = np.load(destination_path, allow_pickle=False)
             if existing.shape == (8, 32) and np.isfinite(existing).all():
+                validate_reusable_provenance(existing_manifest, requested_provenance)
                 skipped += 1
                 continue
             print(f"Replacing incompatible existing feature: {destination_path}")
@@ -195,26 +253,13 @@ def main() -> None:
         )
 
     if args.max_videos is None:
-        manifest = {
-            "format_version": 1,
-            "feature_schema": INTERACTION_FEATURE_SCHEMA,
-            "shape_per_video": [8, 32],
-            "model": args.model,
-            "confidence": args.confidence,
-            "input_color": "RGB",
-            "ultralytics_numpy_color": "BGR",
-            "instruction_zone": {
-                "x_min": ZONE_X_MIN,
-                "x_max": ZONE_X_MAX,
-                "y_min": ZONE_Y_MIN,
-                "y_max": ZONE_Y_MAX,
-            },
-            "max_person_states": MAX_STUDENTS_TRACKED,
-            "summary": summary,
-        }
-        with manifest_path.open("w", encoding="utf-8") as file:
-            json.dump(manifest, file, indent=2)
-        print(f"Saved interaction provenance manifest: {manifest_path}")
+        if processed == 0 and skipped == len(tasks) and existing_manifest is not None:
+            print(f"Preserved existing interaction provenance manifest: {manifest_path}")
+        else:
+            manifest = {**requested_provenance, "summary": summary}
+            with manifest_path.open("w", encoding="utf-8") as file:
+                json.dump(manifest, file, indent=2)
+            print(f"Saved interaction provenance manifest: {manifest_path}")
     else:
         print("Diagnostic subset run: full-dataset manifest was not replaced.")
 
