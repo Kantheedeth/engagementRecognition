@@ -13,14 +13,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-try:
-    from src.models.model_behavioral import PureBehavioralAttentionClassifier
-    from src.models.dataset import EngagementDataset, load_feature_manifest
-    from src.data.feature_schema import BEHAVIORAL_FEATURE_SCHEMA
-except ImportError:
-    from model_behavioral import PureBehavioralAttentionClassifier
-    from dataset import EngagementDataset, load_feature_manifest
-    from feature_schema import BEHAVIORAL_FEATURE_SCHEMA
+from src.models.model_behavioral import PureBehavioralAttentionClassifier
+from src.models.dataset import EngagementDataset, load_feature_manifest
+from src.data.feature_schema import BEHAVIORAL_FEATURE_SCHEMA
 
 class DummyAutocast:
     def __enter__(self): return None

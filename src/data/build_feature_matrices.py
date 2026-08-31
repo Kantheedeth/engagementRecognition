@@ -14,22 +14,13 @@ if str(PROJECT_ROOT) not in sys.path:
 import numpy as np
 from tqdm import tqdm
 
-try:
-    from src.data.feature_schema import (
-        AFFECT_COLUMNS,
-        AFFECT_FEATURE_SCHEMA,
-        INTERACTION_FEATURE_SCHEMA,
-        MULTI_BRANCH_FEATURE_SCHEMA,
-        MULTI_BRANCH_SHAPE,
-    )
-except ImportError:
-    from feature_schema import (
-        AFFECT_COLUMNS,
-        AFFECT_FEATURE_SCHEMA,
-        INTERACTION_FEATURE_SCHEMA,
-        MULTI_BRANCH_FEATURE_SCHEMA,
-        MULTI_BRANCH_SHAPE,
-    )
+from src.data.feature_schema import (
+    AFFECT_COLUMNS,
+    AFFECT_FEATURE_SCHEMA,
+    INTERACTION_FEATURE_SCHEMA,
+    MULTI_BRANCH_FEATURE_SCHEMA,
+    MULTI_BRANCH_SHAPE,
+)
 
 
 DEFAULT_FEATURE_DIR = PROJECT_ROOT / "preprocessed_features"

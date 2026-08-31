@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -17,10 +18,7 @@ import torch
 from tqdm import tqdm
 from ultralytics import YOLO
 
-try:
-    from src.data.feature_schema import INTERACTION_FEATURE_SCHEMA
-except ImportError:
-    from feature_schema import INTERACTION_FEATURE_SCHEMA
+from src.data.feature_schema import INTERACTION_FEATURE_SCHEMA
 
 
 DEFAULT_INPUT_DIR = PROJECT_ROOT / "preprocessed_data" / "yolov5_640x640"

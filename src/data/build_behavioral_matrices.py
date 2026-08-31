@@ -14,30 +14,17 @@ if str(PROJECT_ROOT) not in sys.path:
 import numpy as np
 from tqdm import tqdm
 
-try:
-    from src.data.build_feature_matrices import (
-        parse_csv_record,
-        read_affect_manifest,
-        read_interaction_manifest,
-    )
-    from src.data.feature_schema import (
-        AFFECT_COLUMNS,
-        AFFECT_FEATURE_SCHEMA,
-        BEHAVIORAL_FEATURE_SCHEMA,
-        BEHAVIORAL_SHAPE,
-    )
-except ImportError:
-    from build_feature_matrices import (
-        parse_csv_record,
-        read_affect_manifest,
-        read_interaction_manifest,
-    )
-    from feature_schema import (
-        AFFECT_COLUMNS,
-        AFFECT_FEATURE_SCHEMA,
-        BEHAVIORAL_FEATURE_SCHEMA,
-        BEHAVIORAL_SHAPE,
-    )
+from src.data.build_feature_matrices import (
+    parse_csv_record,
+    read_affect_manifest,
+    read_interaction_manifest,
+)
+from src.data.feature_schema import (
+    AFFECT_COLUMNS,
+    AFFECT_FEATURE_SCHEMA,
+    BEHAVIORAL_FEATURE_SCHEMA,
+    BEHAVIORAL_SHAPE,
+)
 
 
 DEFAULT_FEATURE_DIR = PROJECT_ROOT / "preprocessed_features"

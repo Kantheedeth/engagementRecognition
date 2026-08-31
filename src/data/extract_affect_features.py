@@ -31,26 +31,15 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-try:
-    from src.data.affect_module import (
-        EMOTION_NAMES,
-        AffectModule,
-        ByteTrackFaceTracker,
-        HuggingFaceFERClassifier,
-        RetinaFaceDetector,
-        TorchScriptFERClassifier,
-    )
-    from src.data.feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
-except ImportError:
-    from affect_module import (
-        EMOTION_NAMES,
-        AffectModule,
-        ByteTrackFaceTracker,
-        HuggingFaceFERClassifier,
-        RetinaFaceDetector,
-        TorchScriptFERClassifier,
-    )
-    from feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
+from src.data.affect_module import (
+    EMOTION_NAMES,
+    AffectModule,
+    ByteTrackFaceTracker,
+    HuggingFaceFERClassifier,
+    RetinaFaceDetector,
+    TorchScriptFERClassifier,
+)
+from src.data.feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
 
 
 DEFAULT_INPUT_DIR = PROJECT_ROOT / "preprocessed_data" / "yolov5_640x640"

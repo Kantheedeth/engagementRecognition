@@ -15,22 +15,13 @@ PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-try:
-    from src.models.model import MultiBranchTemporalAttentionClassifier
-    from src.models.dataset import (
-        EngagementDataset,
-        feature_manifests_compatible,
-        load_feature_manifest,
-    )
-    from src.data.feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
-except ImportError:
-    from model import MultiBranchTemporalAttentionClassifier
-    from dataset import (
-        EngagementDataset,
-        feature_manifests_compatible,
-        load_feature_manifest,
-    )
-    from feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
+from src.models.model import MultiBranchTemporalAttentionClassifier
+from src.models.dataset import (
+    EngagementDataset,
+    feature_manifests_compatible,
+    load_feature_manifest,
+)
+from src.data.feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
 
 def plot_confusion_matrix(cm, classes, filename="confusion_matrix.png"):
     fig, ax = plt.subplots(figsize=(6, 6))

@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from feature_schema import AFFECT_FEATURE_SCHEMA
+from src.data.feature_schema import AFFECT_FEATURE_SCHEMA
 
 
 LEGACY_AFFECT_TRACKER_DEFAULTS = {
