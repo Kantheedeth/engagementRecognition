@@ -127,75 +127,83 @@ pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib u
 
 ## 🚀 Execution Guide
 
-### Phase 1: Video Preprocessing
-Extracts 8 uniformly spaced frames per 10-second video:
+### Option 1: Master Runner Scripts (Recommended)
+
+You can run either pipeline end-to-end or stage-by-stage using the unified root entrypoints:
+
+#### A. Pure Behavioral Pipeline (Zero Scene Shortcut: 32 Inter + 8 Affect)
 ```bash
-python preprocess_frames.py
-# (Optional) Verify preprocessed frame colors & aspect ratios
-python validate_preprocessing.py
+# Run full pipeline end-to-end (extract -> build -> train -> eval)
+python run_behavioral.py --stage all
+
+# Or run individual stages:
+python run_behavioral.py --stage extract    # Extract interaction & affect features
+python run_behavioral.py --stage build      # Build 40-dim behavioral matrices
+python run_behavioral.py --stage train      # Train pure behavioral attention model
+python run_behavioral.py --stage eval       # Evaluate test set & plot confusion matrix
 ```
 
-Paths are resolved relative to the script and detected dataset root. Missing or undecodable videos fail preprocessing; they are never replaced with fabricated black frames or cross-class data.
+#### B. Multi-Branch Balanced Pipeline (Scene 16 + Inter 32 + Affect 32 = 80-dim)
+```bash
+# Run full multi-modal pipeline end-to-end
+python run_multimodal.py --stage all
 
-### Phase 2: Feature Extraction
+# Or run individual stages:
+python run_multimodal.py --stage extract    # Extract scene, interaction & affect
+python run_multimodal.py --stage build      # Build 616-dim multi-branch matrices
+python run_multimodal.py --stage train      # Train multi-branch balanced model
+python run_multimodal.py --stage eval       # Evaluate test set & plot confusion matrix
+```
+
+---
+
+### Option 2: Step-by-Step Module Execution
+
+#### Phase 1: Video Preprocessing
+Extracts 8 uniformly spaced frames per 10-second video:
+```bash
+python src/data/preprocess_frames.py
+# (Optional) Verify preprocessed frame colors & aspect ratios
+python src/data/validate_preprocessing.py
+```
+
+#### Phase 2: Feature Extraction
 Extract numerical vectors offline from the three modules:
 ```bash
 # 1. Scene features (MobileNetV3-Small -> 576-dim)
-python extract_scene_features.py
+python src/data/extract_scene_features.py
 
 # 2. Rich interaction features (YOLOv8 layout + student coordinates -> 32-dim)
-python extract_interaction_features.py
+python src/data/extract_interaction_features.py
 
 # 3. Track-aware affect (RetinaFace + ByteTrack + PyTorch FER -> 8-dim)
-python extract_affect_features.py --save_track_details
+python src/data/extract_affect_features.py --save_track_details
 ```
 
-The affect tensor is `(8, 8)` with columns: `anger, disgust, fear, happiness, sadness, surprise, neutral, affect_reliability`. Outputs are written to `preprocessed_features/affect_track_features`. Missing faces produce zero evidence and zero reliability; there is no hard-coded fallback.
-
----
-
-### Phase 3 & 4: Multi-Branch Balanced Pipeline (Default 16/32/32)
-
+#### Phase 3 & 4: Model Training & Evaluation
 ```bash
-# 1. Build 616-dim feature matrices (Scene 576 + Interaction 32 + Affect 8)
-python build_feature_matrices.py
+# Pure Behavioral Workflow:
+python src/data/build_behavioral_matrices.py
+python src/training/train_behavioral.py
+python src/training/evaluate_behavioral.py
 
-# 2. Train Multi-Branch Attention Model (16 Scene / 32 Interaction / 32 Affect)
-python train.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
-
-# 3. Evaluate and generate confusion matrix
-python evaluate.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
+# Multi-Branch Workflow:
+python src/data/build_feature_matrices.py
+python src/training/train.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
+python src/training/evaluate.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
 ```
 
 ---
 
-### Alternative: Standalone Pure Behavioral Pipeline (Zero Scene Shortcut)
-
-```bash
-# 1. Build 40-dim behavioral matrices (Interaction 32 + Affect 8)
-python build_behavioral_matrices.py
-
-# 2. Train Pure Behavioral Model (Zero background features)
-python train_behavioral.py
-
-# 3. Evaluate and generate confusion matrix
-python evaluate_behavioral.py
-```
-
----
-
-### Audit: Camera Drift & Instruction Zone Inspection
-Visualizes the VFOA boundary overlaid on actual classroom frames:
+### Audit: Camera Drift & Track Inspection
 ```bash
 # Visual VFOA camera drift audit
-python audit_camera_drift.py
+python src/tools/audit_camera_drift.py
 
 # Visualize saved anonymous face tracks and affect estimates
-python create_affect_audit_view.py \
+python src/tools/create_affect_audit_view.py \
   --track_json debug_validation/affect_tracks/train/low/view1000.json
 ```
-
-The affect audit produces a contact sheet, annotated MP4, CSV table, and SHA-256 provenance summary without rerunning inference.
 
 ---
 
@@ -203,39 +211,41 @@ The affect audit produces a contact sheet, annotated MP4, CSV table, and SHA-256
 
 ```text
 engagementRecognition/
-├── audit_outputs/                 # Annotated frames from camera drift audit
-├── checkpoints/                   # Provenance-bearing best-model checkpoints
+├── src/                               # Core Source Code Package
+│   ├── data/                          # Phase 1 & 2: Preprocessing & Feature Extraction
+│   │   ├── preprocess_frames.py       # Dual-branch video frame preprocessor
+│   │   ├── validate_preprocessing.py  # Visual validation gate
+│   │   ├── extract_scene_features.py  # MobileNetV3 scene extraction (576-dim)
+│   │   ├── extract_interaction_features.py # YOLOv8 interaction extraction (32-dim)
+│   │   ├── extract_affect_features.py # RetinaFace + ByteTrack + FER extraction (8-dim)
+│   │   ├── affect_module.py           # RetinaFace + ByteTrack + FER aggregation engine
+│   │   ├── build_feature_matrices.py  # Builds 616-dim multi-branch matrices
+│   │   ├── build_behavioral_matrices.py # Builds 40-dim pure behavioral matrices
+│   │   └── feature_schema.py          # Cross-stage feature contract definitions
+│   │
+│   ├── models/                        # Neural Network Architectures & Datasets
+│   │   ├── dataset.py                 # PyTorch Dataset loader with manifest validation
+│   │   ├── model.py                   # Multi-Branch Balanced Attention Network (16/32/32)
+│   │   └── model_behavioral.py        # Pure Behavioral Attention Network (48/48)
+│   │
+│   ├── training/                      # Training & Evaluation Loops
+│   │   ├── train.py                   # Multi-Branch training loop
+│   │   ├── evaluate.py                # Multi-Branch test evaluation
+│   │   ├── train_behavioral.py        # Pure Behavioral training loop
+│   │   └── evaluate_behavioral.py     # Pure Behavioral test evaluation
+│   │
+│   └── tools/                         # Auditing & Inspection Utilities
+│       ├── audit_camera_drift.py      # Visual VFOA boundary inspection
+│       └── create_affect_audit_view.py# Saved-track visual/CSV/provenance audit
 │
-├── dataset.py                     # PyTorch Dataset loader for feature matrices
-├── model.py                       # Multi-Branch Balanced Attention architecture (16/32/32)
-├── model_behavioral.py            # Standalone Pure Behavioral Attention architecture
+├── run_behavioral.py                  # 🚀 Master CLI runner for Pure Behavioral Pipeline
+├── run_multimodal.py                  # 🚀 Master CLI runner for Multi-Branch Pipeline
 │
-├── preprocess_frames.py           # Phase 1: Dual-branch video frame preprocessor
-├── validate_preprocessing.py      # Phase 1: Visual validation gate
-│
-├── extract_scene_features.py      # Phase 2A: MobileNetV3 scene feature extraction (576-dim)
-├── extract_interaction_features.py# Phase 2B: YOLOv8 rich interaction extraction (32-dim)
-├── affect_module.py               # RetinaFace + ByteTrack + FER aggregation
-├── extract_affect_features.py     # Phase 2C: track-aware affect extraction (8-dim)
-├── create_affect_audit_view.py    # Saved-track visual/CSV/provenance audit
-├── feature_schema.py              # Cross-stage feature contracts
-├── requirements-affect.txt        # Affect-specific dependencies
-│
-├── build_feature_matrices.py      # Combines Scene + Interaction + Affect (616-dim)
-├── build_behavioral_matrices.py   # Combines Interaction + Affect (40-dim, Zero Scene)
-│
-├── train.py                       # Trains Multi-Branch Balanced model
-├── evaluate.py                    # Evaluates Multi-Branch model
-│
-├── train_behavioral.py            # Trains Pure Behavioral model
-├── evaluate_behavioral.py         # Evaluates Pure Behavioral model
-│
-├── audit_camera_drift.py          # Visual VFOA boundary inspection
-├── train.csv / val.csv / test.csv # Dataset split annotations
-├── confusion_matrix.png           # Multi-Branch test confusion matrix
-├── confusion_matrix_behavioral.png# Pure Behavioral test confusion matrix
-├── .gitignore                     # Git exclusion rules for large datasets
-└── README.md                      # Complete project documentation
+├── train.csv / val.csv / test.csv     # Dataset split annotations
+├── requirements-affect.txt            # Affect-specific dependencies
+├── confusion_matrix_behavioral.png    # Pure Behavioral test confusion matrix
+├── .gitignore                         # Git exclusion rules for large datasets
+└── README.md                          # Complete project documentation
 ```
 
 ---

@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import numpy as np
 import torch
@@ -6,11 +7,20 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from model_behavioral import PureBehavioralAttentionClassifier
-from dataset import EngagementDataset, load_feature_manifest
-from feature_schema import BEHAVIORAL_FEATURE_SCHEMA
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+try:
+    from src.models.model import MultiBranchTemporalAttentionClassifier
+    from src.models.dataset import EngagementDataset, load_feature_manifest
+    from src.data.feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
+except ImportError:
+    from model import MultiBranchTemporalAttentionClassifier
+    from dataset import EngagementDataset, load_feature_manifest
+    from feature_schema import MULTI_BRANCH_FEATURE_SCHEMA
 
 class DummyAutocast:
     def __enter__(self): return None
@@ -45,23 +55,28 @@ def calculate_class_weights(dataset):
     return torch.tensor(weights, dtype=torch.float32)
 
 def train(args):
-    print("=" * 65)
-    print("Pure Behavioral Engagement Training (ZERO Scene Shortcut)")
-    print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
-    print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
-    print(f"  • Fused Embed Dim    : {args.branch_dim * 2} (50% Interaction, 50% Affect)")
-    print("=" * 65)
+    fused_dim = args.scene_branch_dim + args.inter_branch_dim + args.affect_branch_dim
+    behavioral_pct = ((args.inter_branch_dim + args.affect_branch_dim) / fused_dim) * 100.0
+    scene_pct = (args.scene_branch_dim / fused_dim) * 100.0
+    
+    print("=" * 60)
+    print("Multi-Branch Feature Fusion Training")
+    print(f"  • Scene Branch       : {args.dim_scene} -> {args.scene_branch_dim} ({scene_pct:.1f}% of fused state)")
+    print(f"  • Interaction Branch : {args.dim_inter} -> {args.inter_branch_dim}")
+    print(f"  • Affect Branch      : {args.dim_affect} -> {args.affect_branch_dim}")
+    print(f"  • Total Fused Dim    : {fused_dim} (Behavioral makes up {behavioral_pct:.1f}%)")
+    print("=" * 60)
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Using device: {device}")
 
-    # Load from feature_matrices_behavioral after validating provenance.
-    expected_shape = (8, args.dim_inter + args.dim_affect)
+    # Initialize Datasets and Loaders only after validating matrix provenance.
+    expected_shape = (8, args.dim_scene + args.dim_inter + args.dim_affect)
     feature_manifest = load_feature_manifest(
         args.data_dir,
-        expected_schema=BEHAVIORAL_FEATURE_SCHEMA,
+        expected_schema=MULTI_BRANCH_FEATURE_SCHEMA,
         expected_shape=expected_shape,
     )
     train_dataset = EngagementDataset(
@@ -79,20 +94,24 @@ def train(args):
     print(f"Loaded {len(train_dataset)} training samples.")
     print(f"Loaded {len(val_dataset)} validation samples.")
 
-    # Weighted CrossEntropyLoss
+    # Calculate class weights
     class_weights = calculate_class_weights(train_dataset).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
-    # Pure Behavioral Model
-    model = PureBehavioralAttentionClassifier(
+    # Multi-Branch Attention Model
+    model = MultiBranchTemporalAttentionClassifier(
+        dim_scene=args.dim_scene,
         dim_inter=args.dim_inter,
         dim_affect=args.dim_affect,
-        branch_dim=args.branch_dim,
+        scene_branch_dim=args.scene_branch_dim,
+        inter_branch_dim=args.inter_branch_dim,
+        affect_branch_dim=args.affect_branch_dim,
         num_heads=args.num_heads,
         num_classes=3,
         dropout=args.dropout
     ).to(device)
 
+    # Optimizer & Scheduler
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = CosineAnnealingLR(optimizer, T_max=args.epochs)
     scaler = torch.amp.GradScaler("cuda") if device.type == "cuda" else None
@@ -102,6 +121,9 @@ def train(args):
     patience_counter = 0
 
     for epoch in range(1, args.epochs + 1):
+        # -------------------------------------------------------------
+        # Training loop
+        # -------------------------------------------------------------
         model.train()
         train_loss = 0.0
         train_correct = 0
@@ -131,7 +153,9 @@ def train(args):
         epoch_train_loss = train_loss / train_total
         epoch_train_acc = train_correct / train_total
 
-        # Validation
+        # -------------------------------------------------------------
+        # Validation loop
+        # -------------------------------------------------------------
         model.eval()
         val_loss = 0.0
         val_correct = 0
@@ -158,10 +182,11 @@ def train(args):
               f"Train Loss: {epoch_train_loss:.4f} - Train Acc: {epoch_train_acc*100:.2f}% | "
               f"Val Loss: {epoch_val_loss:.4f} - Val Acc: {epoch_val_acc*100:.2f}%")
 
+        # Early Stopping & Model checkpoint save
         if epoch_val_loss < best_val_loss:
             best_val_loss = epoch_val_loss
             patience_counter = 0
-            best_model_path = os.path.join(args.checkpoint_dir, "best_model_behavioral.pth")
+            best_model_path = os.path.join(args.checkpoint_dir, "best_model.pth")
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -170,9 +195,12 @@ def train(args):
                 'val_acc': epoch_val_acc,
                 'feature_manifest': feature_manifest,
                 'model_config': {
+                    'dim_scene': args.dim_scene,
                     'dim_inter': args.dim_inter,
                     'dim_affect': args.dim_affect,
-                    'branch_dim': args.branch_dim,
+                    'scene_branch_dim': args.scene_branch_dim,
+                    'inter_branch_dim': args.inter_branch_dim,
+                    'affect_branch_dim': args.affect_branch_dim,
                     'num_heads': args.num_heads,
                     'dropout': args.dropout,
                 },
@@ -184,24 +212,27 @@ def train(args):
             print(f"Early stopping triggered after {epoch} epochs.")
             break
 
-    print("=" * 65)
+    print("=" * 60)
     print(f"Training Complete. Best Validation Loss: {best_val_loss:.4f}")
-    print("=" * 65)
+    print("=" * 60)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default=os.path.join(SCRIPT_DIR, "feature_matrices_behavioral"))
-    parser.add_argument("--checkpoint_dir", default=os.path.join(SCRIPT_DIR, "checkpoints"))
+    parser.add_argument("--data_dir", default=os.path.join(PROJECT_ROOT, "feature_matrices"))
+    parser.add_argument("--checkpoint_dir", default=os.path.join(PROJECT_ROOT, "checkpoints"))
+    parser.add_argument("--dim_scene", type=int, default=576)
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)
-    parser.add_argument("--branch_dim", type=int, default=48)
+    parser.add_argument("--scene_branch_dim", type=int, default=16, help="Branch dimension for Scene (e.g. 16)")
+    parser.add_argument("--inter_branch_dim", type=int, default=32, help="Branch dimension for Interaction (e.g. 32)")
+    parser.add_argument("--affect_branch_dim", type=int, default=32, help="Branch dimension for Affect (e.g. 32)")
     parser.add_argument("--num_heads", type=int, default=4)
-    parser.add_argument("--dropout", type=float, default=0.15)
+    parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=60)
+    parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
-    parser.add_argument("--patience", type=int, default=15)
+    parser.add_argument("--patience", type=int, default=10)
     
     args = parser.parse_args()
     train(args)

@@ -3,6 +3,9 @@ import random
 import numpy as np
 import cv2
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+
 # Instruction zone boundaries (left-most 27%)
 ZONE_X_MIN = 0.0
 ZONE_X_MAX = 0.27
@@ -14,7 +17,7 @@ def main():
     print("Running Camera Drift Audit...")
     print("=" * 60)
 
-    output_dir = "audit_outputs"
+    output_dir = os.path.join(PROJECT_ROOT, "audit_outputs")
     os.makedirs(output_dir, exist_ok=True)
 
     splits = ["train", "val", "test"]
@@ -24,7 +27,7 @@ def main():
     npz_paths = []
     for split in splits:
         for cat in categories:
-            dir_path = os.path.join("preprocessed_data", "yolov5_640x640", split, cat)
+            dir_path = os.path.join(PROJECT_ROOT, "preprocessed_data", "yolov5_640x640", split, cat)
             if os.path.exists(dir_path):
                 files = [f for f in os.listdir(dir_path) if f.endswith(".npz")]
                 for f in files:
@@ -41,7 +44,7 @@ def main():
 
     for split, cat, fname in samples:
         vname = os.path.splitext(fname)[0]
-        path = os.path.join("preprocessed_data", "yolov5_640x640", split, cat, fname)
+        path = os.path.join(PROJECT_ROOT, "preprocessed_data", "yolov5_640x640", split, cat, fname)
         
         data = np.load(path)
         frames = data['frames'] # (8, 640, 640, 3)

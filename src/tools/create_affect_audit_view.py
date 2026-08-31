@@ -19,8 +19,8 @@ import cv2
 import numpy as np
 
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "debug_validation" / "affect_audits"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "debug_validation" / "affect_audits"
 TRACK_COLORS = (
     (63, 208, 244),
     (76, 175, 80),

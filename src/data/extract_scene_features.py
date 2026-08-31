@@ -5,13 +5,16 @@ import torchvision.models as models
 import numpy as np
 from tqdm import tqdm
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+
 def main():
     print("=" * 60)
     print("Extracting Scene Features using MobileNetV3-Small...")
     print("=" * 60)
 
     # Output directory
-    output_base = os.path.join("preprocessed_features", "scene_features")
+    output_base = os.path.join(PROJECT_ROOT, "preprocessed_features", "scene_features")
     os.makedirs(output_base, exist_ok=True)
 
     # Device selection (use MPS if available for M4 hardware)
@@ -35,7 +38,7 @@ def main():
     tasks = []
     for split in splits:
         for cat in categories:
-            src_dir = os.path.join("preprocessed_data", "mobilenetv3_160x160", split, cat)
+            src_dir = os.path.join(PROJECT_ROOT, "preprocessed_data", "mobilenetv3_160x160", split, cat)
             if os.path.exists(src_dir):
                 files = [f for f in os.listdir(src_dir) if f.endswith(".pt")]
                 for f in files:
@@ -49,7 +52,7 @@ def main():
             vname = os.path.splitext(fname)[0]
             
             # Source path
-            src_path = os.path.join("preprocessed_data", "mobilenetv3_160x160", split, cat, fname)
+            src_path = os.path.join(PROJECT_ROOT, "preprocessed_data", "mobilenetv3_160x160", split, cat, fname)
             
             # Destination path
             dest_dir = os.path.join(output_base, split, cat)

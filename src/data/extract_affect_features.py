@@ -5,25 +5,56 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Python 3.8 compatibility shim for BooleanOptionalAction
+if not hasattr(argparse, "BooleanOptionalAction"):
+    class _BooleanOptionalAction(argparse.Action):
+        def __init__(self, option_strings, dest, default=None, required=False, help=None, metavar=None):
+            _option_strings = []
+            for option_string in option_strings:
+                _option_strings.append(option_string)
+                if option_string.startswith('--'):
+                    _option_strings.append('--no-' + option_string[2:])
+            super().__init__(option_strings=_option_strings, dest=dest, nargs=0, default=default, required=required, help=help)
+        def __call__(self, parser, namespace, values, option_string=None):
+            if option_string in self.option_strings:
+                setattr(namespace, self.dest, not option_string.startswith('--no-'))
+    argparse.BooleanOptionalAction = _BooleanOptionalAction
+
 import numpy as np
 import torch
 from tqdm import tqdm
 
-from affect_module import (
-    EMOTION_NAMES,
-    AffectModule,
-    ByteTrackFaceTracker,
-    HuggingFaceFERClassifier,
-    RetinaFaceDetector,
-    TorchScriptFERClassifier,
-)
-from feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
+try:
+    from src.data.affect_module import (
+        EMOTION_NAMES,
+        AffectModule,
+        ByteTrackFaceTracker,
+        HuggingFaceFERClassifier,
+        RetinaFaceDetector,
+        TorchScriptFERClassifier,
+    )
+    from src.data.feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
+except ImportError:
+    from affect_module import (
+        EMOTION_NAMES,
+        AffectModule,
+        ByteTrackFaceTracker,
+        HuggingFaceFERClassifier,
+        RetinaFaceDetector,
+        TorchScriptFERClassifier,
+    )
+    from feature_schema import AFFECT_COLUMNS, AFFECT_FEATURE_SCHEMA
 
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT_DIR = SCRIPT_DIR / "preprocessed_data" / "yolov5_640x640"
-DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "preprocessed_features" / "affect_track_features"
+DEFAULT_INPUT_DIR = PROJECT_ROOT / "preprocessed_data" / "yolov5_640x640"
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "preprocessed_features" / "affect_track_features"
 
 
 def select_device(requested: str) -> torch.device:
@@ -302,7 +333,7 @@ def main() -> None:
     parser.add_argument(
         "--track_details_dir",
         type=Path,
-        default=SCRIPT_DIR / "debug_validation" / "affect_tracks",
+        default=PROJECT_ROOT / "debug_validation" / "affect_tracks",
     )
     parser.add_argument(
         "--max_videos",

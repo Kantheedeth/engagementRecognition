@@ -4,23 +4,36 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import numpy as np
 from tqdm import tqdm
 
-from feature_schema import (
-    AFFECT_COLUMNS,
-    AFFECT_FEATURE_SCHEMA,
-    INTERACTION_FEATURE_SCHEMA,
-    MULTI_BRANCH_FEATURE_SCHEMA,
-    MULTI_BRANCH_SHAPE,
-)
+try:
+    from src.data.feature_schema import (
+        AFFECT_COLUMNS,
+        AFFECT_FEATURE_SCHEMA,
+        INTERACTION_FEATURE_SCHEMA,
+        MULTI_BRANCH_FEATURE_SCHEMA,
+        MULTI_BRANCH_SHAPE,
+    )
+except ImportError:
+    from feature_schema import (
+        AFFECT_COLUMNS,
+        AFFECT_FEATURE_SCHEMA,
+        INTERACTION_FEATURE_SCHEMA,
+        MULTI_BRANCH_FEATURE_SCHEMA,
+        MULTI_BRANCH_SHAPE,
+    )
 
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_FEATURE_DIR = SCRIPT_DIR / "preprocessed_features"
-DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "feature_matrices"
+DEFAULT_FEATURE_DIR = PROJECT_ROOT / "preprocessed_features"
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "feature_matrices"
 STREAMS = {
     "scene": ("scene_features", (8, 576)),
     "interaction": ("interaction_features", (8, 32)),
@@ -35,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--feature_dir", type=Path, default=DEFAULT_FEATURE_DIR)
     parser.add_argument("--output_dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--csv_dir", type=Path, default=SCRIPT_DIR)
+    parser.add_argument("--csv_dir", type=Path, default=PROJECT_ROOT)
     parser.add_argument(
         "--splits",
         nargs="+",

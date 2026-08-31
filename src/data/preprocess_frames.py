@@ -8,6 +8,7 @@ from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
 
 # Standard ImageNet normalization parameters for PyTorch / MobileNetV3
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
@@ -22,11 +23,11 @@ norm_transform = T.Compose([
 
 def get_default_video_root():
     """Find the dataset root containing videos/ near this script."""
-    candidates = [SCRIPT_DIR, os.path.dirname(SCRIPT_DIR)]
+    candidates = [PROJECT_ROOT, SCRIPT_DIR, os.path.dirname(SCRIPT_DIR)]
     for candidate in candidates:
         if os.path.isdir(os.path.join(candidate, 'videos')):
             return candidate
-    return SCRIPT_DIR
+    return PROJECT_ROOT
 
 def resolve_video_path(video_path, video_root='.'):
     """Resolve a CSV video path without substituting data from another class."""
@@ -176,12 +177,12 @@ def process_single_video(video_info, output_dir, num_frames=8, video_root='.'):
 def main():
     parser = argparse.ArgumentParser(description="Preprocess video dataset for MobileNetV3 (160x160 Tensor) and YOLOv5 (640x640 NumPy Array).")
     parser.add_argument('--csv_files', nargs='+', default=[
-                            os.path.join(SCRIPT_DIR, 'train.csv'),
-                            os.path.join(SCRIPT_DIR, 'val.csv'),
-                            os.path.join(SCRIPT_DIR, 'test.csv'),
+                            os.path.join(PROJECT_ROOT, 'train.csv'),
+                            os.path.join(PROJECT_ROOT, 'val.csv'),
+                            os.path.join(PROJECT_ROOT, 'test.csv'),
                         ],
                         help="List of CSV files to process.")
-    parser.add_argument('--output_dir', default=os.path.join(SCRIPT_DIR, 'preprocessed_data'),
+    parser.add_argument('--output_dir', default=os.path.join(PROJECT_ROOT, 'preprocessed_data'),
                         help="Root directory to save outputs.")
     parser.add_argument('--video_root', default=get_default_video_root(),
                         help="Directory relative to which CSV video paths are resolved.")

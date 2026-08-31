@@ -4,6 +4,9 @@ import numpy as np
 import torch
 import cv2
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+
 # ImageNet normalization stats
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406])
 IMAGENET_STD = np.array([0.229, 0.224, 0.225])
@@ -36,7 +39,7 @@ def main():
     print("Running Preprocessing Validation Gate...")
     print("=" * 60)
     
-    output_dir = "debug_validation"
+    output_dir = os.path.join(PROJECT_ROOT, "debug_validation")
     os.makedirs(output_dir, exist_ok=True)
     
     splits = ["train", "val", "test"]
@@ -49,7 +52,7 @@ def main():
     for cat in categories:
         samples_found = []
         for split in splits:
-            path = os.path.join("preprocessed_data", "mobilenetv3_160x160", split, cat)
+            path = os.path.join(PROJECT_ROOT, "preprocessed_data", "mobilenetv3_160x160", split, cat)
             if os.path.exists(path):
                 files = [f for f in os.listdir(path) if f.endswith(".pt")]
                 for f in files:
@@ -69,12 +72,12 @@ def main():
         vname = os.path.splitext(fname)[0]
         
         # Load MobileNetV3 .pt file
-        pt_path = os.path.join("preprocessed_data", "mobilenetv3_160x160", split, cat, fname)
+        pt_path = os.path.join(PROJECT_ROOT, "preprocessed_data", "mobilenetv3_160x160", split, cat, fname)
         pt_data = torch.load(pt_path, weights_only=False)
         mb_tensor = pt_data['frames']  # shape: (8, 3, 160, 160)
         
         # Load YOLOv5/v8 .npz file
-        npz_path = os.path.join("preprocessed_data", "yolov5_640x640", split, cat, f"{vname}.npz")
+        npz_path = os.path.join(PROJECT_ROOT, "preprocessed_data", "yolov5_640x640", split, cat, f"{vname}.npz")
         npz_data = np.load(npz_path)
         yolo_arr = npz_data['frames']  # shape: (8, 640, 640, 3)
         
