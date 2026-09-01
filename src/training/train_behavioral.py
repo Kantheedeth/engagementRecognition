@@ -32,6 +32,15 @@ def get_autocast_context(device):
     else:
         return DummyAutocast()
 
+import random
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
 def calculate_class_weights(dataset):
     labels = []
     for i in range(len(dataset)):
@@ -50,6 +59,10 @@ def calculate_class_weights(dataset):
     return torch.tensor(weights, dtype=torch.float32)
 
 def train(args):
+    if args.seed is not None:
+        set_seed(args.seed)
+        print(f"Random seed set to: {args.seed}")
+
     print("=" * 65)
     print("Pure Behavioral Engagement Training (ZERO Scene Shortcut)")
     print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
@@ -207,6 +220,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
     parser.add_argument("--patience", type=int, default=15)
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     
     args = parser.parse_args()
     train(args)

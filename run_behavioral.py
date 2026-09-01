@@ -70,6 +70,7 @@ def stage_train(args):
         "--lr", str(args.lr),
         "--branch_dim", str(args.branch_dim),
         "--num_heads", str(args.num_heads),
+        "--seed", str(args.seed),
     ]
     run_command(cmd, "Training Pure Behavioral Attention Model")
 
@@ -113,6 +114,9 @@ def main():
     )
     parser.add_argument(
         "--num_heads", type=int, default=4, help="Number of attention heads"
+    )
+    parser.add_argument(
+        "--seed", type=int, default=42, help="Random seed for reproducibility"
     )
 
     args = parser.parse_args()

@@ -79,6 +79,7 @@ def stage_train(args):
         "--inter_branch_dim", str(args.inter_branch_dim),
         "--affect_branch_dim", str(args.affect_branch_dim),
         "--num_heads", str(args.num_heads),
+        "--seed", str(args.seed),
     ]
     run_command(cmd, "Training Multi-Branch Attention Model (16/32/32)")
 
@@ -130,6 +131,9 @@ def main():
     )
     parser.add_argument(
         "--num_heads", type=int, default=4, help="Number of attention heads"
+    )
+    parser.add_argument(
+        "--seed", type=int, default=42, help="Random seed for reproducibility"
     )
 
     args = parser.parse_args()
