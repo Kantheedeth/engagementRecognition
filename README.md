@@ -206,14 +206,30 @@ feature manifest and split-integrity evidence before inference, then reports:
 The master runner is also available:
 
 ```bash
+# One command: audit first, then reuse/extract, build, train, and evaluate.
+python run_behavioral_track.py \
+  --stage all \
+  --group_manifest split_groups.csv
+
+# Or run individual stages.
 python run_behavioral_track.py --stage extract
 python run_behavioral_track.py --stage build
+python run_behavioral_track.py --stage audit --group_manifest split_groups.csv
 python run_behavioral_track.py --stage train --group_manifest split_groups.csv
 python run_behavioral_track.py --stage eval --group_manifest split_groups.csv
 ```
 
 `--overwrite_interaction` and `--overwrite_affect` are separate so regenerating
 interaction does not accidentally trigger the much slower affect extraction.
+With neither overwrite flag, `--stage all` verifies and reuses compatible
+existing arrays. It does not rerun the 1,195-video affect inference merely
+because the runner was invoked.
+
+Do not create fake session or pair identifiers just to make the audit pass.
+`golden_pair_id` may be blank when no authoritative pair is known, but every
+`session_id` must be supplied from the real source-session metadata. Therefore,
+the complete command intentionally stops before training when that metadata is
+absent or inconsistent.
 
 ## Old-versus-new ablation
 
