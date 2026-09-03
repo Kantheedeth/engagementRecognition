@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "experiment": {
+    "name": "legacy_affect_x_legacy_interaction",
+    "artifacts_root": "experiments_v2/artifacts"
+  },
+  "dataset": {
+    "split_files": {
+      "train": "train.csv",
+      "val": "val.csv",
+      "test": "test.csv"
+    },
+    "preprocessed_input_dir": "preprocessed_data/yolov5_640x640",
+    "preprocessing": {
+      "num_frames": 8,
+      "frame_size": [640, 640],
+      "color": "RGB",
+      "sampling": "uniform"
+    }
+  },
+  "methods": {
+    "affect": [
+      {
+        "code": "A1",
+        "enabled": true,
+        "force_train": false,
+        "force_extract": false,
+        "legacy_feature_dir": "preprocessed_features/affect_track_features",
+        "parameters": {
+          "device": "auto",
+          "retinaface_model": "buffalo_s",
+          "insightface_root": "~/.insightface",
+          "det_size": 640,
+          "det_threshold": 0.45,
+          "max_faces": 64,
+          "fer_backend": "huggingface",
+          "fer_model_id": "abhilash88/face-emotion-detection",
+          "fer_input_size": 224,
+          "tracking": true,
+          "track_high_threshold": 0.45,
+          "track_low_threshold": 0.1,
+          "new_track_threshold": 0.45,
+          "track_match_threshold": 0.8,
+          "track_buffer": 8,
+          "expected_faces": 8,
+          "emotion_momentum": 0.6,
+          "missed_detection_decay": 0.35,
+          "max_feature_age": 1
+        }
+      }
+    ],
+    "interaction": [
+      {
+        "code": "I1",
+        "enabled": true,
+        "force_train": false,
+        "force_extract": false,
+        "legacy_feature_dir": "preprocessed_features/interaction_features",
+        "parameters": {
+          "device": "auto",
+          "model": "yolov8n.pt",
+          "confidence": 0.25
+        }
+      }
+    ]
+  },
+  "pairing": {
+    "strategy": "cartesian",
+    "feature_order": ["interaction", "affect"]
+  },
+  "baseline": {
+    "publish_official": true,
+    "affect_code": "A1",
+    "interaction_code": "I1"
+  },
+  "certification": {
+    "required_python": "3.10",
+    "documented_legacy_reference": {
+      "label": "DOCUMENTED LEGACY REFERENCE",
+      "accuracy": 0.840909091,
+      "precision_macro": 0.814679884,
+      "recall_macro": 0.843492063,
+      "f1_macro": 0.826892110,
+      "confusion_matrix": [[60, 6, 6], [3, 21, 1], [3, 2, 30]]
+    },
+    "paths": {
+      "dataset_root": ".",
+      "preprocessed_root": "preprocessed_data/yolov5_640x640",
+      "legacy_feature_root": "preprocessed_features",
+      "legacy_matrix_root": "feature_matrices_behavioral",
+      "legacy_checkpoint_root": "checkpoints"
+    }
+  },
+  "engagement": {
+    "model": {
+      "architecture": "legacy_pure_behavioral_attention",
+      "branch_dim": 48,
+      "num_heads": 4,
+      "dropout": 0.15
+    },
+    "training": {
+      "seed": 42,
+      "epochs": 60,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "patience": 15
+    },
+    "evaluation": {
+      "batch_size": 32,
+      "warmup_batches": 1
+    }
+  }
+}

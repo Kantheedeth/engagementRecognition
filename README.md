@@ -10,6 +10,11 @@ This repository supports two execution modes:
 1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and Track-Aware Affect (RetinaFace + ByteTrack + ViT FER) while allocating **80% of embedding representation to behavioral signals**.
 2. **Pure Behavioral Pipeline** (Zero Scene Shortcut): Strips away visual background features entirely, relying **100% on student body posture, spatial density, and facial expressions**.
 
+> **Baseline stability:** The pipelines and source files documented below are the
+> frozen, reproducible baseline. Future method-comparison work must be added as a
+> separate `experiments_v2/` layer and must not refactor, rename, move, or delete
+> the existing implementation.
+
 ```text
 ========================================================================================
                           MULTI-BRANCH BALANCED PIPELINE (80-dim)
@@ -54,6 +59,72 @@ This repository supports two execution modes:
  Track-Aware Affect (8-dim) ─► Linear(8,  48) ──┘
  (Zero Scene Features / Zero Background Memorization)
 ```
+
+---
+
+## 🧪 Planned Additive V2: Affect × Interaction Golden-Pair Search
+
+The next research layer will compare versioned Affect and Interaction methods
+while leaving the existing project unchanged. Scene extraction remains available
+in the baseline but is excluded from the default golden-pair search.
+
+```text
+                    FROZEN EXISTING PROJECT
+                              │
+                    Legacy adapters/wrappers
+                              │
+                 ┌─────────────┴─────────────┐
+                 ▼                           ▼
+           Affect methods               Interaction methods
+       Legacy, A2, A3, ...           Legacy, I2, I3, ...
+                 │                           │
+                 ▼                           ▼
+      Versioned saved features       Versioned saved features
+                 └─────────────┬─────────────┘
+                              ▼
+                  Affect × Interaction pair
+                              │
+                              ▼
+                 Train engagement classifier
+                              │
+                              ▼
+               Immutable engagement checkpoint
+                              │
+                              ▼
+                          Evaluate
+                              │
+                              ▼
+       Accuracy / F1 / Size / Parameters / FPS / Time
+                              │
+                              ▼
+                  Pareto-optimal golden pairs
+```
+
+The V2 system is planned around these rules:
+
+- Existing extractors, models, builders, trainers, and evaluators remain usable
+  without modification.
+- Legacy Affect and Interaction enter V2 through adapters and form the first
+  reproducibility baseline pair.
+- A method may contain one model, several models, method-specific preprocessing,
+  and internal fusion logic.
+- Model checkpoints, feature sets, pair definitions, engagement checkpoints, and
+  results receive immutable version IDs and are never automatically overwritten.
+- Compatible saved features are reused. A forced training or extraction request
+  creates a new version instead of replacing an old one.
+- Registered Affect and Interaction versions are paired using their Cartesian
+  product, so adding a method does not require editing hard-coded pair lists.
+- Pair comparisons retain raw accuracy, precision, recall, F1, confusion matrix,
+  model size, parameter count, extraction time, engagement inference time, and
+  FPS where meaningful.
+- Golden-pair selection reports performance, efficiency, and Pareto-optimal
+  trade-offs rather than using accuracy alone or an implicit combined score.
+- Dataset splits, engagement architecture, optimizer, learning rate, epochs,
+  batch size, evaluation procedure, and random seed remain fixed unless an
+  experiment explicitly changes them.
+
+This section describes the approved architecture direction. The `experiments_v2/`
+implementation will be introduced incrementally on a dedicated branch.
 
 ---
 
