@@ -6,13 +6,13 @@ class PureBehavioralAttentionClassifier(nn.Module):
     Pure Behavioral Engagement Recognition Network (Zero Scene Background Shortcut).
     
     Fuses:
-      • Branch 1 (Interaction): 32-dim YOLO spatial layout & student posture -> 48-dim
+      • Branch 1 (Interaction): 40-dim role-aware track pooling -> 48-dim
       • Branch 2 (Affect):       7 expression probabilities + reliability -> 48-dim
     Total Fused Dimension: 48 + 48 = 96 dimensions per frame.
     """
     def __init__(
         self, 
-        dim_inter=32, 
+        dim_inter=40,
         dim_affect=8, 
         branch_dim=48, 
         num_heads=4, 
@@ -24,7 +24,7 @@ class PureBehavioralAttentionClassifier(nn.Module):
         self.dim_inter = dim_inter
         self.dim_affect = dim_affect
         
-        # Interaction Branch: 32 -> 48
+        # Interaction Branch: 40 -> 48
         self.branch_inter = nn.Sequential(
             nn.Linear(dim_inter, branch_dim),
             nn.LayerNorm(branch_dim),
@@ -65,10 +65,10 @@ class PureBehavioralAttentionClassifier(nn.Module):
         )
         
     def forward(self, x):
-        # Input shape: (batch, 8, 40)
+        # Input shape: (batch, 8, 48)
         # Slices:
-        # [0:32]  -> Interaction features
-        # [32:40] -> 7 affect probabilities + affect reliability
+        # [0:40]  -> Track-aware role-aware interaction features
+        # [40:48] -> 7 affect probabilities + affect reliability
         
         x_inter = x[:, :, 0:self.dim_inter]
         x_affect = x[:, :, self.dim_inter:self.dim_inter + self.dim_affect]
@@ -94,7 +94,7 @@ class PureBehavioralAttentionClassifier(nn.Module):
 
 if __name__ == "__main__":
     model = PureBehavioralAttentionClassifier()
-    dummy_input = torch.randn(2, 8, 40)
+    dummy_input = torch.randn(2, 8, 48)
     out = model(dummy_input)
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Pure Behavioral Model output shape: {out.shape}")

@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
@@ -16,6 +17,7 @@ if PROJECT_ROOT not in sys.path:
 from src.models.model_behavioral import PureBehavioralAttentionClassifier
 from src.models.dataset import EngagementDataset, load_feature_manifest
 from src.data.feature_schema import BEHAVIORAL_FEATURE_SCHEMA
+from src.data.split_integrity import audit_split_integrity
 
 class DummyAutocast:
     def __enter__(self): return None
@@ -64,6 +66,15 @@ def train(args):
         print(f"Random seed set to: {args.seed}")
 
     print("=" * 65)
+
+    split_integrity = audit_split_integrity(
+        Path(args.csv_dir), Path(args.group_manifest)
+    )
+    print(
+        "Split integrity verified: "
+        f"{split_integrity['session_count']} sessions, "
+        f"{split_integrity['golden_pair_count']} golden-pair groups"
+    )
     print("Pure Behavioral Engagement Training (ZERO Scene Shortcut)")
     print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
     print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
@@ -82,6 +93,11 @@ def train(args):
         expected_schema=BEHAVIORAL_FEATURE_SCHEMA,
         expected_shape=expected_shape,
     )
+    if feature_manifest.get("split_csv_sha256") != split_integrity["csv_sha256"]:
+        raise ValueError(
+            "Behavioral matrices were not built from the currently audited split "
+            "CSVs. Rebuild the matrices before training."
+        )
     train_dataset = EngagementDataset(
         os.path.join(args.data_dir, "train"), expected_shape=expected_shape
     )
@@ -90,6 +106,13 @@ def train(args):
     )
     if not train_dataset or not val_dataset:
         raise RuntimeError("Training and validation splits must both contain matrices")
+    recorded_counts = feature_manifest.get("split_counts", {})
+    actual_counts = {"train": len(train_dataset), "val": len(val_dataset)}
+    if any(recorded_counts.get(split) != count for split, count in actual_counts.items()):
+        raise ValueError(
+            "Matrix counts do not match the build manifest; rebuild before training. "
+            f"recorded={recorded_counts}, actual={actual_counts}"
+        )
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
@@ -179,7 +202,7 @@ def train(args):
         if epoch_val_loss < best_val_loss:
             best_val_loss = epoch_val_loss
             patience_counter = 0
-            best_model_path = os.path.join(args.checkpoint_dir, "best_model_behavioral.pth")
+            best_model_path = os.path.join(args.checkpoint_dir, args.checkpoint_name)
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -187,6 +210,7 @@ def train(args):
                 'val_loss': best_val_loss,
                 'val_acc': epoch_val_acc,
                 'feature_manifest': feature_manifest,
+                'split_integrity': split_integrity,
                 'model_config': {
                     'dim_inter': args.dim_inter,
                     'dim_affect': args.dim_affect,
@@ -208,9 +232,23 @@ def train(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default=os.path.join(PROJECT_ROOT, "feature_matrices_behavioral"))
+    parser.add_argument(
+        "--data_dir",
+        default=os.path.join(PROJECT_ROOT, "feature_matrices_behavioral_track"),
+    )
     parser.add_argument("--checkpoint_dir", default=os.path.join(PROJECT_ROOT, "checkpoints"))
-    parser.add_argument("--dim_inter", type=int, default=32)
+    parser.add_argument("--checkpoint_name", default="best_model_behavioral_track.pth")
+    parser.add_argument(
+        "--group_manifest",
+        required=True,
+        help="CSV containing video_path,session_id,golden_pair_id for split auditing",
+    )
+    parser.add_argument(
+        "--csv_dir",
+        default=PROJECT_ROOT,
+        help="Directory containing the exact train.csv, val.csv, and test.csv files",
+    )
+    parser.add_argument("--dim_inter", type=int, default=40)
     parser.add_argument("--dim_affect", type=int, default=8)
     parser.add_argument("--branch_dim", type=int, default=48)
     parser.add_argument("--num_heads", type=int, default=4)

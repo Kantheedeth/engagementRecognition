@@ -1,156 +1,326 @@
 #!/usr/bin/env python3
-"""Feature Ablation Study: Evaluate the contribution of each modality and test for spatial shortcuts.
+"""Reproducible Random-Forest ablations for old and track-aware interactions."""
 
-This script tests whether the model relies on true behavioral indicators (facial affect,
-body posture, vertical dispersion) versus spatial camera-angle coordinates (c_x, c_y).
-
-Usage:
-    python src/tools/ablation_study.py
-"""
+from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
+
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, f1_score
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    confusion_matrix,
+    f1_score,
+    mean_absolute_error,
+    precision_recall_fscore_support,
+)
 
-# Add project root to sys.path
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.models.dataset import EngagementDataset
+from src.data.feature_schema import (
+    AFFECT_COLUMNS,
+    BEHAVIORAL_FEATURE_SCHEMA,
+    BEHAVIORAL_SHAPE,
+    LEGACY_BEHAVIORAL_FEATURE_SCHEMA,
+    TRACK_INTERACTION_COLUMNS,
+)
+from src.data.split_integrity import audit_split_integrity
+from src.models.dataset import EngagementDataset, load_feature_manifest
 
 
-def run_ablation(args):
-    data_dir = Path(args.data_dir).resolve()
-    train_dir = data_dir / "train"
-    test_dir = data_dir / "test"
+def load_temporal_means(
+    data_dir: Path,
+    schema: str,
+    shape: tuple[int, int],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[str], list[str]]:
+    manifest = load_feature_manifest(
+        data_dir, expected_schema=schema, expected_shape=shape
+    )
+    train = EngagementDataset(data_dir / "train", expected_shape=shape)
+    test = EngagementDataset(data_dir / "test", expected_shape=shape)
+    if not train or not test:
+        raise RuntimeError(f"Missing train or test matrices under {data_dir}")
+    recorded_counts = manifest.get("split_counts", {})
+    if recorded_counts.get("train") != len(train) or recorded_counts.get("test") != len(test):
+        raise ValueError(
+            f"Matrix counts under {data_dir} do not match its build manifest"
+        )
+    train_x = np.stack([train[index][0].numpy() for index in range(len(train))]).mean(1)
+    train_y = np.asarray([train[index][1].item() for index in range(len(train))])
+    test_x = np.stack([test[index][0].numpy() for index in range(len(test))]).mean(1)
+    test_y = np.asarray([test[index][1].item() for index in range(len(test))])
+    return (
+        train_x,
+        train_y,
+        test_x,
+        test_y,
+        [path.name for path in train.file_paths],
+        [path.name for path in test.file_paths],
+    )
 
-    if not train_dir.is_dir() or not test_dir.is_dir():
-        print(f"❌ Error: Data directory not found at {data_dir}")
-        print("Please build matrices first: python run_behavioral.py --stage build")
-        sys.exit(1)
 
-    print("=" * 75)
-    print("🔬 FEATURE ABLATION & SPATIAL SHORTCUT AUDIT")
-    print(f"  • Data Source: {data_dir}")
-    print(f"  • Random Seed: {args.seed}")
-    print("=" * 75)
+def score_predictions(y_true: np.ndarray, predictions: np.ndarray) -> dict:
+    precision, recall, f1, support = precision_recall_fscore_support(
+        y_true,
+        predictions,
+        labels=[0, 1, 2],
+        zero_division=0,
+    )
+    class_names = ("Low", "Mid", "High")
+    return {
+        "accuracy": float(accuracy_score(y_true, predictions)),
+        "macro_f1": float(
+            f1_score(y_true, predictions, average="macro", zero_division=0)
+        ),
+        "balanced_accuracy": float(balanced_accuracy_score(y_true, predictions)),
+        "ordinal_mae": float(mean_absolute_error(y_true, predictions)),
+        "per_class": {
+            name: {
+                "precision": float(precision[index]),
+                "recall": float(recall[index]),
+                "f1": float(f1[index]),
+                "support": int(support[index]),
+            }
+            for index, name in enumerate(class_names)
+        },
+        "confusion_matrix": confusion_matrix(
+            y_true, predictions, labels=[0, 1, 2]
+        ).tolist(),
+    }
 
-    # Load dataset matrices
-    train_dataset = EngagementDataset(train_dir, expected_shape=(8, 40))
-    test_dataset = EngagementDataset(test_dir, expected_shape=(8, 40))
 
-    X_train_raw = np.array([train_dataset[i][0].numpy() for i in range(len(train_dataset))])
-    y_train = np.array([train_dataset[i][1].item() for i in range(len(train_dataset))])
+def fit_baseline(
+    train_x: np.ndarray,
+    train_y: np.ndarray,
+    test_x: np.ndarray,
+    test_y: np.ndarray,
+    indices,
+    seed: int,
+) -> tuple[dict, RandomForestClassifier]:
+    model = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=-1)
+    model.fit(train_x[:, indices], train_y)
+    return score_predictions(test_y, model.predict(test_x[:, indices])), model
 
-    X_test_raw = np.array([test_dataset[i][0].numpy() for i in range(len(test_dataset))])
-    y_test = np.array([test_dataset[i][1].item() for i in range(len(test_dataset))])
 
-    # Temporal mean pooling over 8 frames for baseline feature analysis
-    X_train = X_train_raw.mean(axis=1)  # Shape: (939, 40)
-    X_test = X_test_raw.mean(axis=1)    # Shape: (132, 40)
+def run_ablation(args: argparse.Namespace) -> None:
+    split_integrity = audit_split_integrity(
+        Path(args.csv_dir), Path(args.group_manifest)
+    )
+    new_dir = Path(args.data_dir).expanduser().resolve()
+    legacy_dir = Path(args.legacy_data_dir).expanduser().resolve()
+    new_manifest = load_feature_manifest(
+        new_dir,
+        expected_schema=BEHAVIORAL_FEATURE_SCHEMA,
+        expected_shape=BEHAVIORAL_SHAPE,
+    )
+    if new_manifest.get("split_csv_sha256") != split_integrity["csv_sha256"]:
+        raise ValueError(
+            "New matrices were not built from the currently audited split CSVs"
+        )
+    new_data = load_temporal_means(
+        new_dir, BEHAVIORAL_FEATURE_SCHEMA, BEHAVIORAL_SHAPE
+    )
+    legacy_data = load_temporal_means(
+        legacy_dir, LEGACY_BEHAVIORAL_FEATURE_SCHEMA, (8, 40)
+    )
+    (
+        new_train_x,
+        new_train_y,
+        new_test_x,
+        new_test_y,
+        new_train_names,
+        new_test_names,
+    ) = new_data
+    (
+        old_train_x,
+        old_train_y,
+        old_test_x,
+        old_test_y,
+        old_train_names,
+        old_test_names,
+    ) = legacy_data
+    if new_train_names != old_train_names or new_test_names != old_test_names:
+        raise ValueError(
+            "Old and new datasets do not contain the identical ordered matrix "
+            "filenames; refusing a sample-misaligned comparison."
+        )
+    if not np.array_equal(new_train_y, old_train_y) or not np.array_equal(
+        new_test_y, old_test_y
+    ):
+        raise ValueError(
+            "Old and new datasets do not have identical ordered labels; refusing an "
+            "invalid comparison."
+        )
 
-    # Baseline: Always predict majority class ("Low" = 0)
-    majority_preds = np.zeros_like(y_test)
-    baseline_f1 = f1_score(y_test, majority_preds, average="macro")
+    interaction_dim = len(TRACK_INTERACTION_COLUMNS)
+    affect_dim = len(AFFECT_COLUMNS)
+    coordinate_names = {
+        "teacher_position_x",
+        "teacher_position_y",
+        "mean_student_x",
+        "mean_student_y",
+    }
+    no_absolute_coordinates = [
+        index
+        for index, name in enumerate(TRACK_INTERACTION_COLUMNS)
+        if name not in coordinate_names
+    ] + list(range(interaction_dim, interaction_dim + affect_dim))
 
-    # Define Feature Subspaces
-    # 0..31: Interaction (32 dims)
-    # 32..39: Affect (8 dims)
-    # Non-coordinate indices (deleting centroid_x/y and student cx/cy):
-    non_coord_indices = [0, 1, 2, 5, 6]  # count, in_zone, vfoa, disp_x, disp_y
-    for i in range(5):
-        base = 7 + i * 5
-        non_coord_indices.extend([base + 2, base + 3, base + 4])  # w, h, in_zone
-    non_coord_indices.extend(list(range(32, 40)))  # 8 affect features
+    experiments = []
+    majority = np.full_like(new_test_y, np.bincount(new_train_y).argmax())
+    experiments.append(("Majority-class baseline", score_predictions(new_test_y, majority)))
 
-    experiments = [
-        ("1. Baseline (Majority Guess: 'Low')", None, "majority"),
-        ("2. Affect Only (8-dim: ZERO coordinates/camera angle)", slice(32, 40), "rf"),
-        ("3. Interaction Only (32-dim: body geometry & positions)", slice(0, 32), "rf"),
-        ("4. Zero Coordinates (28-dim: posture + affect, NO (cx, cy))", non_coord_indices, "rf"),
-        ("5. Full Combined (40-dim: all interaction + affect)", slice(0, 40), "rf"),
+    specifications = [
+        (
+            "Affect only",
+            new_train_x,
+            new_train_y,
+            new_test_x,
+            new_test_y,
+            slice(interaction_dim, interaction_dim + affect_dim),
+        ),
+        (
+            "Old interaction only (32-D, no track roles)",
+            old_train_x,
+            old_train_y,
+            old_test_x,
+            old_test_y,
+            slice(0, 32),
+        ),
+        (
+            "Affect + old interaction",
+            old_train_x,
+            old_train_y,
+            old_test_x,
+            old_test_y,
+            slice(0, 40),
+        ),
+        (
+            "New interaction only (40-D track roles)",
+            new_train_x,
+            new_train_y,
+            new_test_x,
+            new_test_y,
+            slice(0, interaction_dim),
+        ),
+        (
+            "Affect + new interaction",
+            new_train_x,
+            new_train_y,
+            new_test_x,
+            new_test_y,
+            slice(0, interaction_dim + affect_dim),
+        ),
+        (
+            "New fusion without absolute positions",
+            new_train_x,
+            new_train_y,
+            new_test_x,
+            new_test_y,
+            no_absolute_coordinates,
+        ),
     ]
+    full_model = None
+    for name, train_x, train_y, test_x, test_y, indices in specifications:
+        metrics, model = fit_baseline(
+            train_x, train_y, test_x, test_y, indices, args.seed
+        )
+        experiments.append((name, metrics))
+        if name == "Affect + new interaction":
+            full_model = model
 
-    results = []
-    trained_full_rf = None
+    print("=" * 105)
+    print("TRACK-AWARE INTERACTION ABLATION (TEMPORAL-MEAN RANDOM FOREST)")
+    print(f"Seed: {args.seed} | train={len(new_train_y)} | test={len(new_test_y)}")
+    print(
+        "Strict split audit: "
+        f"{split_integrity['session_count']} sessions, "
+        f"{split_integrity['golden_pair_count']} golden-pair groups"
+    )
+    print("=" * 105)
+    print(
+        f"{'Configuration':<48} {'Accuracy':>10} {'Macro-F1':>10} "
+        f"{'Balanced':>10} {'Ord MAE':>10}"
+    )
+    for name, metrics in experiments:
+        print(
+            f"{name:<48} {metrics['accuracy']*100:>9.2f}% "
+            f"{metrics['macro_f1']*100:>9.2f}% "
+            f"{metrics['balanced_accuracy']*100:>9.2f}% "
+            f"{metrics['ordinal_mae']:>10.4f}"
+        )
 
-    for name, indices, model_type in experiments:
-        if model_type == "majority":
-            f1 = baseline_f1
-            acc = (y_test == 0).mean()
-        else:
-            rf = RandomForestClassifier(n_estimators=100, random_state=args.seed)
-            if isinstance(indices, slice):
-                X_tr = X_train[:, indices]
-                X_te = X_test[:, indices]
-            else:
-                X_tr = X_train[:, indices]
-                X_te = X_test[:, indices]
+    print("\nPer-class metrics and confusion matrices (rows=true, columns=predicted):")
+    for name, metrics in experiments:
+        print(f"\n{name}")
+        for class_name, class_metrics in metrics["per_class"].items():
+            print(
+                f"  {class_name:<4} precision={class_metrics['precision']:.4f} "
+                f"recall={class_metrics['recall']:.4f} "
+                f"f1={class_metrics['f1']:.4f} "
+                f"support={class_metrics['support']}"
+            )
+        print(f"  confusion_matrix={metrics['confusion_matrix']}")
 
-            rf.fit(X_tr, y_train)
-            preds = rf.predict(X_te)
-            f1 = f1_score(y_test, preds, average="macro")
-            acc = (preds == y_test).mean()
-
-            if name.startswith("5."):
-                trained_full_rf = rf
-
-        results.append((name, f1 * 100, acc * 100))
-
-    # Print Table
-    print(f"\n{'Experiment Configuration':<60} | {'Macro-F1':<10} | {'Accuracy':<10}")
-    print("-" * 88)
-    for name, f1_val, acc_val in results:
-        print(f"{name:<60} | {f1_val:>8.2f}% | {acc_val:>8.2f}%")
-    print("-" * 88)
-
-    # Feature Importance Analysis from Full 40-dim Model
-    feature_names = [
-        "total_count", "in_zone_count", "vfoa_ratio", "centroid_x", "centroid_y", "disp_x", "disp_y"
-    ]
-    for i in range(5):
-        feature_names.extend([f"s{i}_cx", f"s{i}_cy", f"s{i}_w", f"s{i}_h", f"s{i}_in_zone"])
-    feature_names.extend([
-        "anger", "disgust", "fear", "happiness", "sadness", "surprise", "neutral", "reliability"
-    ])
-
-    importances = trained_full_rf.feature_importances_
-    top_indices = np.argsort(importances)[::-1][:10]
-
-    print("\n" + "=" * 75)
-    print("🏆 TOP 10 MOST INFLUENTIAL BEHAVIORAL FEATURES")
-    print("=" * 75)
-    for rank, idx in enumerate(top_indices, 1):
-        feature_type = "Affect" if idx >= 32 else ("Coordinate" if "c" in feature_names[idx] and "count" not in feature_names[idx] else "Posture/Movement")
-        print(f" #{rank:2d}: {feature_names[idx]:<16} ({importances[idx]*100:5.2f}% importance) ──► Type: {feature_type}")
-    print("=" * 75)
-
-    print("\n💡 KEY SCIENTIFIC TAKEAWAY:")
-    print("  • Affect alone (8-dim) achieves >55% Macro-F1 with zero spatial coordinates.")
-    print("  • Stripping ALL absolute (cx, cy) positions yields ~75% Macro-F1 purely from posture & affect.")
-    print("  • This proves the model learns authentic human engagement rather than memorizing camera angles.\n")
+    if full_model is not None:
+        names = list(TRACK_INTERACTION_COLUMNS) + list(AFFECT_COLUMNS)
+        top = np.argsort(full_model.feature_importances_)[::-1][:10]
+        print("\nTop Random-Forest feature associations (not causal importance):")
+        for rank, index in enumerate(top, start=1):
+            print(
+                f"  {rank:2d}. {names[index]:<42} "
+                f"{full_model.feature_importances_[index]*100:6.2f}%"
+            )
+    print(
+        "\nInterpretation warning: this diagnostic does not prove attention, "
+        "engagement causality, or freedom from session/camera leakage."
+    )
+    if args.output_json is not None:
+        output_path = Path(args.output_json).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "seed": args.seed,
+            "split_integrity": split_integrity,
+            "train_samples": len(new_train_y),
+            "test_samples": len(new_test_y),
+            "experiments": [
+                {"configuration": name, **metrics} for name, metrics in experiments
+            ],
+        }
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(payload, file, indent=2)
+        print(f"Saved computed ablation report: {output_path}")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Feature Ablation Study for Student Engagement Recognition")
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--data_dir",
-        default=PROJECT_ROOT / "feature_matrices_behavioral",
-        help="Path to behavioral feature matrices folder",
+        type=Path,
+        default=PROJECT_ROOT / "feature_matrices_behavioral_track",
     )
     parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="Random seed for reproducibility",
+        "--legacy_data_dir",
+        type=Path,
+        default=PROJECT_ROOT / "feature_matrices_behavioral",
     )
-    args = parser.parse_args()
-    run_ablation(args)
+    parser.add_argument("--csv_dir", type=Path, default=PROJECT_ROOT)
+    parser.add_argument(
+        "--group_manifest",
+        type=Path,
+        required=True,
+        help="Authoritative CSV with video_path,session_id,golden_pair_id",
+    )
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--output_json", type=Path)
+    run_ablation(parser.parse_args())
 
 
 if __name__ == "__main__":

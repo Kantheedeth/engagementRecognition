@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import sys
 import subprocess
@@ -17,6 +18,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 PYTHON_EXE = sys.executable
+
+from src.data.feature_schema import INTERACTION_FEATURE_SCHEMA
 
 
 def run_command(cmd, desc):
@@ -39,13 +42,31 @@ def stage_extract(args):
     ]
     run_command(cmd_scene, "Extracting MobileNetV3 576-dim Scene Features")
 
-    # 2. Interaction features (YOLOv8)
-    cmd_inter = [
-        PYTHON_EXE,
-        str(PROJECT_ROOT / "src" / "data" / "extract_interaction_features.py"),
-        "--device", args.device,
-    ]
-    run_command(cmd_inter, "Extracting YOLOv8 32-dim Interaction Features")
+    # 2. This runner remains tied to the legacy, already-extracted 32-D schema.
+    # The new extractor intentionally writes a separate 40-D output and must not
+    # be silently substituted into the 616-D scene pipeline.
+    legacy_manifest_path = (
+        PROJECT_ROOT
+        / "preprocessed_features"
+        / "interaction_features"
+        / "extraction_manifest.json"
+    )
+    if not legacy_manifest_path.is_file():
+        raise RuntimeError(
+            "run_multimodal.py requires existing legacy 32-D interaction features. "
+            "The new track-aware 40-D extractor is zero-scene and is available via "
+            "run_behavioral_track.py; it is not silently mixed into this runner."
+        )
+    with legacy_manifest_path.open(encoding="utf-8") as file:
+        legacy_manifest = json.load(file)
+    if (
+        legacy_manifest.get("feature_schema") != INTERACTION_FEATURE_SCHEMA
+        or legacy_manifest.get("shape_per_video") != [8, 32]
+    ):
+        raise RuntimeError(
+            f"Incompatible legacy interaction manifest: {legacy_manifest_path}"
+        )
+    print(f"Reusing verified legacy 32-D interaction features: {legacy_manifest_path}")
 
     # 3. Track-Aware Affect features (RetinaFace + ByteTrack + ViT FER)
     cmd_affect = [

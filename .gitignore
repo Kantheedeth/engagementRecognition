@@ -7,6 +7,7 @@ preprocessed_data/
 preprocessed_features/
 feature_matrices/
 feature_matrices_behavioral/
+feature_matrices_behavioral_track/
 
 # Checkpoints and Model Weights (Large Binaries)
 checkpoints/
@@ -18,6 +19,7 @@ checkpoints/
 # Visual Debug and Audit Outputs
 debug_validation/
 audit_outputs/
+confusion_matrix_behavioral_track.png
 
 # Python Cache & Bytecode
 __pycache__/
