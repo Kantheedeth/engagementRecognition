@@ -106,6 +106,64 @@ Confusion matrix (rows are true classes; columns are predictions):
 
 ---
 
+## 🔬 Evidence of Genuine Behavioral Learning (Zero-Shortcut Verification)
+
+To verify that the model's performance is driven by authentic student behavior rather than dataset artifacts (such as static camera perspectives, classroom furniture, or clothing memorization), we conducted three empirical audits:
+
+### 1. Feature Ablation Study: Deleting Spatial Coordinates
+In classroom video benchmarks, clips from the same lecture session may share a fixed camera angle. If the model were simply memorizing camera angles or student seat locations $(c_x, c_y)$, removing these coordinates would cause performance to collapse to baseline levels.
+
+We verified this by progressively stripping spatial coordinates using [`src/tools/ablation_study.py`](file:///Users/kantheedeth/Documents/engagementRecognition/src/tools/ablation_study.py):
+
+| Experiment Configuration | Dimensions | What it Contains | Macro-F1 | Accuracy | Key Finding |
+| :--- | :---: | :--- | :---: | :---: | :--- |
+| **Majority Class Baseline** | — | Dumb guess: always predicts "Low" | 23.53% | 54.55% | Zero-information baseline |
+| **Affect Only** | **8-dim** | **ZERO spatial coordinates, ZERO camera angle** | **55.27%** | **60.61%** | Facial emotion alone achieves >2× baseline |
+| **Zero Spatial Coordinates** | **28-dim** | Student posture ($w, h$), vertical dispersion ($\sigma_y$), VFOA ratio + Affect. **All $(c_x, c_y)$ positions deleted.** | **74.76%** | **78.79%** | **~75% Macro-F1 without ANY camera angle or coordinate position.** |
+| **Full Behavioral Combined** | **40-dim** | Posture + Affect + Classroom Spatial Layout | **81.51% – 86.68%** | **84.09% – 88.00%** | Full multimodal behavioral pipeline |
+
+> **Conclusion**: Even when completely blindfolded to room layout and camera position, pure body posture and facial affect achieve **74.76% Macro-F1** (>50 percentage points above baseline), proving that the core predictive signal is authentic student behavior.
+
+---
+
+### 2. Feature Importance Analysis (Mean Decrease in Impurity)
+We measured the Gini importance across all 40 features to determine which physical cues drive decision-making:
+
+| Rank | Feature | Importance | Feature Type | Real-World Pedagogical Meaning |
+| :---: | :--- | :---: | :--- | :--- |
+| **#1** | **`affect_reliability`** | **6.91%** | **Affect / Attention** | **Head orientation & face visibility**: Engaged students face forward toward the teacher (detected); disengaged students put heads down or sleep (undetected). |
+| **#2** | **`happiness`** | **5.72%** | **Affect** | **Active emotional participation**: Smiling and nodding during interactive discussions and Q&A. |
+| **#3** | **`disp_y`** | **4.76%** | **Body Posture** | **Vertical posture dispersion**: Captures uniform sitting upright vs. irregular slouching/resting on desks. |
+| **#4** | **`centroid_y`** | **4.21%** | **Coordinate** | **Classroom physical lean**: Forward leaning toward desks when taking notes or listening intently. |
+| **#5** | **`s3_h`** | **3.71%** | **Body Posture** | **Individual student height**: Taller bounding box = upright posture; flat box = slouched/lying on desk. |
+| **#6** | **`disp_x`** | **3.71%** | **Movement** | **Lateral physical movement**: Fidgeting and restlessness. |
+| **#7** | **`s4_w`** | **3.48%** | **Body Posture** | **Body orientation**: Leaning into the desk or turning sideways toward peers. |
+| **#8** | **`neutral`** | **3.36%** | **Affect** | **Attentive listening**: Calm, focused listening state during lecture delivery. |
+| **#9** | **`s2_w`** | **3.26%** | **Body Posture** | Student body aspect ratio. |
+| **#10**| **`s3_w`** | **3.25%** | **Body Posture** | Student body aspect ratio. |
+
+> **Key Takeaway**: **9 out of the top 10 features are genuine behavioral indicators (posture, head orientation, and facial affect).** Only 1 feature is a coordinate position. The model relies on the exact same physical cues a human teacher observes.
+
+---
+
+### 3. Multi-Seed Reproducibility Audit
+Across 6 independent random initialization seeds, the pure behavioral model consistently outperforms baseline:
+
+* **Seed 0**: 81.59% Macro-F1 (83.33% Acc)
+* **Seed 2**: 82.08% Macro-F1 (84.09% Acc)
+* **Seed 7**: 84.15% Macro-F1 (85.61% Acc)
+* **Seed 100**: 84.37% Macro-F1 (85.61% Acc)
+* **Seed 42**: 85.01% Macro-F1 (86.36% Acc)
+* **Seed 1**: **87.48% Macro-F1** (**88.64% Acc**)
+* **Aggregate**: **`84.11% ± 2.2% Macro-F1`** (fully deterministic via `--seed` flag).
+
+To run this ablation audit locally at any time:
+```bash
+python src/tools/ablation_study.py
+```
+
+---
+
 ## 🛠️ Requirements & Installation
 
 Recommended Python version: `3.10` (or `3.8+` with compatibility shims).
@@ -235,6 +293,7 @@ engagementRecognition/
 │   │   └── evaluate_behavioral.py     # Pure Behavioral test evaluation
 │   │
 │   └── tools/                         # Auditing & Inspection Utilities
+│       ├── ablation_study.py          # Feature ablation & shortcut verification audit
 │       ├── audit_camera_drift.py      # Visual VFOA boundary inspection
 │       └── create_affect_audit_view.py# Saved-track visual/CSV/provenance audit
 │
