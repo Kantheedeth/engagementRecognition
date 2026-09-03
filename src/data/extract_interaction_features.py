@@ -84,35 +84,112 @@ def validate_reusable_provenance(existing: dict | None, requested: dict) -> None
         )
 
 
-def extract_frame_interaction_descriptor(boxes) -> np.ndarray:
-    """Return 7 group geometry + 5x5 area-sorted person-state values."""
-    persons = []
-    for box in boxes:
-        if int(box.cls[0]) != 0:
+DEFAULT_TARGET = np.array([0.135, 0.50], dtype=np.float32)
+
+
+def extract_frame_interaction_descriptor(boxes, keypoints=None) -> np.ndarray:
+    """Return 7 group geometry + 5x5 area-sorted person-state values with real Zone Attention."""
+    if len(boxes) == 0:
+        return np.zeros(32, dtype=np.float32)
+
+    xyxy = boxes.xyxy.detach().cpu().numpy()
+    classes = boxes.cls.detach().cpu().numpy()
+    kpts = keypoints.xy.detach().cpu().numpy() if keypoints is not None else None
+    kpts_conf = (
+        keypoints.conf.detach().cpu().numpy()
+        if keypoints is not None and keypoints.conf is not None
+        else None
+    )
+
+    # 1. Identify teacher position in instruction zone if present
+    teacher_pos = None
+    for i, box in enumerate(xyxy):
+        if int(classes[i]) != 0:
             continue
-        x1, y1, x2, y2 = box.xyxy[0].detach().cpu().numpy()
-        cx = ((x1 + x2) / 2.0) / 640.0
-        cy = ((y1 + y2) / 2.0) / 640.0
-        width = (x2 - x1) / 640.0
-        height = (y2 - y1) / 640.0
+        cx = ((box[0] + box[2]) / 2.0) / 640.0
+        cy = ((box[1] + box[3]) / 2.0) / 640.0
+        if ZONE_X_MIN <= cx <= ZONE_X_MAX and ZONE_Y_MIN <= cy <= ZONE_Y_MAX:
+            teacher_pos = np.array([cx, cy], dtype=np.float32)
+            break
+
+    target_pos = teacher_pos if teacher_pos is not None else DEFAULT_TARGET
+
+    persons = []
+    for i, box in enumerate(xyxy):
+        if int(classes[i]) != 0:
+            continue
+        cx = ((box[0] + box[2]) / 2.0) / 640.0
+        cy = ((box[1] + box[3]) / 2.0) / 640.0
+        width = (box[2] - box[0]) / 640.0
+        height = (box[3] - box[1]) / 640.0
         area = width * height
-        in_zone = float(
-            ZONE_X_MIN <= cx <= ZONE_X_MAX and ZONE_Y_MIN <= cy <= ZONE_Y_MAX
-        )
-        persons.append((area, cx, cy, width, height, in_zone))
+
+        # Target direction vector from student to instruction zone
+        v_target = target_pos - np.array([cx, cy], dtype=np.float32)
+        dist_target = float(np.linalg.norm(v_target))
+        u_target = v_target / dist_target if dist_target > 1e-4 else np.zeros(2, dtype=np.float32)
+
+        # Compute facing vector from pose keypoints
+        zone_attention = 0.5  # default neutral orientation
+        if cx <= ZONE_X_MAX:
+            # Teacher inside the zone is 1.0
+            zone_attention = 1.0
+        elif kpts is not None and i < len(kpts):
+            p_kpts = kpts[i]
+            p_conf = kpts_conf[i] if kpts_conf is not None else np.ones(17, dtype=np.float32)
+
+            nose = p_kpts[0] / 640.0
+            l_eye, r_eye = p_kpts[1] / 640.0, p_kpts[2] / 640.0
+            l_sh, r_sh = p_kpts[5] / 640.0, p_kpts[6] / 640.0
+
+            # Method 1: Head vector (eyes midpoint to nose)
+            v_facing = None
+            if p_conf[0] > 0.3 and (p_conf[1] > 0.3 or p_conf[2] > 0.3):
+                eye_mid = (
+                    (l_eye + r_eye) / 2.0
+                    if (p_conf[1] > 0.3 and p_conf[2] > 0.3)
+                    else (l_eye if p_conf[1] > 0.3 else r_eye)
+                )
+                v_head = nose - eye_mid
+                norm_h = float(np.linalg.norm(v_head))
+                if norm_h > 1e-4:
+                    v_facing = v_head / norm_h
+
+            # Method 2: Torso vector (orthogonal to shoulders)
+            if v_facing is None and p_conf[5] > 0.3 and p_conf[6] > 0.3:
+                v_sh = r_sh - l_sh
+                # Normal pointing forward
+                v_torso = np.array([-v_sh[1], v_sh[0]], dtype=np.float32)
+                norm_t = float(np.linalg.norm(v_torso))
+                if norm_t > 1e-4:
+                    v_facing = v_torso / norm_t
+
+            if v_facing is not None and dist_target > 1e-4:
+                cos_sim = float(np.dot(v_facing, u_target))
+                zone_attention = float(np.clip((cos_sim + 1.0) / 2.0, 0.0, 1.0))
+            else:
+                zone_attention = 0.5
+
+        persons.append((area, cx, cy, width, height, zone_attention))
 
     person_count = len(persons)
     if person_count == 0:
-        # Zero means no detected interaction evidence, not an engagement label.
         return np.zeros(32, dtype=np.float32)
 
-    in_zone_count = sum(person[5] for person in persons)
-    centers_x = [person[1] for person in persons]
-    centers_y = [person[2] for person in persons]
+    # Compute student-only attention (students outside instruction zone)
+    student_attentions = [p[5] for p in persons if p[1] > ZONE_X_MAX]
+    if len(student_attentions) == 0:
+        student_attentions = [p[5] for p in persons]
+
+    mean_attention = float(np.mean(student_attentions))
+    vfoa_ratio = float(np.mean([att >= 0.55 for att in student_attentions]))
+
+    centers_x = [p[1] for p in persons]
+    centers_y = [p[2] for p in persons]
     global_features = [
         person_count / 10.0,
-        in_zone_count / 10.0,
-        in_zone_count / person_count,
+        mean_attention,
+        vfoa_ratio,
         float(np.mean(centers_x)),
         float(np.mean(centers_y)),
         float(np.std(centers_x)) if person_count > 1 else 0.0,
@@ -123,10 +200,11 @@ def extract_frame_interaction_descriptor(boxes) -> np.ndarray:
     person_features = []
     for index in range(MAX_STUDENTS_TRACKED):
         if index < person_count:
-            _, cx, cy, width, height, in_zone = persons[index]
-            person_features.extend([cx, cy, width, height, in_zone])
+            _, cx, cy, width, height, att = persons[index]
+            person_features.extend([cx, cy, width, height, att])
         else:
             person_features.extend([0.0] * 5)
+
     descriptor = np.asarray(global_features + person_features, dtype=np.float32)
     if descriptor.shape != (32,) or not np.isfinite(descriptor).all():
         raise ValueError(f"Invalid interaction descriptor: {descriptor}")
@@ -159,7 +237,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input_dir", type=Path, default=DEFAULT_INPUT_DIR)
     parser.add_argument("--output_dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--model", default="yolov8n.pt")
+    parser.add_argument("--model", default="yolov8n-pose.pt")
     parser.add_argument("--confidence", type=float, default=0.25)
     parser.add_argument("--device", default="auto", help="auto, cpu, mps, or CUDA index")
     parser.add_argument("--max_videos", type=int)
@@ -232,7 +310,12 @@ def main() -> None:
                 verbose=False,
             )
             descriptors = np.stack(
-                [extract_frame_interaction_descriptor(result.boxes) for result in results]
+                [
+                    extract_frame_interaction_descriptor(
+                        result.boxes, result.keypoints
+                    )
+                    for result in results
+                ]
             ).astype(np.float32)
             if descriptors.shape != (8, 32) or not np.isfinite(descriptors).all():
                 raise ValueError(f"Invalid output matrix {descriptors.shape}")
