@@ -106,6 +106,19 @@ def validate_config(config: dict[str, Any], project_root: Path) -> dict[str, Any
     reference.setdefault("precision_macro", 0.814679884)
     reference.setdefault("recall_macro", 0.843492063)
     reference.setdefault("f1_macro", 0.826892110)
+    certification.setdefault("dataset_name", "OUC-CGE cleaned subset")
+    certification.setdefault(
+        "preprocessing_provenance", "external/friend-provided preprocessing"
+    )
+    certification.setdefault("expected_engagement_parameter_count", 46179)
+    certification.setdefault(
+        "matrix_smoke_samples",
+        [
+            "train/low/view642",
+            "train/mid/view55",
+            "train/high/view2514",
+        ],
+    )
     paths = certification.setdefault("paths", {})
     feature_root_was_explicit = "legacy_feature_root" in paths
     for key, default in {

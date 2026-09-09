@@ -95,6 +95,31 @@ def create_engagement_model(
     return model, resolved
 
 
+def inspect_engagement_model_contract(
+    *, pair: PairDefinition, model_config: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Instantiate on CPU and report the exact unchanged classifier contract."""
+
+    model, resolved = create_engagement_model(pair=pair, model_config=model_config)
+    return {
+        "status": "passed",
+        "model_class": f"{type(model).__module__}.{type(model).__name__}",
+        "input_dimensions": {
+            "interaction": resolved["dim_inter"],
+            "affect": resolved["dim_affect"],
+            "raw_input": resolved["raw_input_dim"],
+            "temporal_frames": resolved["temporal_frames"],
+        },
+        "parameter_count": sum(parameter.numel() for parameter in model.parameters()),
+        "trainable_parameter_count": sum(
+            parameter.numel()
+            for parameter in model.parameters()
+            if parameter.requires_grad
+        ),
+        "architecture_config": resolved,
+    }
+
+
 def validate_checkpoint_input_contract(
     *, pair: PairDefinition, checkpoint_config: Mapping[str, Any]
 ) -> dict[str, Any]:

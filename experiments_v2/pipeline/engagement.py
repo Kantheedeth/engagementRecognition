@@ -125,7 +125,8 @@ def train_engagement(
     autocast_context = get_autocast_context(device)
 
     model_id = new_id("MODEL")
-    checkpoint_dir = create_exclusive_dir(run_dir / "checkpoints" / model_id)
+    checkpoint_id = new_id("CHECKPOINT")
+    checkpoint_dir = create_exclusive_dir(run_dir / "checkpoints" / checkpoint_id)
     best_val_loss = float("inf")
     best_epoch = 0
     best_val_accuracy = 0.0
@@ -136,6 +137,9 @@ def train_engagement(
     training_started = perf_counter()
 
     for epoch in range(1, epochs + 1):
+        _synchronize(torch, device)
+        epoch_started = perf_counter()
+        learning_rate = float(optimizer.param_groups[0]["lr"])
         model.train()
         train_loss = 0.0
         train_correct = 0
@@ -173,15 +177,28 @@ def train_engagement(
                 val_correct += torch.sum(predictions == targets).item()
                 val_total += features.size(0)
 
+        _synchronize(torch, device)
         epoch_metrics = {
             "epoch": epoch,
             "train_loss": train_loss / train_total,
             "train_accuracy": train_correct / train_total,
             "val_loss": val_loss / val_total,
             "val_accuracy": val_correct / val_total,
+            "learning_rate": learning_rate,
+            "epoch_seconds": perf_counter() - epoch_started,
         }
         history.append(epoch_metrics)
         scheduler.step()
+        print(
+            f"Epoch {epoch:02d}/{epochs} | "
+            f"Train Loss: {epoch_metrics['train_loss']:.4f} - "
+            f"Train Acc: {epoch_metrics['train_accuracy'] * 100:.2f}% | "
+            f"Val Loss: {epoch_metrics['val_loss']:.4f} - "
+            f"Val Acc: {epoch_metrics['val_accuracy'] * 100:.2f}% | "
+            f"LR: {learning_rate:.8f} | "
+            f"Time: {epoch_metrics['epoch_seconds']:.3f}s",
+            flush=True,
+        )
 
         if epoch_metrics["val_loss"] < best_val_loss:
             best_val_loss = epoch_metrics["val_loss"]
@@ -195,6 +212,7 @@ def train_engagement(
                 {
                     "epoch": epoch,
                     "model_id": model_id,
+                    "checkpoint_id": checkpoint_id,
                     "run_id": run_id,
                     "pair_id": pair.pair_id,
                     "model_state_dict": model.state_dict(),
@@ -220,6 +238,7 @@ def train_engagement(
 
     training_result = {
         "model_id": model_id,
+        "checkpoint_id": checkpoint_id,
         "device": str(device),
         "seed": seed,
         "epochs_requested": epochs,
@@ -229,6 +248,16 @@ def train_engagement(
         "best_validation_accuracy": best_val_accuracy,
         "training_seconds": training_seconds,
         "parameter_count": parameter_count,
+        "trainable_parameter_count": sum(
+            parameter.numel()
+            for parameter in model.parameters()
+            if parameter.requires_grad
+        ),
+        "checkpoint_selection": {
+            "split": "validation",
+            "criterion": "minimum_validation_loss",
+            "test_metrics_used": False,
+        },
         "checkpoint_path": str(best_checkpoint.resolve()),
         "checkpoint_size_mb": file_size_mb(best_checkpoint),
         "model_config": resolved_model_config,
@@ -239,6 +268,7 @@ def train_engagement(
     write_json_exclusive(run_dir / "training.json", training_result)
     artifact = model_registry.register_engagement_checkpoint(
         model_id=model_id,
+        checkpoint_id=checkpoint_id,
         pair_id=pair.pair_id,
         run_id=run_id,
         checkpoint_path=best_checkpoint,

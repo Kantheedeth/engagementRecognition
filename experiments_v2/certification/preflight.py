@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -124,6 +125,84 @@ def _checkpoint_check(root: Path) -> dict[str, Any]:
     }
 
 
+def _v2_feature_artifact_check(
+    artifacts_root: Path,
+    records: list[Record],
+    *,
+    category: str,
+    method_id: str,
+) -> dict[str, Any]:
+    """Find the newest validated immutable V2 feature without hiding legacy caches."""
+    method_root = artifacts_root / "features" / category / method_id
+    candidates = sorted(method_root.glob("MODEL_*/FEATURE_*/manifest.json"), reverse=True)
+    rejected = []
+    for manifest_path in candidates:
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            rejected.append(
+                {"manifest": str(manifest_path), "reason": f"invalid JSON: {exc}"}
+            )
+            continue
+        if (
+            manifest.get("status") != "complete"
+            or manifest.get("category") != category
+            or manifest.get("method_id") != method_id
+            or manifest.get("validated_files") != len(records)
+        ):
+            rejected.append(
+                {
+                    "manifest": str(manifest_path),
+                    "reason": "manifest identity/status/count mismatch",
+                }
+            )
+            continue
+        data_check = _expected_artifact_check(
+            manifest_path.parent / "data",
+            records,
+            kind="feature",
+            required_manifest="extraction_manifest.json",
+        )
+        if not data_check["ready"]:
+            rejected.append(
+                {
+                    "manifest": str(manifest_path),
+                    "reason": "artifact data inventory is incomplete",
+                }
+            )
+            continue
+        return {
+            **data_check,
+            "source_type": "v2_immutable_feature_artifact",
+            "feature_id": manifest.get("feature_id"),
+            "model_id": manifest.get("model_id"),
+            "method_id": method_id,
+            "feature_dim": manifest.get("feature_dim"),
+            "shape_per_video": manifest.get("shape_per_video"),
+            "manifest": str(manifest_path),
+            "rejected_candidates": rejected,
+        }
+    return {
+        "path": str(method_root),
+        "exists": method_root.is_dir(),
+        "expected_file_count": len(records),
+        "matched_file_count": 0,
+        "missing_count": len(records),
+        "missing_examples": [],
+        "required_manifest": "manifest.json + data/extraction_manifest.json",
+        "manifest_ready": False,
+        "ready": False,
+        "source_type": "v2_immutable_feature_artifact",
+        "feature_id": None,
+        "model_id": None,
+        "method_id": method_id,
+        "feature_dim": None,
+        "shape_per_video": None,
+        "manifest": None,
+        "rejected_candidates": rejected,
+    }
+
+
 def inspect_data_readiness(config: Mapping[str, Any]) -> dict[str, Any]:
     dataset = config["dataset"]
     certification_paths = config["certification"]["paths"]
@@ -150,6 +229,21 @@ def inspect_data_readiness(config: Mapping[str, Any]) -> dict[str, Any]:
         kind="feature",
         required_manifest="extraction_manifest.json",
     )
+    affect_cache["source_type"] = "legacy_feature_cache"
+    interaction_cache["source_type"] = "legacy_feature_cache"
+    artifacts_root = Path(config["experiment"]["artifacts_root"])
+    v2_affect = _v2_feature_artifact_check(
+        artifacts_root,
+        records,
+        category="affect",
+        method_id=f"METHOD_{method_entries['affect']['code']}",
+    )
+    v2_interaction = _v2_feature_artifact_check(
+        artifacts_root,
+        records,
+        category="interaction",
+        method_id=f"METHOD_{method_entries['interaction']['code']}",
+    )
     preprocessed = _expected_artifact_check(
         Path(dataset["preprocessed_input_dir"]),
         records,
@@ -174,22 +268,30 @@ def inspect_data_readiness(config: Mapping[str, Any]) -> dict[str, Any]:
         and checkpoint["ready"]
     )
     rebuild_preprocessed_data_ready = splits_ready and preprocessed["ready"]
+    v2_features_ready = splits_ready and v2_affect["ready"] and v2_interaction["ready"]
     raw_preparation_available = splits_ready and raw_dataset["ready"]
     return {
         "status": "READY"
-        if reuse_data_ready or rebuild_preprocessed_data_ready
+        if reuse_data_ready or v2_features_ready or rebuild_preprocessed_data_ready
         else "NOT_READY",
-        "ready": reuse_data_ready or rebuild_preprocessed_data_ready,
+        "ready": reuse_data_ready or v2_features_ready or rebuild_preprocessed_data_ready,
         "split_files": split_files,
         "splits_ready": splits_ready,
         "raw_dataset": raw_dataset,
         "preprocessed_frames": preprocessed,
         "legacy_affect_cache": affect_cache,
         "legacy_interaction_cache": interaction_cache,
+        "v2_affect_feature": v2_affect,
+        "v2_interaction_feature": v2_interaction,
+        "effective_affect_feature": v2_affect if v2_affect["ready"] else affect_cache,
+        "effective_interaction_feature": (
+            v2_interaction if v2_interaction["ready"] else interaction_cache
+        ),
         "legacy_behavioral_matrices": matrices,
         "legacy_behavioral_checkpoint": checkpoint,
         "route_data_readiness": {
             "reuse_legacy_artifacts": reuse_data_ready,
+            "build_from_v2_features": v2_features_ready,
             "rebuild_from_preprocessed": rebuild_preprocessed_data_ready,
             "raw_data_requires_preprocessing": raw_preparation_available,
         },
@@ -209,10 +311,18 @@ def build_preflight_report(config: Mapping[str, Any]) -> dict[str, Any]:
         data["route_data_readiness"]["rebuild_from_preprocessed"]
         and environment["profiles"]["feature_extraction_and_training"]["ready"]
     )
+    v2_features_ready = (
+        data["route_data_readiness"]["build_from_v2_features"]
+        and environment["profiles"]["reuse_and_training"]["ready"]
+    )
     selected_path = (
         "reuse_legacy_artifacts"
         if reuse_ready
-        else ("rebuild_from_preprocessed" if rebuild_ready else None)
+        else (
+            "build_from_v2_features"
+            if v2_features_ready
+            else ("rebuild_from_preprocessed" if rebuild_ready else None)
+        )
     )
     raw_available = data["route_data_readiness"]["raw_data_requires_preprocessing"]
     explanations = []
@@ -245,6 +355,15 @@ def build_preflight_report(config: Mapping[str, Any]) -> dict[str, Any]:
                 "ready": rebuild_ready,
                 "environment_profile": "feature_extraction_and_training",
                 "requires": ["split CSVs", "preprocessed frames"],
+            },
+            "build_from_v2_features": {
+                "ready": v2_features_ready,
+                "environment_profile": "reuse_and_training",
+                "requires": [
+                    "split CSVs",
+                    "complete immutable V2 Affect FEATURE artifact",
+                    "complete immutable V2 Interaction FEATURE artifact",
+                ],
             },
             "raw_data_preparation": {
                 "ready": False,

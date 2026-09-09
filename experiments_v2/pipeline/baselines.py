@@ -7,6 +7,7 @@ from typing import Any, Mapping
 
 from experiments_v2.core.artifacts import (
     create_exclusive_dir,
+    fingerprint,
     new_id,
     read_json,
     utc_now,
@@ -55,6 +56,7 @@ class BaselineStore:
         performance = metrics.get("performance", {})
         model_cost = metrics.get("model_cost", {})
         matrix_manifest = metrics.get("matrix_manifest", {})
+        training = metrics.get("training", {})
         if affect_code != "A1" or identity.get("affect_method_id") != "METHOD_A1":
             raise ValueError("The official baseline Affect method must be A1/METHOD_A1")
         if (
@@ -82,6 +84,9 @@ class BaselineStore:
                 "method_id": identity["affect_method_id"],
                 "model_id": identity["affect_model_id"],
                 "feature_id": identity["affect_feature_id"],
+                "compatibility_fix": matrix_manifest.get(
+                    "compatibility_fixes", {}
+                ).get("affect"),
             },
             "interaction": {
                 "code": interaction_code,
@@ -90,18 +95,40 @@ class BaselineStore:
                 "feature_id": identity["interaction_feature_id"],
             },
             "engagement": {
-                "checkpoint_id": identity["engagement_model_id"],
+                "model_id": identity["engagement_model_id"],
+                "checkpoint_id": identity.get(
+                    "engagement_checkpoint_id", identity["engagement_model_id"]
+                ),
             },
             "dataset": {
+                "name": matrix_manifest.get("dataset", {}).get("name"),
                 "fingerprint": identity["dataset_fingerprint"],
                 "splits": matrix_manifest.get("split_counts"),
+                "total": sum((matrix_manifest.get("split_counts") or {}).values()),
                 "split_identity": identity.get("split_identity"),
                 "seed": identity["random_seed"],
+                "preprocessing_provenance": matrix_manifest.get("dataset", {}).get(
+                    "preprocessing_provenance"
+                ),
             },
             "matrix": {
+                "matrix_id": identity.get("matrix_id"),
                 "shape_per_video": matrix_manifest.get("shape_per_video"),
+                "temporal_dim": (matrix_manifest.get("shape_per_video") or [None])[0],
+                "total_feature_dim": (
+                    matrix_manifest.get("shape_per_video") or [None, None]
+                )[1],
                 "feature_order": matrix_manifest.get("matrix_order"),
                 "feature_layout": matrix_manifest.get("feature_layout"),
+                "checksums_file": matrix_manifest.get("checksums_file"),
+                "validation_file": matrix_manifest.get("validation_file"),
+            },
+            "training": {
+                "configuration": training.get("training_config"),
+                "model_configuration": training.get("model_config"),
+                "device": training.get("device"),
+                "best_epoch": training.get("best_epoch"),
+                "checkpoint_selection": training.get("checkpoint_selection"),
             },
             "metrics": {
                 "accuracy": performance.get("accuracy"),
@@ -129,10 +156,32 @@ class BaselineStore:
                     "inference_ms_per_video"
                 ),
                 "fps": performance.get("engagement_fps"),
+                "feature_method_footprint": model_cost.get(
+                    "feature_method_footprint"
+                ),
+                "combined_feature_method_size_mb": model_cost.get(
+                    "combined_feature_method_size_mb"
+                ),
+                "extraction_seconds": metrics.get("extraction", {})
+                .get("feature_generation", {})
+                .get("total_seconds"),
             },
             "comparison_values": comparison_values(metrics),
             "environment": dict(environment),
+            "environment_fingerprint": fingerprint(environment),
             "git": identity.get("git"),
+            "provenance": {
+                "preprocessing_source": matrix_manifest.get("dataset", {}).get(
+                    "preprocessing_provenance"
+                ),
+                "source_affect_feature_id": identity["affect_feature_id"],
+                "source_interaction_feature_id": identity[
+                    "interaction_feature_id"
+                ],
+                "test_set_used_for_model_selection": training.get(
+                    "checkpoint_selection", {}
+                ).get("test_metrics_used"),
+            },
             "source_metrics_path": str(metrics_path.resolve()),
             "created_at": utc_now(),
         }

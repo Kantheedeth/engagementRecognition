@@ -4,7 +4,10 @@ from typing import Any
 import unittest
 
 from experiments_v2.core.contracts import FeatureArtifact, ModelArtifact
-from experiments_v2.pipeline.engagement_model import create_engagement_model
+from experiments_v2.pipeline.engagement_model import (
+    create_engagement_model,
+    inspect_engagement_model_contract,
+)
 from experiments_v2.pipeline.matrix_builder import pair_matrix_contract
 from experiments_v2.pipeline.pairs import PairStore
 from experiments_v2.registry.builtins import create_builtin_registry
@@ -120,6 +123,22 @@ class DimensionAwarenessTests(unittest.TestCase):
                 classifier.kwargs["dim_inter"] + classifier.kwargs["dim_affect"],
                 pair.matrix_dim,
             )
+
+    def test_legacy_a1_i1_parameter_contract(self):
+        with TemporaryDirectory() as temporary:
+            pair = make_pair(Path(temporary), "A1", 8, "I1", 32)
+            contract = inspect_engagement_model_contract(
+                pair=pair,
+                model_config={
+                    "architecture": "legacy_pure_behavioral_attention",
+                    "branch_dim": 48,
+                    "num_heads": 4,
+                    "dropout": 0.15,
+                },
+            )
+            self.assertEqual(contract["parameter_count"], 46179)
+            self.assertEqual(contract["trainable_parameter_count"], 46179)
+            self.assertEqual(contract["input_dimensions"]["raw_input"], 40)
 
     def test_factory_rejects_dimension_or_order_mismatch(self):
         with TemporaryDirectory() as temporary:

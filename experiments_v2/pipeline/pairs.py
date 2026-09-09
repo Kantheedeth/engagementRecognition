@@ -53,6 +53,7 @@ class PairStore:
         affect: Iterable[ResolvedMethod],
         interaction: Iterable[ResolvedMethod],
         git_commit: str | None,
+        dataset_identity: Mapping[str, Any] | None = None,
     ) -> list[PairDefinition]:
         pairs = []
         for affect_resolved, interaction_resolved in product(affect, interaction):
@@ -61,6 +62,7 @@ class PairStore:
                     affect=affect_resolved,
                     interaction=interaction_resolved,
                     git_commit=git_commit,
+                    dataset_identity=dataset_identity,
                 )
             )
         if not pairs:
@@ -73,6 +75,7 @@ class PairStore:
         affect: ResolvedMethod,
         interaction: ResolvedMethod,
         git_commit: str | None,
+        dataset_identity: Mapping[str, Any] | None = None,
     ) -> PairDefinition:
         affect_model, affect_feature = affect
         interaction_model, interaction_feature = interaction
@@ -98,26 +101,41 @@ class PairStore:
                 feature_dim=feature.feature_dim,
                 start=offset,
                 end=offset + feature.feature_dim,
+                method_code=feature.manifest.get("method_code"),
             )
             feature_layout.append(entry)
             offset = entry.end
         identity = {
             "affect": {
+                "method_code": affect_feature.manifest.get("method_code"),
                 "method_id": affect_feature.method_id,
                 "model_id": affect_model.model_id,
                 "feature_id": affect_feature.feature_id,
                 "feature_fingerprint": affect_feature.fingerprint,
                 "feature_dim": affect_feature.feature_dim,
+                "compatibility_fix": affect_feature.manifest.get(
+                    "compatibility_fix"
+                ),
             },
             "interaction": {
+                "method_code": interaction_feature.manifest.get("method_code"),
                 "method_id": interaction_feature.method_id,
                 "model_id": interaction_model.model_id,
                 "feature_id": interaction_feature.feature_id,
                 "feature_fingerprint": interaction_feature.fingerprint,
                 "feature_dim": interaction_feature.feature_dim,
+                "compatibility_fix": interaction_feature.manifest.get(
+                    "compatibility_fix"
+                ),
             },
             "feature_layout": [entry.as_manifest() for entry in feature_layout],
             "temporal_frames": self.temporal_frames,
+            "dataset": {
+                "fingerprint": dataset_identity.get("fingerprint"),
+                "split_identity": dataset_identity.get("splits"),
+            }
+            if dataset_identity is not None
+            else None,
         }
         pair_fingerprint = fingerprint(identity)
         found = find_manifest_by_fingerprint(self.root, pair_fingerprint)
@@ -154,6 +172,7 @@ class PairStore:
                 feature_dim=int(entry["feature_dim"]),
                 start=int(entry["start"]),
                 end=int(entry["end"]),
+                method_code=entry.get("method"),
             )
             for entry in raw_layout
         )

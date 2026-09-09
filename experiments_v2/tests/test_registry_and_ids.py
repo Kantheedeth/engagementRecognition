@@ -21,7 +21,16 @@ class RegistryAndIdTests(unittest.TestCase):
         self.assertEqual(registry.create("I1").spec.name, "legacy_interaction")
 
     def test_ids_have_requested_prefix(self):
-        for prefix in ("MODEL", "FEATURE", "PAIR", "RUN"):
+        for prefix in (
+            "MODEL",
+            "METHOD",
+            "FEATURE",
+            "PAIR",
+            "MATRIX",
+            "RUN",
+            "CHECKPOINT",
+            "BASELINE",
+        ):
             self.assertTrue(new_id(prefix).startswith(prefix + "_"))
 
     def test_exclusive_json_refuses_overwrite(self):
@@ -66,6 +75,7 @@ class RegistryAndIdTests(unittest.TestCase):
             models = ModelRegistry(root / "artifacts")
             registered = models.register_engagement_checkpoint(
                 model_id="MODEL_FIXED",
+                checkpoint_id="CHECKPOINT_FIXED",
                 pair_id="PAIR_FIXED",
                 run_id="RUN_FIXED",
                 checkpoint_path=checkpoint,
@@ -75,9 +85,11 @@ class RegistryAndIdTests(unittest.TestCase):
                 git_commit="test",
             )
             original_manifest = (registered.directory / "manifest.json").read_bytes()
+            self.assertEqual(registered.manifest["checkpoint_id"], "CHECKPOINT_FIXED")
             with self.assertRaises(FileExistsError):
                 models.register_engagement_checkpoint(
                     model_id="MODEL_FIXED",
+                    checkpoint_id="CHECKPOINT_OTHER",
                     pair_id="PAIR_OTHER",
                     run_id="RUN_OTHER",
                     checkpoint_path=checkpoint,
@@ -176,6 +188,8 @@ class RegistryAndIdTests(unittest.TestCase):
             self.assertAlmostEqual(deltas["accuracy_delta"], 6.0)
             self.assertAlmostEqual(deltas["f1_delta"], 4.0)
             self.assertAlmostEqual(deltas["size_delta_mb"], 1.5)
+            self.assertAlmostEqual(deltas["accuracy_delta_pp"], 6.0)
+            self.assertAlmostEqual(deltas["macro_f1_delta_pp"], 4.0)
             self.assertEqual(deltas["parameter_delta"], 25)
 
 

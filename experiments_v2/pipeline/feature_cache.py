@@ -13,6 +13,7 @@ from experiments_v2.core.artifacts import (
     find_manifest_by_fingerprint,
     fingerprint,
     new_id,
+    read_json,
     utc_now,
     write_json_exclusive,
 )
@@ -36,6 +37,7 @@ class FeatureCache:
         force_extract: bool,
         legacy_feature_dir: Path | None,
         git_commit: str | None,
+        approved_feature_id: str | None = None,
     ) -> FeatureArtifact:
         spec = adapter.spec
         request = {
@@ -54,6 +56,30 @@ class FeatureCache:
             raise ValueError("dataset_identity must record preprocessing.num_frames")
         temporal_frames = int(preprocessing["num_frames"])
         method_root = self.root / spec.category / spec.method_id / model.model_id
+        if approved_feature_id is not None:
+            approved_dir = method_root / approved_feature_id
+            manifest_path = approved_dir / "manifest.json"
+            if not manifest_path.is_file():
+                raise FileNotFoundError(
+                    f"Approved immutable feature artifact is unavailable: {manifest_path}"
+                )
+            manifest = read_json(manifest_path)
+            if (
+                manifest.get("status") != "complete"
+                or manifest.get("feature_id") != approved_feature_id
+                or manifest.get("fingerprint") != cache_fingerprint
+            ):
+                raise ValueError(
+                    f"Approved feature artifact does not match the current request: "
+                    f"{manifest_path}"
+                )
+            data_dir = approved_dir / "data"
+            validation = adapter.validate_features(data_dir)
+            if validation.get("validated_files") != manifest.get("validated_files"):
+                raise ValueError(
+                    f"Approved feature artifact failed content validation: {approved_dir}"
+                )
+            return self._artifact(approved_dir, manifest, reused=True)
         if not force_extract:
             found = find_manifest_by_fingerprint(method_root, cache_fingerprint)
             if found is not None:
@@ -140,6 +166,7 @@ class FeatureCache:
                 "validated_files": extraction.get("validated_files"),
                 "legacy_manifest": extraction.get("legacy_manifest"),
                 "command": extraction.get("command"),
+                "process": extraction.get("process"),
                 "created_at": utc_now(),
                 "git_commit": git_commit,
             }
@@ -148,6 +175,7 @@ class FeatureCache:
                 directory, manifest, reused=adopted_from_legacy is not None
             )
         except Exception as exc:
+            process_path = directory / "process.json"
             write_json_exclusive(
                 directory / "failure.json",
                 {
@@ -156,6 +184,7 @@ class FeatureCache:
                     "error_type": type(exc).__name__,
                     "error": str(exc),
                     "traceback": traceback.format_exc(),
+                    "process": read_json(process_path) if process_path.is_file() else None,
                     "failed_at": utc_now(),
                 },
             )

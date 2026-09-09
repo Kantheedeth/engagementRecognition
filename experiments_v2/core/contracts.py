@@ -69,6 +69,7 @@ class FeatureLayoutEntry:
     feature_dim: int
     start: int
     end: int
+    method_code: str | None = None
 
     def __post_init__(self) -> None:
         if self.category not in VALID_CATEGORIES:
@@ -84,9 +85,11 @@ class FeatureLayoutEntry:
     def as_manifest(self) -> dict[str, Any]:
         return {
             "category": self.category,
+            "method": self.method_code,
             "method_id": self.method_id,
             "model_id": self.model_id,
             "feature_id": self.feature_id,
+            "dim": self.feature_dim,
             "feature_dim": self.feature_dim,
             "start": self.start,
             "end": self.end,

@@ -81,14 +81,18 @@ def build_pair_matrices(
         lines = [line.strip() for line in csv_path.read_text().splitlines() if line.strip()]
         split_dir = output_dir / split
         split_dir.mkdir()
-        seen: set[str] = set()
+        seen: set[tuple[str, int]] = set()
         for line_number, line in enumerate(lines, start=1):
             video_path, label, video_name, category = parse_csv_record(
                 line, csv_path, line_number
             )
-            if video_name in seen:
-                raise ValueError(f"Duplicate video stem in {csv_path}: {video_name}")
-            seen.add(video_name)
+            destination_identity = (video_name, label)
+            if destination_identity in seen:
+                raise ValueError(
+                    f"Duplicate matrix destination identity in {csv_path}: "
+                    f"{destination_identity}"
+                )
+            seen.add(destination_identity)
             arrays = []
             for entry in pair.feature_layout:
                 feature_path = (

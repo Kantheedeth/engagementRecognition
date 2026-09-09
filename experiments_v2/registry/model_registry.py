@@ -31,6 +31,7 @@ class ModelRegistry:
         identity: Mapping[str, Any],
         force_train: bool,
         git_commit: str | None,
+        approved_model_id: str | None = None,
     ) -> ModelArtifact:
         if force_train:
             raise ValueError(
@@ -45,6 +46,24 @@ class ModelRegistry:
             "identity": dict(identity),
         }
         model_fingerprint = fingerprint(request)
+        if approved_model_id is not None:
+            directory = self.root / approved_model_id
+            manifest_path = directory / "manifest.json"
+            if not manifest_path.is_file():
+                raise FileNotFoundError(
+                    f"Approved immutable model artifact is unavailable: {manifest_path}"
+                )
+            manifest = read_json(manifest_path)
+            if (
+                manifest.get("status") != "complete"
+                or manifest.get("model_id") != approved_model_id
+                or manifest.get("fingerprint") != model_fingerprint
+            ):
+                raise ValueError(
+                    f"Approved model artifact does not match the current request: "
+                    f"{manifest_path}"
+                )
+            return self._artifact(directory, manifest)
         found = find_manifest_by_fingerprint(self.root, model_fingerprint)
         if found is not None:
             path, manifest = found
@@ -89,9 +108,13 @@ class ModelRegistry:
         parameter_count: int,
         validation_metric: Mapping[str, Any],
         git_commit: str | None,
+        checkpoint_id: str | None = None,
     ) -> ModelArtifact:
         if not model_id.startswith("MODEL_"):
             raise ValueError("Engagement model IDs must start with MODEL_")
+        checkpoint_id = checkpoint_id or new_id("CHECKPOINT")
+        if not checkpoint_id.startswith("CHECKPOINT_"):
+            raise ValueError("Engagement checkpoint IDs must start with CHECKPOINT_")
         directory = create_exclusive_dir(self.root / model_id)
         identity = {
             "kind": "engagement_checkpoint",
@@ -104,6 +127,7 @@ class ModelRegistry:
         manifest = {
             "status": "complete",
             "model_id": model_id,
+            "checkpoint_id": checkpoint_id,
             "method_id": "METHOD_ENGAGEMENT",
             "category": "engagement",
             "architecture": "legacy_pure_behavioral_attention",

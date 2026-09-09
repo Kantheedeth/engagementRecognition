@@ -88,6 +88,88 @@ class MatrixBuilderTests(unittest.TestCase):
             self.assertEqual(manifest["feature_layout"][1]["start"], 3)
             self.assertEqual(manifest["feature_layout"][1]["end"], 5)
 
+    def test_cross_category_duplicate_stems_use_label_qualified_destinations(self):
+        import numpy as np
+
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            affect_root = root / "affect"
+            interaction_root = root / "interaction"
+            split_files = {}
+            for split in ("train", "val", "test"):
+                split_files[split] = root / f"{split}.csv"
+                split_files[split].write_text(
+                    "videos/Low/shared.mp4 0\n"
+                    "videos/high/shared.mp4 2\n",
+                    encoding="utf-8",
+                )
+                for category, affect_value, interaction_value in (
+                    ("low", 2.0, 1.0),
+                    ("high", 4.0, 3.0),
+                ):
+                    affect_dir = affect_root / split / category
+                    interaction_dir = interaction_root / split / category
+                    affect_dir.mkdir(parents=True)
+                    interaction_dir.mkdir(parents=True)
+                    np.save(
+                        affect_dir / "shared.npy",
+                        np.full((8, 2), affect_value, dtype=np.float32),
+                    )
+                    np.save(
+                        interaction_dir / "shared.npy",
+                        np.full((8, 3), interaction_value, dtype=np.float32),
+                    )
+            affect = FeatureArtifact(
+                "FEATURE_A",
+                "METHOD_A",
+                "MODEL_A",
+                "affect",
+                "fa",
+                affect_root,
+                affect_root,
+                2,
+                {},
+            )
+            interaction = FeatureArtifact(
+                "FEATURE_I",
+                "METHOD_I",
+                "MODEL_I",
+                "interaction",
+                "fi",
+                interaction_root,
+                interaction_root,
+                3,
+                {},
+            )
+            pair = PairDefinition(
+                pair_id="PAIR_TEST",
+                feature_layout=(
+                    FeatureLayoutEntry(
+                        "interaction", "METHOD_I", "MODEL_I", "FEATURE_I", 3, 0, 3
+                    ),
+                    FeatureLayoutEntry(
+                        "affect", "METHOD_A", "MODEL_A", "FEATURE_A", 2, 3, 5
+                    ),
+                ),
+                temporal_frames=8,
+                directory=root,
+            )
+            output = root / "matrices"
+            manifest = build_pair_matrices(
+                pair=pair,
+                features={"affect": affect, "interaction": interaction},
+                split_files=split_files,
+                output_dir=output,
+            )
+
+            low = np.load(output / "train" / "shared_label0.npy")
+            high = np.load(output / "train" / "shared_label2.npy")
+            self.assertEqual(manifest["split_counts"]["train"], 2)
+            self.assertTrue(np.all(low[:, :3] == 1.0))
+            self.assertTrue(np.all(low[:, 3:] == 2.0))
+            self.assertTrue(np.all(high[:, :3] == 3.0))
+            self.assertTrue(np.all(high[:, 3:] == 4.0))
+
 
 if __name__ == "__main__":
     unittest.main()
