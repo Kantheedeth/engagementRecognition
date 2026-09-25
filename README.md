@@ -1,318 +1,200 @@
-# Multi-Modal Student Engagement Recognition in Classroom Videos
+# Classroom Group Engagement Recognition
 
-A lightweight, real-time deep learning pipeline designed to recognize student engagement levels (**Low**, **Mid**, **High**) from 10-second classroom video clips using offline multi-modal feature extraction, multi-branch balanced attention, and standalone track-aware pure-behavioral modeling.
+This project studies lightweight group-engagement recognition for the **lecture-only** portion of OUC-CGE. As of 2026-09-26, the activity-reviewed subset contains **308 clips**. The current local experiment deliberately excludes scene embeddings and uses two behavioral branches:
 
----
+- 32 interaction features from YOLOv8 pose detections
+- 8 group-affect features from RetinaFace, ByteTrack smoothing, and FER
 
-## 📌 Architectures & Pipelines
+The output classes are Low, Mid, and High group engagement.
 
-This repository supports two execution modes:
-1. **Multi-Branch Balanced Fusion** (`16/32/32`): Fuses Scene (MobileNetV3), Interaction (YOLOv8), and Track-Aware Affect (RetinaFace + ByteTrack + ViT FER) while allocating **80% of embedding representation to behavioral signals**.
-2. **Pure Behavioral Pipeline** (Zero Scene Shortcut): Strips away visual background features entirely, relying **100% on student body posture, spatial density, and facial expressions**.
+The lecture-only run achieved **95.48% macro-F1 and 96.77% accuracy (30/31 test clips)**. This is a preliminary result on filtered original splits, not established generalization to new recordings or classrooms.
+
+### Documentation and implementation status
+
+This document describes the local **32-interaction + 8-affect sampled-tracking experiment**. The remote `feat/track-aware-affect-fusion` branch also contains a distinct 40-interaction + 8-affect role-aware ByteTrack implementation. The results below do not evaluate that implementation. This documentation-only update does not publish the matching local code changes, ignored matrices or checkpoints; the reproduction commands require that matching implementation and data.
+
+## Current system: V3 sampled behavioral model
+
+Each clip is represented by eight uniformly sampled 640×640 frames. Clip durations can vary; do not assume every retained clip is exactly ten seconds.
 
 ```text
-========================================================================================
-                          MULTI-BRANCH BALANCED PIPELINE (80-dim)
-========================================================================================
- 10-Second Video Clip (1,195 Samples) ──► 8 Uniformly Sampled Frames
-                                                   │
-  ┌────────────────────────────────────────────────┼──────────────────────────────────┐
-  │ (160x160)                                      │ (640x640)                        │ (640x640)
-  ▼                                                ▼                                  ▼
-┌──────────────────┐               ┌───────────────────────────────┐  ┌───────────────────────────────┐
-│ MobileNetV3      │               │ YOLOv8 32-dim Interaction     │  │ RetinaFace + ByteTrack        │
-│ Small (576-dim)  │               │ Geometry & Density (32-dim)   │  │ PyTorch FER (7 + reliability) │
-└────────┬─────────┘               └───────────────┬───────────────┘  └───────────────┬───────────────┘
-         │                                         │                                  │
-         ▼                                         ▼                                  ▼
-┌──────────────────┐               ┌───────────────────────────────┐  ┌───────────────────────────────┐
-│ Scene Branch     │               │ Interaction Branch            │  │ Affect Branch                 │
-│ Linear(576, 16)  │               │ Linear(32, 32)                │  │ Linear(8, 32)                 │
-└────────┬─────────┘               └───────────────┬───────────────┘  └───────────────┬───────────────┘
-         │ (16-dim, 20%)                           │ (32-dim, 40%)                    │ (32-dim, 40%)
-         └─────────────────────────────────────────┼──────────────────────────────────┘
-                                                   ▼
-                                  [ Fused Embedding State: (8, 80) ]
-                                      (Behavioral Signals = 80%)
-                                                   │
-                                                   ▼
-                               ┌───────────────────────────────────────┐
-                               │  Temporal Multi-Head Self-Attention   │
-                               │  • Multi-Head Attention (4 heads)     │
-                               │  • Residual + LayerNorm + Dropout     │
-                               │  • Temporal Mean Pooling → (80,)      │
-                               │  • Classifier Head (80 → 3 Classes)   │
-                               └───────────────────┬───────────────────┘
-                                                   ▼
-                                 [ Engagement: Low / Mid / High ]
-
-========================================================================================
-                    STANDALONE PURE BEHAVIORAL PIPELINE (40-dim ➔ 96-dim)
-========================================================================================
- YOLO Interaction (32-dim) ──► Linear(32, 48) ──┐
-                                                ├──► [ 96-dim ] ──► Temporal Attention ──► Output
- Track-Aware Affect (8-dim) ─► Linear(8,  48) ──┘
- (Zero Scene Features / Zero Background Memorization)
+8 sampled frames
+      │
+      ├── YOLOv8 pose ── Hungarian association across 8 frames ── 32 interaction features
+      │
+      └── RetinaFace + ByteTrack + FER ─────────────────────────── 8 affect features
+                                    │
+                         (8, 40) behavioral sequence
+                                    │
+             Linear(32→64) + Linear(8→64) → 128-dimensional fusion
+                                    │
+                 temporal multi-head attention + mean pooling
+                                    │
+                              Low / Mid / High
 ```
 
----
+The interaction output does not contain absolute bounding-box coordinates such as `cx`, `cy`, width, or height. Coordinates are still used internally for speaker-zone selection, identity association, and displacement features. Removing direct coordinate inputs does not by itself establish freedom from shortcuts or camera invariance.
 
-## 📊 Reproducible Evaluation Status
+### Speaker and listener definition
 
-The checkpoint currently available locally for the pure-behavioral model was
-evaluated against all 132 files in `feature_matrices_behavioral/test`. The
-checkpoint is ignored by Git, so these numbers are not reproducible from a
-fresh clone until that checkpoint is supplied or the model is retrained.
+- Instruction zone: normalized `x ∈ [0.0, 0.27]`.
+- A detected person in the zone is treated as the speaker.
+- When no speaker is detected, the center of the instruction zone, `[0.135, 0.50]`, is used as the interaction target.
+- People outside the zone are treated as listeners, except a previously associated speaker who temporarily moves outside it.
+- IDs are anonymous, reset for every clip, and are not persistent student identities across videos.
 
-| Evaluation Setup | Test Accuracy | Macro-F1 | Status |
-| :--- | :---: | :---: | :--- |
-| **Pure Behavioral (Zero Scene)** | **84.09%** | **82.69%** | Reproduced on the current 132-sample test matrices |
-| **Majority Class Baseline** | 54.55% | 23.53% | Computed from the same test labels |
-| **Multi-Branch Balanced Fusion** | — | — | No matching 616-D checkpoint is currently available for verification |
+### V3 behavioral corrections
 
-The previously documented 100% multi-branch and 88% behavioral results were
-not reproduced by the checkpoint and matrices currently present, so they are
-not reported as verified results here.
+The first manual audit showed that the former nose-to-eye vertical-distance rule was not a reliable head-pitch estimator for this camera view. V3 therefore uses observed normalized nose-to-shoulder elevation as a coarse **raised/lowered-head proxy**:
 
-### Pure Behavioral Model: Current Checkpoint
+- Lowered head: elevation `< 0.130`
+- Raised head: elevation `≥ 0.155`
+- Upright posture: elevation `≥ 0.120`
+- Very-low-head proxy: elevation `≤ 0.060`
+- Orientation-consensus threshold: score `≥ 0.66`
+
+Missing face or shoulder keypoints are treated as unknown for head/posture ratios. The model does **not** claim to detect sleeping: `very_low_head_proxy_ratio` describes an observed pose only.
+
+The submitted development reviews were assigned to Kan (audit frames 01–15), Pan (19–20), and Bright (22–36). Frames 16–18 were excluded because they show the out-of-scope round-table clip `view1230`; frame 21 was left unannotated. Reviewers covered mostly disjoint frames, and reviews informed threshold development. This is calibration evidence, not independent validation or inter-rater reliability. The historical calibration aggregation needs its frame-index mapping rechecked before quoting reviewer-wide proxy-validation scores.
+
+## Dataset status and evaluation limits
+
+Earlier filtering used camera angle, but the same view can contain lecture and group-work activities. The new manual filtering uses the one-speaker/multiple-listeners activity rule. Inattentive listeners remain eligible; low engagement is not a reason to exclude a lecture clip.
+
+The isolated snapshot reuses existing matrices without preprocessing or feature re-extraction:
+
+| Split | Low | Mid | High | Total |
+|---|---:|---:|---:|---:|
+| Train | 133 | 55 | 64 | 252 |
+| Validation | 10 | 3 | 12 | 25 |
+| Test | 16 | 6 | 9 | 31 |
+| Total | 159 | 64 | 85 | 308 |
+
+The older angle-filtered matrix set is preserved separately: 938 train, 124 validation and 132 test clips (1,194 total). Its extraction manifest records 1,195 preprocessed clips; `view1230` was excluded from its training CSV. A later filesystem inventory found 1,152 raw clips in `videos/`; raw-folder counts and historical matrix counts describe different snapshots and should not be conflated.
+
+### Corrections to earlier split claims
+
+- Clip identity is **class folder + filename**, not the numeric `view` ID alone.
+- The older 1,194 CSV rows have 1,194 distinct class/filename keys but 1,144 distinct numeric IDs. Twenty-three numeric IDs occur across splits in different class folders. This does **not** establish exact-video duplication or contradictory labels.
+- No identical class/filename key was shared between those splits. The 308-clip snapshot also had no cross-split identical matrix hashes; neither check rules out similar or related source footage.
+- The same camera, people and clothing indicate a shared recording setup, not necessarily one uninterrupted recording. Filename adjacency and gaps alone do not establish temporal continuity or parent-session boundaries.
+- Parent sessions and clip independence remain unverified. Visually confirmed continuity blocks can support a more conservative evaluation, but must not be relabelled as confirmed lecture sessions without evidence.
+
+The new snapshot preserves the original split assignments after filtering. It is an **original clip-split benchmark within the selected setup**, not a recording-held-out, cross-camera or unseen-student evaluation. Historical manual calibration also needs checking for overlap with any proposed independent test set.
+
+## Current lecture-only result
+
+Run: `experiments/lecture_only/runs/smoothed_seed42/`. Source: `reports/metrics.json`, `reports/train.log` and `run_config.json` in that run directory. The recorded seed is 42; the selected checkpoint is epoch 40, with validation accuracy 88% (22/25). Early stopping occurred at epoch 55.
+
+| Actual class | Predicted Low | Predicted Mid | Predicted High |
+|---|---:|---:|---:|
+| Low | 16 | 0 | 0 |
+| Mid | 0 | 6 | 0 |
+| High | 0 | 1 | 8 |
+
+- Macro-F1: **95.48%**
+- Accuracy: **96.77% (30/31)**
+- Always-Low baseline macro-F1: **22.70%**
+- One error: `high/view2480.mp4` predicted Mid.
+
+The task and test population changed, so this score is not directly comparable to the older 78.46% result. Activity filtering may better match the speaker–listener representation, but the test subset may also be easier. Neither explanation has been isolated experimentally.
+
+Only six Mid clips are tested, and only three appear in validation. One additional test error would reduce macro-F1 to approximately 90.74–92.66%, depending on its class pair. This illustrates score sensitivity; it is not a confidence interval. The result is one run, not a multi-seed mean or proof that the features measure genuine attention.
+
+### Loss and training configuration
+
+The run uses weighted cross-entropy with square-root inverse-frequency weights computed from **training labels only** and normalized to mean one: Low 0.7506, Mid 1.1673, High 1.0821. `smoothed` names the class-weight rule; label smoothing is **0.0**.
+
+Branch dimension 64, four heads, dropout 0.20, batch size 32, AdamW learning rate 0.001, weight decay 0.0001, maximum 60 epochs and patience 15 were retained as starting settings. Weighted epoch loss now uses the sum of target-class weights as its denominator. New checkpoints persist training settings and class weights. No loss tuning based on the test result has been performed.
+
+## Previous angle-filtered V3 baseline
+
+The original `checkpoints/best_model_behavioral.pth` was evaluated on 132 test matrices. It does not persist a seed, unlike new lecture-only checkpoints.
 
 ```text
-=================================================================
-Running Pure Behavioral Pipeline Evaluation Phase...
-  • Features: 32 Interaction + 8 Affect (ZERO Scene Features)
-=================================================================
               precision    recall  f1-score   support
 
-         Low       0.91      0.83      0.87        72
-         Mid       0.72      0.84      0.78        25
-        High       0.81      0.86      0.83        35
+         Low       0.93      0.75      0.83        72
+         Mid       0.70      0.84      0.76        25
+        High       0.68      0.86      0.76        35
 
-    accuracy                           0.84       132
-   macro avg       0.81      0.84      0.83       132
-weighted avg       0.85      0.84      0.84       132
+    accuracy                           0.80       132
+   macro avg       0.77      0.82      0.78       132
+weighted avg       0.82      0.80      0.80       132
 
-Model Macro-F1 Score:     82.69%
-Baseline (Always Low) F1:  23.53%
-=================================================================
+Macro-F1: 78.46%
+Exact accuracy: 79.55% (105/132)
+Always-Low baseline macro-F1: 23.53%
 ```
 
-Confusion matrix (rows are true classes; columns are predictions):
+Confusion matrix (rows are true labels; columns are predictions):
 
 ```text
-[[60, 6, 6],
- [ 3,21, 1],
- [ 3, 2,30]]
+             Pred Low  Pred Mid  Pred High
+True Low        54         7         11
+True Mid         1        21          3
+True High        3         2         30
 ```
 
----
+That older result overpredicted High: recall 0.86 versus precision 0.68. It is a single-run baseline on the earlier mixed-activity selection, not the current lecture-only score.
 
-## 🔬 Evidence of Genuine Behavioral Learning (Zero-Shortcut Verification)
+## Historical experiments
 
-To verify that the model's performance is driven by authentic student behavior rather than dataset artifacts (such as static camera perspectives, classroom furniture, or clothing memorization), we conducted three empirical audits:
+These results document earlier feature versions and are not directly comparable to V3 because feature definitions, tracking, training data, or experimental procedures differed.
 
-### 1. Feature Ablation Study: Deleting Spatial Coordinates
-In classroom video benchmarks, clips from the same lecture session may share a fixed camera angle. If the model were simply memorizing camera angles or student seat locations $(c_x, c_y)$, removing these coordinates would cause performance to collapse to baseline levels.
+| Version | Main idea | Reported macro-F1 | Interpretation |
+|---|---|---:|---|
+| I1 | Bounding-box proximity and coordinates | 84.44% ± 1.92% | High risk of spatial/session shortcuts |
+| I2 | Fixed-axis pose orientation | 79.52% ± 1.32% | Pose-based but retained coordinates |
+| I3 | Dynamic target orientation | 82.62% ± 1.60% | Retained coordinates and only five people |
+| V2 | All-person aggregate without exported coordinates | 82.69% verified single checkpoint | Used unvalidated nose-to-eye and missing-face heuristics |
+| V3, earlier selection | Eight-frame association and reviewed proxy rules | 78.46% single run | 132 test clips; angle-filtered selection |
+| V3, activity-filtered lecture subset | Same stored behavioral matrices; fresh classifier | 95.48% single run | 31 test clips; preliminary fixed-setup result |
 
-We verified this by progressively stripping spatial coordinates using [`src/tools/ablation_study.py`](file:///Users/kantheedeth/Documents/engagementRecognition/src/tools/ablation_study.py):
+Historical affect-only and reduced-feature ablations were produced with earlier schemas. They remain useful development records but must be rerun on V3 before being presented as current ablation evidence. The lower V3 score cannot yet be attributed specifically to “shortcut removal,” because several variables changed together.
 
-| Experiment Configuration | Dimensions | What it Contains | Macro-F1 | Accuracy | Key Finding |
-| :--- | :---: | :--- | :---: | :---: | :--- |
-| **Majority Class Baseline** | — | Dumb guess: always predicts "Low" | 23.53% | 54.55% | Zero-information baseline |
-| **Affect Only** | **8-dim** | **ZERO spatial coordinates, ZERO camera angle** | **55.27%** | **60.61%** | Facial emotion alone achieves >2× baseline |
-| **Zero Spatial Coordinates** | **28-dim** | Student posture ($w, h$), vertical dispersion ($\sigma_y$), VFOA ratio + Affect. **All $(c_x, c_y)$ positions deleted.** | **74.76%** | **78.79%** | **~75% Macro-F1 without ANY camera angle or coordinate position.** |
-| **Full Behavioral Combined** | **40-dim** | Posture + Affect + Classroom Spatial Layout | **81.51% – 86.68%** | **84.09% – 88.00%** | Full multimodal behavioral pipeline |
+## Efficiency measurement
 
-> **Conclusion**: Even when completely blindfolded to room layout and camera position, pure body posture and facial affect achieve **74.76% Macro-F1** (>50 percentage points above baseline), proving that the core predictive signal is authentic student behavior.
+A 10-clip pilot of the V3 interaction extractor on Apple MPS took approximately 15.8 seconds after startup, or 1.58 seconds per 10-second clip. This was about 6.7× faster than the attempted dense all-frame tracker (~10.57 seconds per clip). This timing covers the interaction extractor only; it is not an end-to-end real-time or FPS benchmark.
 
----
+## Reproduction
 
-### 2. Feature Importance Analysis (Mean Decrease in Impurity)
-We measured the Gini importance across all 40 features to determine which physical cues drive decision-making:
-
-| Rank | Feature | Importance | Feature Type | Real-World Pedagogical Meaning |
-| :---: | :--- | :---: | :--- | :--- |
-| **#1** | **`affect_reliability`** | **6.91%** | **Affect / Attention** | **Head orientation & face visibility**: Engaged students face forward toward the teacher (detected); disengaged students put heads down or sleep (undetected). |
-| **#2** | **`happiness`** | **5.72%** | **Affect** | **Active emotional participation**: Smiling and nodding during interactive discussions and Q&A. |
-| **#3** | **`disp_y`** | **4.76%** | **Body Posture** | **Vertical posture dispersion**: Captures uniform sitting upright vs. irregular slouching/resting on desks. |
-| **#4** | **`centroid_y`** | **4.21%** | **Coordinate** | **Classroom physical lean**: Forward leaning toward desks when taking notes or listening intently. |
-| **#5** | **`s3_h`** | **3.71%** | **Body Posture** | **Individual student height**: Taller bounding box = upright posture; flat box = slouched/lying on desk. |
-| **#6** | **`disp_x`** | **3.71%** | **Movement** | **Lateral physical movement**: Fidgeting and restlessness. |
-| **#7** | **`s4_w`** | **3.48%** | **Body Posture** | **Body orientation**: Leaning into the desk or turning sideways toward peers. |
-| **#8** | **`neutral`** | **3.36%** | **Affect** | **Attentive listening**: Calm, focused listening state during lecture delivery. |
-| **#9** | **`s2_w`** | **3.26%** | **Body Posture** | Student body aspect ratio. |
-| **#10**| **`s3_w`** | **3.25%** | **Body Posture** | Student body aspect ratio. |
-
-> **Key Takeaway**: **9 out of the top 10 features are genuine behavioral indicators (posture, head orientation, and facial affect).** Only 1 feature is a coordinate position. The model relies on the exact same physical cues a human teacher observes.
-
----
-
-### 3. Multi-Seed Reproducibility Audit
-Across 6 independent random initialization seeds, the pure behavioral model consistently outperforms baseline:
-
-* **Seed 0**: 81.59% Macro-F1 (83.33% Acc)
-* **Seed 2**: 82.08% Macro-F1 (84.09% Acc)
-* **Seed 7**: 84.15% Macro-F1 (85.61% Acc)
-* **Seed 100**: 84.37% Macro-F1 (85.61% Acc)
-* **Seed 42**: 85.01% Macro-F1 (86.36% Acc)
-* **Seed 1**: **87.48% Macro-F1** (**88.64% Acc**)
-* **Aggregate**: **`84.11% ± 2.2% Macro-F1`** (fully deterministic via `--seed` flag).
-
-To run this ablation audit locally at any time:
-```bash
-python src/tools/ablation_study.py
-```
-
----
-
-## 🛠️ Requirements & Installation
-
-Recommended Python version: `3.10` (or `3.8+` with compatibility shims).
+The 308-clip snapshot and `smoothed_seed42` run already exist locally. Do not rerun extraction or preparation for this snapshot. Evaluate the saved run with:
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/Kantheedeth/engagementRecognition.git
-cd engagementRecognition
-
-# 2. Create and activate conda environment
-conda create -n engagement python=3.10 -y
-conda activate engagement
-
-# 3. Install dependencies
-pip install torch torchvision opencv-python numpy tqdm scikit-learn matplotlib ultralytics insightface transformers lap
+python run_lecture_behavioral.py --stage eval --run_name smoothed_seed42
 ```
 
----
+For a fresh training run using the same snapshot:
 
-## 🚀 Execution Guide
-
-### Option 1: Master Runner Scripts (Recommended)
-
-You can run either pipeline end-to-end or stage-by-stage using the unified root entrypoints:
-
-#### A. Pure Behavioral Pipeline (Zero Scene Shortcut: 32 Inter + 8 Affect)
 ```bash
-# Run full pipeline end-to-end (extract -> build -> train -> eval)
-python run_behavioral.py --stage all
-
-# Or run individual stages:
-python run_behavioral.py --stage extract    # Extract interaction & affect features
-python run_behavioral.py --stage build      # Build 40-dim behavioral matrices
-python run_behavioral.py --stage train      # Train pure behavioral attention model
-python run_behavioral.py --stage eval       # Evaluate test set & plot confusion matrix
+python run_lecture_behavioral.py --stage train --seed 43 --run_name smoothed_seed43
+python run_lecture_behavioral.py --stage eval --run_name smoothed_seed43
 ```
 
-#### B. Multi-Branch Balanced Pipeline (Scene 16 + Inter 32 + Affect 32 = 80-dim)
+Choose the seed list and settings in advance and report all runs, not the best test score. The recorded seed-42 run used the local `LEM` environment; earlier extraction used `slowfast`. Use a compatible environment with the project dependencies installed.
+
+For a new snapshot only, select a new experiment directory:
+
 ```bash
-# Run full multi-modal pipeline end-to-end
-python run_multimodal.py --stage all
-
-# Or run individual stages:
-python run_multimodal.py --stage extract    # Extract scene, interaction & affect
-python run_multimodal.py --stage build      # Build 616-dim multi-branch matrices
-python run_multimodal.py --stage train      # Train multi-branch balanced model
-python run_multimodal.py --stage eval       # Evaluate test set & plot confusion matrix
+python run_lecture_behavioral.py --stage prepare --experiment_dir experiments/lecture_only_v2
 ```
 
----
+Pass the same `--experiment_dir` when training/evaluating that snapshot. Preparation copies matrices using class + filename and retains original split membership. It refuses existing destinations, validates shape/finite values, and records exact membership and hashes. Training runs also refuse overwrite. Data live under `dataset/`; checkpoints, history, logs, confusion matrix and per-clip predictions live under `runs/<run_name>/`. The original matrices and results are untouched.
 
-### Option 2: Step-by-Step Module Execution
+The full 27-test local suite passed, including a synthetic end-to-end lecture-only training/evaluation test. This verifies software behavior, not scientific generalization.
 
-#### Phase 1: Video Preprocessing
-Extracts 8 uniformly spaced frames per 10-second video:
-```bash
-python src/data/preprocess_frames.py
-# (Optional) Verify preprocessed frame colors & aspect ratios
-python src/data/validate_preprocessing.py
-```
+## Next experiments
 
-#### Phase 2: Feature Extraction
-Extract numerical vectors offline from the three modules:
-```bash
-# 1. Scene features (MobileNetV3-Small -> 576-dim)
-python src/data/extract_scene_features.py
+1. Freeze the current feature/loss settings and repeat a predetermined set of training seeds; report mean, standard deviation and all individual results. This measures training variability, not independence of the split.
+2. Verify continuity relationships and class coverage before designing grouped/blocked evaluation. Do not invent sessions from filename ranges or assume a fixed five-fold design is feasible.
+3. Check development-audit overlap and independently validate head/posture, orientation and speaker/listener proxies without tuning on evaluation labels.
+4. After stabilizing the evaluation protocol, compare interaction-only, affect-only and feature-group ablations on the same splits.
+5. Additional lecture recordings remain optional future evidence. No compatible external lecture test set has been identified; expanding to group discussions solely to increase counts is not the current plan.
 
-# 2. Rich interaction features (YOLOv8 layout + student coordinates -> 32-dim)
-python src/data/extract_interaction_features.py
+## Important terminology
 
-# 3. Track-aware affect (RetinaFace + ByteTrack + PyTorch FER -> 8-dim)
-python src/data/extract_affect_features.py --save_track_details
-```
-
-#### Phase 3 & 4: Model Training & Evaluation
-```bash
-# Pure Behavioral Workflow:
-python src/data/build_behavioral_matrices.py
-python src/training/train_behavioral.py
-python src/training/evaluate_behavioral.py
-
-# Multi-Branch Workflow:
-python src/data/build_feature_matrices.py
-python src/training/train.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
-python src/training/evaluate.py --scene_branch_dim 16 --inter_branch_dim 32 --affect_branch_dim 32
-```
-
----
-
-### Audit: Camera Drift & Track Inspection
-```bash
-# Visual VFOA camera drift audit
-python src/tools/audit_camera_drift.py
-
-# Visualize saved anonymous face tracks and affect estimates
-python src/tools/create_affect_audit_view.py \
-  --track_json debug_validation/affect_tracks/train/low/view1000.json
-```
-
----
-
-## 📁 Repository Structure
-
-```text
-engagementRecognition/
-├── src/                               # Core Source Code Package
-│   ├── data/                          # Phase 1 & 2: Preprocessing & Feature Extraction
-│   │   ├── preprocess_frames.py       # Dual-branch video frame preprocessor
-│   │   ├── validate_preprocessing.py  # Visual validation gate
-│   │   ├── extract_scene_features.py  # MobileNetV3 scene extraction (576-dim)
-│   │   ├── extract_interaction_features.py # YOLOv8 interaction extraction (32-dim)
-│   │   ├── extract_affect_features.py # RetinaFace + ByteTrack + FER extraction (8-dim)
-│   │   ├── affect_module.py           # RetinaFace + ByteTrack + FER aggregation engine
-│   │   ├── build_feature_matrices.py  # Builds 616-dim multi-branch matrices
-│   │   ├── build_behavioral_matrices.py # Builds 40-dim pure behavioral matrices
-│   │   └── feature_schema.py          # Cross-stage feature contract definitions
-│   │
-│   ├── models/                        # Neural Network Architectures & Datasets
-│   │   ├── dataset.py                 # PyTorch Dataset loader with manifest validation
-│   │   ├── model.py                   # Multi-Branch Balanced Attention Network (16/32/32)
-│   │   └── model_behavioral.py        # Pure Behavioral Attention Network (48/48)
-│   │
-│   ├── training/                      # Training & Evaluation Loops
-│   │   ├── train.py                   # Multi-Branch training loop
-│   │   ├── evaluate.py                # Multi-Branch test evaluation
-│   │   ├── train_behavioral.py        # Pure Behavioral training loop
-│   │   └── evaluate_behavioral.py     # Pure Behavioral test evaluation
-│   │
-│   └── tools/                         # Auditing & Inspection Utilities
-│       ├── ablation_study.py          # Feature ablation & shortcut verification audit
-│       ├── audit_camera_drift.py      # Visual VFOA boundary inspection
-│       └── create_affect_audit_view.py# Saved-track visual/CSV/provenance audit
-│
-├── run_behavioral.py                  # 🚀 Master CLI runner for Pure Behavioral Pipeline
-├── run_multimodal.py                  # 🚀 Master CLI runner for Multi-Branch Pipeline
-│
-├── train.csv / val.csv / test.csv     # Dataset split annotations
-├── requirements-affect.txt            # Affect-specific dependencies
-├── confusion_matrix_behavioral.png    # Pure Behavioral test confusion matrix
-├── .gitignore                         # Git exclusion rules for large datasets
-└── README.md                          # Complete project documentation
-```
-
----
-
-## 🛡️ Affect Interpretation & Provenance
-
-- **Anonymous Tracking**: Track IDs are anonymous and reset for each video; they do not identify students across videos.
-- **Sparse Video Sampling**: Eight uniformly sampled frames are sparse for ByteTrack. Inspect audit views for ID fragmentation and compare against `--no-tracking` experimentally.
-- **Uncertain Affect Modeling**: Facial expression probabilities are model estimates, not ground-truth internal emotions. They are treated as uncertain group-level behavioral evidence.
-- **Strict Schema Enforcement**: Both matrix builders require valid extraction manifests (`extraction_manifest.json`) before building arrays.
-- **Embedded Checkpoint Provenance**: Training checkpoints embed the complete feature schema and configuration. Evaluation verifies this schema before calculating metrics.
+- Engagement labels are dataset-level group labels, not direct measurements of learning.
+- Orientation scores are pose-derived proxies, not eye tracking or an attention probability.
+- Facial-affect outputs are model estimates, not ground-truth internal emotions.
+- Raised/lowered head and very-low-head values are physical pose proxies, not proof of attention, phone use, fatigue, or sleep.
