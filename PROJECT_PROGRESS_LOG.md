@@ -1,6 +1,6 @@
 # Project Progress and Experiment Log
 
-Updated 2026-09-26. This log describes the local 32-interaction + 8-affect V3 experiment, not the separate 40-interaction role-aware ByteTrack implementation on the remote branch. This documentation update does not publish the matching local implementation, matrices or checkpoints.
+Updated 2026-09-26. This log describes the 32-interaction + 8-affect V3 experiment, not the separate 40-interaction role-aware ByteTrack implementation on the remote feature branch. The `docs/lecture-only-results-20260926` branch now includes the matching core implementation, tests and portable 308-clip selection list. Matrices, videos and checkpoints remain outside Git.
 
 ## 1. Current research objective
 
@@ -188,6 +188,7 @@ This is an interaction-extraction pilot, not a full end-to-end latency or FPS be
 - Added separate run outputs, training configuration/history, machine-readable metrics and per-clip predictions.
 - Verified all 308 copied matrices and passed the full 27-test local suite, including a synthetic end-to-end run. Software tests are not evidence of scientific validity.
 - Completed the first lecture-only training/evaluation: 95.48% macro-F1 on 31 clips.
+- Prepared the core implementation for collaborators: portable selection-list input, dependency instructions, sampled tracker/calibration/schema, subset safeguards and isolated training/evaluation. Legacy visualization changes asserting sleep from hidden faces are excluded from the release.
 
 ## 8. Immediate next experiments
 

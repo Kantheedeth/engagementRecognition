@@ -1,0 +1,13 @@
+# Python 3.10+ recommended. Install a matching torch/torchvision build for your hardware.
+# Dependencies for behavioral training, evaluation, sampled interaction extraction and tests.
+# FER/affect regeneration additionally needs requirements-affect.txt.
+# These are compatibility ranges, not an exact lock of the reported training environment.
+torch>=2.2
+torchvision>=0.17
+numpy>=1.24
+scipy>=1.10
+scikit-learn>=1.3
+matplotlib>=3.7
+tqdm>=4.66
+opencv-python>=4.8
+ultralytics>=8.3

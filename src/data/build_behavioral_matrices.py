@@ -24,6 +24,7 @@ from src.data.feature_schema import (
     AFFECT_FEATURE_SCHEMA,
     BEHAVIORAL_FEATURE_SCHEMA,
     BEHAVIORAL_SHAPE,
+    INTERACTION_COLUMNS,
 )
 
 
@@ -158,7 +159,7 @@ def main() -> None:
         "affect_schema": AFFECT_FEATURE_SCHEMA,
         "shape_per_video": list(BEHAVIORAL_SHAPE),
         "streams": {
-            "interaction": {"columns": 32},
+            "interaction": {"columns": 32, "names": list(INTERACTION_COLUMNS)},
             "affect": {"columns": 8, "names": list(AFFECT_COLUMNS)},
         },
         "affect_extraction": {

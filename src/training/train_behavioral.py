@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import json
 import numpy as np
 import torch
 import torch.nn as nn
@@ -41,7 +42,7 @@ def set_seed(seed: int):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-def calculate_class_weights(dataset):
+def calculate_class_weights(dataset, mode="smoothed"):
     labels = []
     for i in range(len(dataset)):
         _, y = dataset[i]
@@ -53,10 +54,35 @@ def calculate_class_weights(dataset):
     total = len(labels)
     num_classes = len(classes)
     
-    weights = total / (num_classes * counts)
+    if mode == "smoothed":
+        # Square-root inverse frequency (not effective-number class balancing).
+        # Balances sensitivity without excessive false positives on minority class
+        raw_weights = np.sqrt(total / (num_classes * counts))
+        weights = raw_weights / np.mean(raw_weights)
+    elif mode == "balanced":
+        weights = total / (num_classes * counts)
+    else:
+        weights = np.ones(num_classes, dtype=np.float32)
+
     print(f"Class counts: {dict(zip(classes, counts))}")
-    print(f"Calculated class weights: {weights}")
+    print(f"Calculated class weights ({mode}): {np.round(weights, 4)}")
     return torch.tensor(weights, dtype=torch.float32)
+
+
+class WeightedLossMeter:
+    """Aggregate weighted CE by its weight denominator, not the batch size."""
+    def __init__(self):
+        self.numerator = 0.0
+        self.denominator = 0.0
+
+    def update(self, loss, targets, class_weights):
+        denominator = class_weights[targets].sum().item()
+        self.numerator += loss.item() * denominator
+        self.denominator += denominator
+
+    @property
+    def mean(self):
+        return self.numerator / self.denominator
 
 def train(args):
     if args.seed is not None:
@@ -72,7 +98,11 @@ def train(args):
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
-    device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
+    requested_device = getattr(args, "device", "auto")
+    device = torch.device(
+        requested_device if requested_device != "auto" else
+        ("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
+    )
     print(f"Using device: {device}")
 
     # Load from feature_matrices_behavioral after validating provenance.
@@ -98,8 +128,10 @@ def train(args):
     print(f"Loaded {len(val_dataset)} validation samples.")
 
     # Weighted CrossEntropyLoss
-    class_weights = calculate_class_weights(train_dataset).to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    class_weights = calculate_class_weights(train_dataset, mode=args.class_weight_mode).to(device)
+    criterion = nn.CrossEntropyLoss(
+        weight=class_weights, label_smoothing=getattr(args, "label_smoothing", 0.0)
+    )
 
     # Pure Behavioral Model
     model = PureBehavioralAttentionClassifier(
@@ -118,10 +150,11 @@ def train(args):
 
     best_val_loss = float("inf")
     patience_counter = 0
+    history = []
 
     for epoch in range(1, args.epochs + 1):
         model.train()
-        train_loss = 0.0
+        train_loss = WeightedLossMeter()
         train_correct = 0
         train_total = 0
 
@@ -141,17 +174,17 @@ def train(args):
                 loss.backward()
                 optimizer.step()
 
-            train_loss += loss.item() * x.size(0)
+            train_loss.update(loss, y, class_weights)
             preds = torch.argmax(logits, dim=1)
             train_correct += torch.sum(preds == y).item()
             train_total += x.size(0)
 
-        epoch_train_loss = train_loss / train_total
+        epoch_train_loss = train_loss.mean
         epoch_train_acc = train_correct / train_total
 
         # Validation
         model.eval()
-        val_loss = 0.0
+        val_loss = WeightedLossMeter()
         val_correct = 0
         val_total = 0
 
@@ -162,12 +195,12 @@ def train(args):
                     logits = model(x)
                     loss = criterion(logits, y)
 
-                val_loss += loss.item() * x.size(0)
+                val_loss.update(loss, y, class_weights)
                 preds = torch.argmax(logits, dim=1)
                 val_correct += torch.sum(preds == y).item()
                 val_total += x.size(0)
 
-        epoch_val_loss = val_loss / val_total
+        epoch_val_loss = val_loss.mean
         epoch_val_acc = val_correct / val_total
 
         scheduler.step()
@@ -175,6 +208,11 @@ def train(args):
         print(f"Epoch {epoch:02d}/{args.epochs} | "
               f"Train Loss: {epoch_train_loss:.4f} - Train Acc: {epoch_train_acc*100:.2f}% | "
               f"Val Loss: {epoch_val_loss:.4f} - Val Acc: {epoch_val_acc*100:.2f}%")
+        history.append({"epoch": epoch, "train_loss": epoch_train_loss,
+                        "train_accuracy": epoch_train_acc, "val_loss": epoch_val_loss,
+                        "val_accuracy": epoch_val_acc})
+        with open(os.path.join(args.checkpoint_dir, "training_history.json"), "w") as file:
+            json.dump(history, file, indent=2)
 
         if epoch_val_loss < best_val_loss:
             best_val_loss = epoch_val_loss
@@ -187,6 +225,9 @@ def train(args):
                 'val_loss': best_val_loss,
                 'val_acc': epoch_val_acc,
                 'feature_manifest': feature_manifest,
+                'training_config': {key: str(value) if isinstance(value, os.PathLike) else value
+                                    for key, value in vars(args).items()},
+                'class_weights': class_weights.detach().cpu().tolist(),
                 'model_config': {
                     'dim_inter': args.dim_inter,
                     'dim_affect': args.dim_affect,
@@ -212,15 +253,20 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_dir", default=os.path.join(PROJECT_ROOT, "checkpoints"))
     parser.add_argument("--dim_inter", type=int, default=32)
     parser.add_argument("--dim_affect", type=int, default=8)
-    parser.add_argument("--branch_dim", type=int, default=48)
+    parser.add_argument("--branch_dim", type=int, default=64)
     parser.add_argument("--num_heads", type=int, default=4)
-    parser.add_argument("--dropout", type=float, default=0.15)
+    parser.add_argument("--dropout", type=float, default=0.20)
+    parser.add_argument("--class_weight_mode", choices=["smoothed", "balanced", "none"], default="smoothed",
+                        help="smoothed (square-root, balanced), balanced (inverse freq), or none")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=60)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
     parser.add_argument("--patience", type=int, default=15)
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+    parser.add_argument("--device", choices=["auto", "cpu", "mps", "cuda"], default="auto")
+    parser.add_argument("--label_smoothing", type=float, default=0.0,
+                        help="Optional CE label smoothing; keep 0 for the initial baseline")
     
     args = parser.parse_args()
     train(args)

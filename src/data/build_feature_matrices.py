@@ -18,6 +18,7 @@ from src.data.feature_schema import (
     AFFECT_COLUMNS,
     AFFECT_FEATURE_SCHEMA,
     INTERACTION_FEATURE_SCHEMA,
+    INTERACTION_COLUMNS,
     MULTI_BRANCH_FEATURE_SCHEMA,
     MULTI_BRANCH_SHAPE,
 )
@@ -110,6 +111,10 @@ def read_interaction_manifest(feature_dir: Path) -> dict:
             f"Interaction shape contract mismatch in {manifest_path}: "
             f"{manifest.get('shape_per_video')}"
         )
+    if manifest.get("columns") != list(INTERACTION_COLUMNS):
+        raise ValueError("Interaction column contract does not match the tracked schema")
+    if manifest.get("tracker", {}).get("sampling") != "eight_preprocessed_frames":
+        raise ValueError("Interaction features must include eight-frame association provenance")
     return manifest
 
 
@@ -251,7 +256,7 @@ def main() -> None:
         "shape_per_video": list(MULTI_BRANCH_SHAPE),
         "streams": {
             "scene": {"columns": 576},
-            "interaction": {"columns": 32},
+            "interaction": {"columns": 32, "names": list(INTERACTION_COLUMNS)},
             "affect": {"columns": 8, "names": list(AFFECT_COLUMNS)},
         },
         "affect_extraction": {

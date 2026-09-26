@@ -1,0 +1,30 @@
+{
+  "purpose": "development calibration, not an independent test set",
+  "audit_id": "listener_posture_review_20260909",
+  "assignments": {
+    "Kan": "audit frames 01-15",
+    "Pan": "audit frames 19-20",
+    "Bright": "audit frames 22-36"
+  },
+  "excluded": {
+    "audit_frames_16_18": "round-table view1230, outside lecture scope",
+    "audit_frame_21": "annotation skipped; video remains in dataset"
+  },
+  "annotation_sha256": {
+    "listener_annotations_Kan.csv": "8ee4308898c6d6e87cad4500f77a7c5f0188344853a1543815493bf3a3189e14",
+    "listener_annotations.csv": "99787b3073a4d9b124055d9166250897513d5bba6afa574c856b019c907caccb",
+    "listener_annotations_Bright.csv": "30a5b3b3c605403d2257dcd30cb37d1ec9584d5d7aeddcc23847e92fee2cd1c9"
+  },
+  "thresholds": {
+    "lowered_head_max": 0.13,
+    "raised_head_min": 0.155,
+    "upright_min": 0.12,
+    "very_low_head_max": 0.06,
+    "orientation_consensus_min": 0.66
+  },
+  "notes": [
+    "Head state uses observed normalized nose-to-shoulder elevation; nose-to-eye vertical distance was rejected.",
+    "Missing face or shoulder evidence is unknown and is not labelled as sleep.",
+    "Very-low-head is a pose proxy, not a semantic asleep label."
+  ]
+}

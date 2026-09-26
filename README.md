@@ -11,7 +11,9 @@ The lecture-only run achieved **95.48% macro-F1 and 96.77% accuracy (30/31 test 
 
 ### Documentation and implementation status
 
-This document describes the local **32-interaction + 8-affect sampled-tracking experiment**. The remote `feat/track-aware-affect-fusion` branch also contains a distinct 40-interaction + 8-affect role-aware ByteTrack implementation. The results below do not evaluate that implementation. This documentation-only update does not publish the matching local code changes, ignored matrices or checkpoints; the reproduction commands require that matching implementation and data.
+This branch (`docs/lecture-only-results-20260926`) includes the **32-interaction + 8-affect sampled-tracking implementation**, its lecture-only runner, core tests and exact 308-clip selection list. The remote `feat/track-aware-affect-fusion` branch contains a distinct 40-interaction + 8-affect role-aware ByteTrack implementation. The results below do not evaluate that implementation; do not mix their schemas, matrices or checkpoints.
+
+Videos, preprocessed arrays, feature matrices, model weights and run outputs are not included in Git. Collaborators need compatible V3 matrices or must regenerate them from their own authorized dataset copy. See [collaborator setup](experiments/lecture_only/README.md#collaborator-setup) for the portable selection workflow and dependencies.
 
 ## Current system: V3 sampled behavioral model
 
@@ -182,7 +184,7 @@ python run_lecture_behavioral.py --stage prepare --experiment_dir experiments/le
 
 Pass the same `--experiment_dir` when training/evaluating that snapshot. Preparation copies matrices using class + filename and retains original split membership. It refuses existing destinations, validates shape/finite values, and records exact membership and hashes. Training runs also refuse overwrite. Data live under `dataset/`; checkpoints, history, logs, confusion matrix and per-clip predictions live under `runs/<run_name>/`. The original matrices and results are untouched.
 
-The full 27-test local suite passed, including a synthetic end-to-end lecture-only training/evaluation test. This verifies software behavior, not scientific generalization.
+The original 27-test local suite passed, including a synthetic end-to-end lecture-only training/evaluation test. The published core suite additionally covers portable selection lists; local audit-UI tooling is not required for training and is not included in this release. Run `python -m unittest discover -s tests -v` to check the published suite. Software tests do not establish scientific generalization.
 
 ## Next experiments
 

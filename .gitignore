@@ -44,3 +44,11 @@ Thumbs.db
 .vscode/
 
 .venv*
+
+# Local data copies and generated experiment artifacts
+lecture_only_videos/
+feature_matrices_behavioral_before_tracking/
+preprocessed_data.zip
+experiments/**/dataset/
+experiments/**/runs/
+experiments/**/.lecture-subset-*/
