@@ -1,6 +1,6 @@
 # Project Progress and Experiment Log
 
-Updated 2026-09-26. This log describes the 32-interaction + 8-affect V3 experiment, not the separate 40-interaction role-aware ByteTrack implementation on the remote feature branch. The `docs/lecture-only-results-20260926` branch now includes the matching core implementation, tests and portable 308-clip selection list. Matrices, videos and checkpoints remain outside Git.
+Updated 2026-10-01. This log describes the 32-interaction + 8-affect V3 experiment, not the separate 40-interaction role-aware ByteTrack implementation on the remote feature branch. The `docs/lecture-only-results-20260926` branch now includes the matching core implementation, tests and portable 308-clip selection list. Matrices, videos and checkpoints remain outside Git.
 
 ## 1. Current research objective
 
@@ -126,6 +126,53 @@ The score is promising within this selected setup, but not yet a reliable estima
 
 Filtering changes the task population and the test set. The rise from 78.46% cannot be presented as a controlled model improvement or proof of shortcut removal. Better task alignment, easier retained examples and related source footage remain possible explanations.
 
+### Conservative temporal evaluation, verified 2026-09-27
+
+The 308 clips were also evaluated using 18 conservative temporal groups and a
+size-matched randomized control. Both protocols use identical per-fold class
+counts, matrices, hyperparameters, and model seeds.
+
+| Protocol | Mean Macro-F1 (seeds 42--46) | Sample SD |
+|---|---:|---:|
+| Conservative temporal groups | **56.34%** | 1.77 |
+| Size-matched randomized clips | **81.43%** | 1.66 |
+| Paired difference | **25.10 points** | 2.51 |
+
+The positive gap appears for all five seeds. It shows that random clip mixing
+benefits from temporal correlation; it does not estimate generalization to a
+new classroom or recording.
+
+On the temporal folds, interaction-only achieved **54.02% ± 8.33%**,
+affect-only **57.01% ± 4.37%**, and interaction+affect **56.34% ± 1.77%**.
+Fold 1 remains weak for all branch modes. Feature diagnostics over all 308
+matrices and sampled tracking diagnostics over 36 clips show no broad numerical
+collapse in the large High group `H04`. H04 is instead markedly stiller and
+lower-motion than the other High groups, with moderately lower face/affect
+reliability. This initially supported behavioral distribution shift, possible
+label ambiguity, and scarce independent High groups rather than a group-specific
+extraction collapse. V3 remains frozen as the evaluated baseline rather than
+being tuned directly against these test-fold observations.
+
+A subsequent preliminary manual audit completed three clips (H04=2, H02=1).
+Pose placement was marked good in all three, but orientation was mixed or
+inconsistent in all three and every clip reported an ID switch. Two clips had
+major tracking-continuity issues. This sample is too small and unbalanced for a
+group comparison, but it demonstrates that automatic feature availability does
+not establish semantic correctness. The current eye-to-nose image vector is not
+a calibrated head-pose or gaze estimate. V3 orientation explanations are
+therefore unvalidated.
+
+The pre-specified orientation-family ablation was then run on both frozen
+protocols for seeds 42--46 without rebuilding matrices. Removing interaction
+columns 2--7 and 30 reduced temporal Macro-F1 from **56.34% ± 1.77%** to
+**51.85% ± 1.13%** and matched-random Macro-F1 from **81.43% ± 1.66%** to
+**80.15% ± 1.37%**. The model therefore relies on these fields, especially for
+the difficult temporal High class, but the score contribution does not validate
+their behavioral meaning.
+
+Complete evidence and limitations are in
+[`docs/BEHAVIORAL_INVESTIGATION_RESULTS.md`](docs/BEHAVIORAL_INVESTIGATION_RESULTS.md).
+
 ### Loss and configuration
 
 - Cross-entropy: square-root inverse-frequency weights calculated from training counts 133/55/64, normalized to mean one.
@@ -189,20 +236,45 @@ This is an interaction-extraction pilot, not a full end-to-end latency or FPS be
 - Verified all 308 copied matrices and passed the full 27-test local suite, including a synthetic end-to-end run. Software tests are not evidence of scientific validity.
 - Completed the first lecture-only training/evaluation: 95.48% macro-F1 on 31 clips.
 - Prepared the core implementation for collaborators: portable selection-list input, dependency instructions, sampled tracker/calibration/schema, subset safeguards and isolated training/evaluation. Legacy visualization changes asserting sleep from hidden faces are excluded from the release.
+- Completed seeds 42--46 on the frozen temporal and size-matched randomized protocols.
+- Audited temporal-group feature quality over all 308 matrices and sampled raw tracking records from 36 clips.
+- Added and ran interaction-only and affect-only ablations over the same folds and seeds.
+- Retained V3 as the frozen evaluated baseline instead of tuning directly against the held-out H04 group.
+- Generated a blinded H04-versus-other-High visual audit from the exact saved frames and interaction tracking records. Thirty-five clips are locally renderable; 50 cloud-placeholder clips are explicitly recorded as unavailable pending download.
+- Recorded the first three visual reviews: good pose placement but repeated orientation-arrow mismatch and ID-switch reports. This is preliminary, not an error-rate estimate.
+- Implemented matrix-preserving interaction-column ablation with checkpointed feature indices and backward-compatible evaluation.
+- Ran the orientation-family ablation for seeds 42--46 on both frozen protocols; all 40 local tests pass.
 
 ## 8. Immediate next experiments
 
-1. **Freeze the baseline:** preserve seed-42 results and current feature/loss settings. Do not optimize against the observed test result.
-2. **Training stability:** choose a small seed list in advance (for example 42–46), repeat identical settings/splits and report every result plus mean and standard deviation. This does not establish recording independence.
-3. **Split reliability:** verify clip continuity and assess class coverage before selecting a grouped/blocked design. Filename runs are candidate review units, not proven source sessions. Keep known-related footage together where feasible.
-4. **Independent proxy audit:** check previous development-audit overlap; validate head/posture, tracking and speaker-role behavior on examples not used for tuning. Recheck the historical annotation aggregation before reporting proxy metrics.
-5. **Ablations after evaluation design:** compare interaction-only, affect-only and feature groups using the same defined splits.
-6. **External data remains optional:** no compatible additional lecture test set has been identified. Do not restore group-discussion clips merely to increase counts; broadening activity scope would change the interaction problem.
+1. **Freeze V3 and the evaluation:** keep the current 308 matrices, temporal
+   groups, matched-random membership, hyperparameters, and seeds unchanged.
+2. **Complete feature-family contribution tests:** use the existing
+   matrix-preserving ablation support for head/posture, motion/tracking, and
+   speaker/reliability families. Orientation columns 2--7 and 30 are already
+   complete. Define every column set before running it.
+3. **Perform independent semantic validation:** create a new manual-audit sample
+   across Low, Mid, High, and multiple temporal groups. Do not reuse the earlier
+   development annotations as independent validation. Freeze the sample,
+   rubric, V3 thresholds, and reviewer overlap before annotation.
+4. **Keep importance and correctness separate:** a Macro-F1 decline establishes
+   model reliance only. Manual agreement with visible behavior is required
+   before a feature is presented as an explanation.
+5. **Create V4 only from diagnosed evidence:** replace useful but invalid
+   features, beginning with a separately validated head-pose method. Do not add
+   action recognition without individual action labels and a new evaluation
+   plan.
+6. **Report both frozen protocols:** present 56.34% ± 1.77% as the conservative
+   within-recording temporal baseline and 81.43% ± 1.66% as the
+   leakage-sensitive randomized control. The 51.85% and 80.15% results are only
+   the orientation-removal diagnostic.
+7. **Finish the efficiency claim later:** after V4 is fixed, measure interaction,
+   affect, complete inference time, model parameters, and peak memory separately.
 
 ## 9. Questions for professor discussion
 
-1. With 308 activity-filtered clips and no authoritative session IDs, what evaluation design is defensible within our fixed classroom setup?
-2. How should we report the 95.48% result given only 31 test clips and unverified source independence?
+1. Is the five-seed conservative temporal protocol a defensible main result for this single-recording dataset?
+2. Should H04's distinct but apparently valid High behavior be presented as label ambiguity, intra-class variation, or both?
 3. Is a narrowly scoped speaker–listener study sufficient if no compatible external lecture dataset is available?
 4. What independent manual validation is expected for head/posture, orientation and speaker/listener assignment?
 5. If stronger generalization evidence is required, is collecting a small additional lecture recording feasible?

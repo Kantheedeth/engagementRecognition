@@ -1,11 +1,17 @@
 # Classroom Group Engagement Recognition
 
-This project studies lightweight group-engagement recognition for the **lecture-only** portion of OUC-CGE. As of 2026-09-26, the activity-reviewed subset contains **308 clips**. The current local experiment deliberately excludes scene embeddings and uses two behavioral branches:
+This project studies lightweight group-engagement recognition for the **lecture-only** portion of OUC-CGE. As of 2026-10-01, the activity-reviewed subset contains **308 clips**. The current local experiment deliberately excludes scene embeddings and uses two behavioral branches:
 
 - 32 interaction features from YOLOv8 pose detections
 - 8 group-affect features from RetinaFace, ByteTrack smoothing, and FER
 
 The output classes are Low, Mid, and High group engagement.
+
+The consolidated experimental narrative, defensible claims, DS2 structure, and
+seven-minute presentation plan are recorded in
+[DS2 and Midterm Presentation Evidence](docs/DS2_PRESENTATION_EVIDENCE.md).
+The exact collaborator resume point, required local data, and next experiment
+order are recorded in [Project Handoff](docs/PROJECT_HANDOFF.md).
 
 The lecture-only run achieved **95.48% macro-F1 and 96.77% accuracy (30/31 test clips)**. This is a preliminary result on filtered original splits, not established generalization to new recordings or classrooms.
 
@@ -152,8 +158,29 @@ These results document earlier feature versions and are not directly comparable 
 | V2 | All-person aggregate without exported coordinates | 82.69% verified single checkpoint | Used unvalidated nose-to-eye and missing-face heuristics |
 | V3, earlier selection | Eight-frame association and reviewed proxy rules | 78.46% single run | 132 test clips; angle-filtered selection |
 | V3, activity-filtered lecture subset | Same stored behavioral matrices; fresh classifier | 95.48% single run | 31 test clips; preliminary fixed-setup result |
+| V3, candidate-episode-held-out CV | Same frozen features; three outer temporal folds | **64.87% pooled** | 308 out-of-fold predictions; one fixed recording |
+| V3, conservative temporal-group CV | One-clip gaps merged into 18 split groups | **56.34% ± 1.77%** | Seeds 42--46; 308 out-of-fold predictions per seed |
+| V3, size-matched randomized control | Same per-fold class counts as temporal CV | **81.43% ± 1.66%** | Seeds 42--46; fixed split seed 20260926 |
+| V3 minus orientation family, temporal | Columns 2--7 and 30 omitted at model input | **51.85% ± 1.13%** | Diagnostic ablation; matrices unchanged |
+| V3 minus orientation family, matched random | Same omission and frozen random protocol | **80.15% ± 1.37%** | Diagnostic ablation; matrices unchanged |
 
-Historical affect-only and reduced-feature ablations were produced with earlier schemas. They remain useful development records but must be rerun on V3 before being presented as current ablation evidence. The lower V3 score cannot yet be attributed specifically to “shortcut removal,” because several variables changed together.
+The paired randomized-minus-temporal gap is **25.10 ± 2.51 points** and is
+positive for every model seed. Current temporal-fold ablations are:
+interaction-only **54.02% ± 8.33%**, affect-only **57.01% ± 4.37%**, and
+combined **56.34% ± 1.77%**. All three remain weak on Fold 1. Automatic
+feature and sampled tracking diagnostics show no broad numerical collapse in
+its 62-clip High group (`H04`); it is substantially stiller and lower-motion
+than the other High groups. A later three-clip visual review found good pose
+placement but mixed/incorrect orientation arrows and ID switches in every
+reviewed clip. This sample is not a group-level error estimate, but it means
+current orientation explanations are unvalidated. See
+[the full investigation](docs/BEHAVIORAL_INVESTIGATION_RESULTS.md).
+
+The completed orientation-family ablation reduced temporal Macro-F1 by **4.49
+± 1.86 points** and matched-random Macro-F1 by **1.28 ± 1.99 points**. This
+shows that the classifier uses those fields, especially for temporal High-class
+recognition. It does not show that the eye-to-nose direction is valid head pose,
+gaze, or attention.
 
 ## Efficiency measurement
 
@@ -184,15 +211,26 @@ python run_lecture_behavioral.py --stage prepare --experiment_dir experiments/le
 
 Pass the same `--experiment_dir` when training/evaluating that snapshot. Preparation copies matrices using class + filename and retains original split membership. It refuses existing destinations, validates shape/finite values, and records exact membership and hashes. Training runs also refuse overwrite. Data live under `dataset/`; checkpoints, history, logs, confusion matrix and per-clip predictions live under `runs/<run_name>/`. The original matrices and results are untouched.
 
-The original 27-test local suite passed, including a synthetic end-to-end lecture-only training/evaluation test. The published core suite additionally covers portable selection lists; local audit-UI tooling is not required for training and is not included in this release. Run `python -m unittest discover -s tests -v` to check the published suite. Software tests do not establish scientific generalization.
+The current 40-test local suite passed, including a synthetic end-to-end lecture-only training/evaluation test, protocol construction, branch/feature ablation support, sampled tracking, and audit-tool checks. Run `python -m unittest discover -s tests -v` to check the suite. Software tests do not establish scientific generalization.
 
 ## Next experiments
 
-1. Freeze the current feature/loss settings and repeat a predetermined set of training seeds; report mean, standard deviation and all individual results. This measures training variability, not independence of the split.
-2. Verify continuity relationships and class coverage before designing grouped/blocked evaluation. Do not invent sessions from filename ranges or assume a fixed five-fold design is feasible.
-3. Check development-audit overlap and independently validate head/posture, orientation and speaker/listener proxies without tuning on evaluation labels.
-4. After stabilizing the evaluation protocol, compare interaction-only, affect-only and feature-group ablations on the same splits.
-5. Additional lecture recordings remain optional future evidence. No compatible external lecture test set has been identified; expanding to group discussions solely to increase counts is not the current plan.
+1. Keep V3, its 308 matrices, the temporal groups, training settings, and seeds
+   frozen while diagnosing the current representation.
+2. Measure model contribution with pre-specified feature-family ablations under
+   the same temporal and matched-random protocols. Orientation is complete;
+   head/posture, motion/tracking, and speaker/reliability remain.
+3. Measure semantic validity on a new manual-audit sample that is separate from
+   the earlier threshold-development annotations. Include Low, Mid, High, and
+   multiple temporal groups; use reviewer overlap to measure agreement.
+4. Keep a feature only when its contribution and behavioral meaning are
+   defensible. A score decrease after removal proves reliance, not correctness.
+5. Create V4 only after this diagnosis. Replace important but invalid features,
+   beginning with a separately validated head-pose method for orientation.
+6. Retain the 64.87% 23-group result only as grouping sensitivity; report
+   56.34% ± 1.77% as the main current within-recording temporal estimate and
+   81.43% ± 1.66% as the leakage-sensitive randomized control.
+7. Complete end-to-end timing after the scientific validation design is frozen.
 
 ## Important terminology
 
