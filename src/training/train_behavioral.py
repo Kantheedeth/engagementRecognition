@@ -42,6 +42,29 @@ def set_seed(seed: int):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
+
+def parse_dropped_interaction_indices(text, dim_inter):
+    """Return (kept, dropped) indices for a matrix-preserving ablation."""
+    if text is None or not str(text).strip():
+        dropped = []
+    else:
+        try:
+            dropped = [int(value.strip()) for value in str(text).split(",") if value.strip()]
+        except ValueError as exc:
+            raise ValueError(
+                "drop_interaction_indices must be comma-separated integers"
+            ) from exc
+    if len(dropped) != len(set(dropped)):
+        raise ValueError("drop_interaction_indices must not contain duplicates")
+    if any(index < 0 or index >= dim_inter for index in dropped):
+        raise ValueError(
+            f"drop_interaction_indices must be between 0 and {dim_inter - 1}"
+        )
+    kept = [index for index in range(dim_inter) if index not in set(dropped)]
+    if not kept:
+        raise ValueError("At least one interaction feature must remain")
+    return kept, dropped
+
 def calculate_class_weights(dataset, mode="smoothed"):
     labels = []
     for i in range(len(dataset)):
@@ -89,11 +112,21 @@ def train(args):
         set_seed(args.seed)
         print(f"Random seed set to: {args.seed}")
 
+    interaction_indices, dropped_interaction_indices = parse_dropped_interaction_indices(
+        getattr(args, "drop_interaction_indices", ""), args.dim_inter
+    )
+
     print("=" * 65)
     print("Pure Behavioral Engagement Training (ZERO Scene Shortcut)")
-    print(f"  • Interaction Branch : {args.dim_inter} -> {args.branch_dim}")
-    print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
-    print(f"  • Fused Embed Dim    : {args.branch_dim * 2} (50% Interaction, 50% Affect)")
+    print(f"  • Branch Mode        : {args.branch_mode}")
+    if args.branch_mode in ("both", "interaction"):
+        print(f"  • Interaction Branch : {len(interaction_indices)} -> {args.branch_dim}")
+        print(f"  • Interaction Kept   : {interaction_indices}")
+        print(f"  • Interaction Dropped: {dropped_interaction_indices}")
+    if args.branch_mode in ("both", "affect"):
+        print(f"  • Affect Branch      : {args.dim_affect} -> {args.branch_dim}")
+    embed_dim = args.branch_dim * (2 if args.branch_mode == "both" else 1)
+    print(f"  • Temporal Embed Dim : {embed_dim}")
     print("=" * 65)
 
     os.makedirs(args.checkpoint_dir, exist_ok=True)
@@ -140,7 +173,9 @@ def train(args):
         branch_dim=args.branch_dim,
         num_heads=args.num_heads,
         num_classes=3,
-        dropout=args.dropout
+        dropout=args.dropout,
+        branch_mode=args.branch_mode,
+        interaction_indices=interaction_indices,
     ).to(device)
 
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
@@ -234,6 +269,9 @@ def train(args):
                     'branch_dim': args.branch_dim,
                     'num_heads': args.num_heads,
                     'dropout': args.dropout,
+                    'branch_mode': args.branch_mode,
+                    'interaction_indices': interaction_indices,
+                    'drop_interaction_indices': dropped_interaction_indices,
                 },
             }, best_model_path)
         else:
@@ -256,6 +294,11 @@ if __name__ == "__main__":
     parser.add_argument("--branch_dim", type=int, default=64)
     parser.add_argument("--num_heads", type=int, default=4)
     parser.add_argument("--dropout", type=float, default=0.20)
+    parser.add_argument("--branch_mode", choices=["both", "interaction", "affect"], default="both")
+    parser.add_argument(
+        "--drop_interaction_indices", default="",
+        help="Comma-separated zero-based interaction columns to omit without rebuilding matrices",
+    )
     parser.add_argument("--class_weight_mode", choices=["smoothed", "balanced", "none"], default="smoothed",
                         help="smoothed (square-root, balanced), balanced (inverse freq), or none")
     parser.add_argument("--batch_size", type=int, default=32)

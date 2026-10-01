@@ -51,12 +51,6 @@ def plot_confusion_matrix(cm, classes, filename="confusion_matrix_behavioral.png
     print(f"Confusion matrix plot successfully saved to {filename}")
 
 def evaluate(args):
-    print("=" * 65)
-    print("Running Pure Behavioral Pipeline Evaluation Phase...")
-    print(f"  • Data Directory : {args.data_dir}")
-    print(f"  • Features       : 32 Interaction + 8 Affect (Zero Scene)")
-    print("=" * 65)
-
     requested_device = getattr(args, "device", "auto")
     device = torch.device(
         requested_device if requested_device != "auto" else
@@ -101,6 +95,16 @@ def evaluate(args):
     branch_dim = model_config.get("branch_dim", args.branch_dim)
     num_heads = model_config.get("num_heads", args.num_heads)
     dropout = model_config.get("dropout", 0.15)
+    branch_mode = model_config.get("branch_mode", "both")
+    interaction_indices = model_config.get("interaction_indices")
+
+    print("=" * 65)
+    print("Running Pure Behavioral Pipeline Evaluation Phase...")
+    print(f"  • Data Directory : {args.data_dir}")
+    print(f"  • Branch Mode    : {branch_mode} (Zero Scene)")
+    if interaction_indices is not None and branch_mode in ("both", "interaction"):
+        print(f"  • Interaction    : {len(interaction_indices)}/{args.dim_inter} columns retained")
+    print("=" * 65)
 
     model = PureBehavioralAttentionClassifier(
         dim_inter=args.dim_inter,
@@ -108,7 +112,9 @@ def evaluate(args):
         branch_dim=branch_dim,
         num_heads=num_heads,
         num_classes=3,
-        dropout=dropout
+        dropout=dropout,
+        branch_mode=branch_mode,
+        interaction_indices=interaction_indices,
     ).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
@@ -159,6 +165,8 @@ def evaluate(args):
             ),
             "checkpoint": os.path.abspath(checkpoint_path),
             "checkpoint_epoch": checkpoint.get("epoch"),
+            "branch_mode": branch_mode,
+            "interaction_indices": interaction_indices,
             "feature_manifest": feature_manifest,
             "predictions": [{"matrix": path.name, "true_label": int(true), "predicted_label": int(pred)}
                             for path, true, pred in zip(test_dataset.file_paths, y_true, y_pred)],

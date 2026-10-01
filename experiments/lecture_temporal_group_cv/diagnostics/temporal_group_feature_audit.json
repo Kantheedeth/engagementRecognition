@@ -1,0 +1,3291 @@
+{
+  "protocol": "temporal_group_held_out_three_fold_cv",
+  "audited_clips": 308,
+  "temporal_groups": 18,
+  "quality_fields": [
+    "student_count_norm",
+    "mean_face_visibility",
+    "hidden_face_ratio",
+    "posture_observation_ratio",
+    "matched_center_displacement_mean_x10",
+    "matched_center_displacement_std_x10",
+    "matched_stillness_ratio",
+    "matched_high_motion_ratio",
+    "speaker_in_zone",
+    "matched_speaker_displacement_x10",
+    "orientation_alignment",
+    "affect_reliability"
+  ],
+  "groups": {
+    "M01": {
+      "class": "mid",
+      "clips": 16,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.43053386360406876,
+          "sample_sd": 0.13880672307572847
+        },
+        "lowered_head_ratio": {
+          "mean": 0.3911774102598429,
+          "sample_sd": 0.10244893844501561
+        },
+        "head_turned_ratio": {
+          "mean": 0.5734868347644806,
+          "sample_sd": 0.10559921977706287
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7126890309154987,
+          "sample_sd": 0.05202758326069582
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.7066189255565405,
+          "sample_sd": 0.15588639056645381
+        },
+        "std_orientation_score": {
+          "mean": 0.1128675271756947,
+          "sample_sd": 0.02936194757897335
+        },
+        "min_orientation_score": {
+          "mean": 0.49689775332808495,
+          "sample_sd": 0.10972188337493058
+        },
+        "max_orientation_score": {
+          "mean": 0.8458661027252674,
+          "sample_sd": 0.0259218597827755
+        },
+        "upright_ratio": {
+          "mean": 0.6728391721844673,
+          "sample_sd": 0.0926887993659056
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.28762909211218357,
+          "sample_sd": 0.09671664756213404
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.039159735024441034,
+          "sample_sd": 0.04934406777817754
+        },
+        "mean_posture_elevation": {
+          "mean": 0.14354734495282173,
+          "sample_sd": 0.012917570464448596
+        },
+        "min_posture_elevation": {
+          "mean": 0.06755370159226004,
+          "sample_sd": 0.03127842147341722
+        },
+        "std_posture_elevation": {
+          "mean": 0.045578147983178496,
+          "sample_sd": 0.010939073974039412
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.38929509930312634,
+          "sample_sd": 0.05031305262609074
+        },
+        "posture_symmetry": {
+          "mean": 0.15944715356454253,
+          "sample_sd": 0.0477114181221092
+        },
+        "student_count_norm": {
+          "mean": 0.5895833373069763,
+          "sample_sd": 0.06955545665232067
+        },
+        "mean_face_visibility": {
+          "mean": 0.7582476697862148,
+          "sample_sd": 0.03393635273849579
+        },
+        "hidden_face_ratio": {
+          "mean": 0.018235367024317384,
+          "sample_sd": 0.024862173598115555
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7587654106318951,
+          "sample_sd": 0.08439139103527331
+        },
+        "single_eye_ratio": {
+          "mean": 0.22693650098517537,
+          "sample_sd": 0.08627054278263688
+        },
+        "median_face_visibility": {
+          "mean": 0.8105461075901985,
+          "sample_sd": 0.047545838529607296
+        },
+        "face_visibility_iqr": {
+          "mean": 0.21006752084940672,
+          "sample_sd": 0.04997439762025171
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9839347749948502,
+          "sample_sd": 0.022478186302736028
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.16567485849373043,
+          "sample_sd": 0.10291360130816145
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.2084020448382944,
+          "sample_sd": 0.1254694231944044
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5705720707774162,
+          "sample_sd": 0.10989665283502952
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.09575639374088496,
+          "sample_sd": 0.09462101393826862
+        },
+        "speaker_in_zone": {
+          "mean": 0.859375,
+          "sample_sd": 0.28458668860881975
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.12422452284954488,
+          "sample_sd": 0.08754009772483243
+        },
+        "orientation_alignment": {
+          "mean": 0.9634368047118187,
+          "sample_sd": 0.018783070163150346
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.045578147983178496,
+          "sample_sd": 0.010939073974039412
+        },
+        "anger": {
+          "mean": 0.05176357342861593,
+          "sample_sd": 0.020552378002702768
+        },
+        "disgust": {
+          "mean": 0.0034382197773084044,
+          "sample_sd": 0.0012436334373656266
+        },
+        "fear": {
+          "mean": 0.0944940890185535,
+          "sample_sd": 0.022552037299823226
+        },
+        "happiness": {
+          "mean": 0.057504935073666275,
+          "sample_sd": 0.018323177926080056
+        },
+        "sadness": {
+          "mean": 0.6360525861382484,
+          "sample_sd": 0.05993690720769748
+        },
+        "surprise": {
+          "mean": 0.02320808349759318,
+          "sample_sd": 0.016875132540886986
+        },
+        "neutral": {
+          "mean": 0.13353852787986398,
+          "sample_sd": 0.03969631008609215
+        },
+        "affect_reliability": {
+          "mean": 0.5212834067642689,
+          "sample_sd": 0.06893854541046623
+        }
+      }
+    },
+    "M02": {
+      "class": "mid",
+      "clips": 26,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.29234169251643694,
+          "sample_sd": 0.10502148265765818
+        },
+        "lowered_head_ratio": {
+          "mean": 0.4588427268541776,
+          "sample_sd": 0.09461379264535424
+        },
+        "head_turned_ratio": {
+          "mean": 0.5065127668472437,
+          "sample_sd": 0.09604880069554862
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7076438894638648,
+          "sample_sd": 0.04594127263437261
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.7228439988998266,
+          "sample_sd": 0.1358408162182406
+        },
+        "std_orientation_score": {
+          "mean": 0.114232226059987,
+          "sample_sd": 0.0428730479463505
+        },
+        "min_orientation_score": {
+          "mean": 0.4754559902044443,
+          "sample_sd": 0.1391878296442508
+        },
+        "max_orientation_score": {
+          "mean": 0.8405981797438401,
+          "sample_sd": 0.024454549309775413
+        },
+        "upright_ratio": {
+          "mean": 0.6194487775747592,
+          "sample_sd": 0.09563947945388157
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.32003517563526446,
+          "sample_sd": 0.06288935539638825
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.05661109695211053,
+          "sample_sd": 0.06328009925848942
+        },
+        "mean_posture_elevation": {
+          "mean": 0.13247577215616518,
+          "sample_sd": 0.012741194101526089
+        },
+        "min_posture_elevation": {
+          "mean": 0.06772346357600047,
+          "sample_sd": 0.026036010683040876
+        },
+        "std_posture_elevation": {
+          "mean": 0.039133648173167154,
+          "sample_sd": 0.008186540361306022
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.349575658257191,
+          "sample_sd": 0.028275020676839246
+        },
+        "posture_symmetry": {
+          "mean": 0.2256295821414544,
+          "sample_sd": 0.0625948360544415
+        },
+        "student_count_norm": {
+          "mean": 0.5746794916116275,
+          "sample_sd": 0.04078948866282356
+        },
+        "mean_face_visibility": {
+          "mean": 0.7650122871765723,
+          "sample_sd": 0.05954195294761302
+        },
+        "hidden_face_ratio": {
+          "mean": 0.04121000599116087,
+          "sample_sd": 0.05746649520079157
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.8207972508210403,
+          "sample_sd": 0.09190910910193725
+        },
+        "single_eye_ratio": {
+          "mean": 0.14984616393653247,
+          "sample_sd": 0.06682806441124878
+        },
+        "median_face_visibility": {
+          "mean": 0.8183587308113391,
+          "sample_sd": 0.049878838448073906
+        },
+        "face_visibility_iqr": {
+          "mean": 0.1679075609606046,
+          "sample_sd": 0.06830444452276434
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9657632318826822,
+          "sample_sd": 0.04980771746731302
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.12124567084874098,
+          "sample_sd": 0.06451324998980032
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.14214280133063978,
+          "sample_sd": 0.08170806002722145
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.6282944507323779,
+          "sample_sd": 0.11465200288968595
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.06379956959818418,
+          "sample_sd": 0.06658497074168378
+        },
+        "speaker_in_zone": {
+          "mean": 0.8028846153846154,
+          "sample_sd": 0.32629181134966617
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.085353749535548,
+          "sample_sd": 0.07555841000189213
+        },
+        "orientation_alignment": {
+          "mean": 0.9571925126589261,
+          "sample_sd": 0.04678874656260824
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.039133648173167154,
+          "sample_sd": 0.008186540361306022
+        },
+        "anger": {
+          "mean": 0.05164508285144201,
+          "sample_sd": 0.01915654959496365
+        },
+        "disgust": {
+          "mean": 0.003208785080530036,
+          "sample_sd": 0.001339400164007633
+        },
+        "fear": {
+          "mean": 0.08479818243246812,
+          "sample_sd": 0.028196789706913843
+        },
+        "happiness": {
+          "mean": 0.05567151250747534,
+          "sample_sd": 0.01283176345000571
+        },
+        "sadness": {
+          "mean": 0.6708552264250242,
+          "sample_sd": 0.07992180824449338
+        },
+        "surprise": {
+          "mean": 0.03144612716725813,
+          "sample_sd": 0.03834712434418558
+        },
+        "neutral": {
+          "mean": 0.10237508066571675,
+          "sample_sd": 0.034783297565428924
+        },
+        "affect_reliability": {
+          "mean": 0.4852233746877083,
+          "sample_sd": 0.09188016974990725
+        }
+      }
+    },
+    "M03": {
+      "class": "mid",
+      "clips": 11,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.2709911655295979,
+          "sample_sd": 0.1114636303395102
+        },
+        "lowered_head_ratio": {
+          "mean": 0.5260326564311981,
+          "sample_sd": 0.08435579491798909
+        },
+        "head_turned_ratio": {
+          "mean": 0.48087122765454376,
+          "sample_sd": 0.1018726852113488
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7009596553715792,
+          "sample_sd": 0.033729184107990785
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.6967307058247653,
+          "sample_sd": 0.10039699070632682
+        },
+        "std_orientation_score": {
+          "mean": 0.12988621606068176,
+          "sample_sd": 0.03588743056115384
+        },
+        "min_orientation_score": {
+          "mean": 0.4527044513008811,
+          "sample_sd": 0.08341914586074005
+        },
+        "max_orientation_score": {
+          "mean": 0.8577367500825361,
+          "sample_sd": 0.059035290983502756
+        },
+        "upright_ratio": {
+          "mean": 0.5650252537293867,
+          "sample_sd": 0.08144333968523099
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.33829816634004767,
+          "sample_sd": 0.10868361173168299
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.09440837030045011,
+          "sample_sd": 0.050079136182960254
+        },
+        "mean_posture_elevation": {
+          "mean": 0.12639914453029633,
+          "sample_sd": 0.008080376584997443
+        },
+        "min_posture_elevation": {
+          "mean": 0.055004963143305344,
+          "sample_sd": 0.009373446897145766
+        },
+        "std_posture_elevation": {
+          "mean": 0.04339380325241522,
+          "sample_sd": 0.00542320278871904
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.3587378751147877,
+          "sample_sd": 0.06894058631628429
+        },
+        "posture_symmetry": {
+          "mean": 0.1489357887343927,
+          "sample_sd": 0.07454752110806347
+        },
+        "student_count_norm": {
+          "mean": 0.5424242453141646,
+          "sample_sd": 0.03790605300270757
+        },
+        "mean_face_visibility": {
+          "mean": 0.7781412493098866,
+          "sample_sd": 0.035689638133804824
+        },
+        "hidden_face_ratio": {
+          "mean": 0.02940566363659772,
+          "sample_sd": 0.028541303907150265
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.8348079052838412,
+          "sample_sd": 0.0903659290585098
+        },
+        "single_eye_ratio": {
+          "mean": 0.14984217573973266,
+          "sample_sd": 0.08834852401181856
+        },
+        "median_face_visibility": {
+          "mean": 0.8480214693329551,
+          "sample_sd": 0.01925425741064333
+        },
+        "face_visibility_iqr": {
+          "mean": 0.1752489066936753,
+          "sample_sd": 0.049260217897595514
+        },
+        "posture_observation_ratio": {
+          "mean": 0.981479980728843,
+          "sample_sd": 0.019014355527294795
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.10266813398762183,
+          "sample_sd": 0.06060296143118715
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.11665353094312278,
+          "sample_sd": 0.10915351124230892
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.6348980990323153,
+          "sample_sd": 0.0906176355404122
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.035854076289317825,
+          "sample_sd": 0.041201172678718166
+        },
+        "speaker_in_zone": {
+          "mean": 1.0,
+          "sample_sd": 0.0
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.13971926932307807,
+          "sample_sd": 0.10703256761237719
+        },
+        "orientation_alignment": {
+          "mean": 0.9578464735638011,
+          "sample_sd": 0.025721473799821107
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04339380325241522,
+          "sample_sd": 0.00542320278871904
+        },
+        "anger": {
+          "mean": 0.04881130548363382,
+          "sample_sd": 0.020857330330318294
+        },
+        "disgust": {
+          "mean": 0.003320212751118974,
+          "sample_sd": 0.0015919657455494764
+        },
+        "fear": {
+          "mean": 0.09370271658355539,
+          "sample_sd": 0.022235842157586536
+        },
+        "happiness": {
+          "mean": 0.05131515030833808,
+          "sample_sd": 0.014875863373071493
+        },
+        "sadness": {
+          "mean": 0.6420301795005798,
+          "sample_sd": 0.05689539125372281
+        },
+        "surprise": {
+          "mean": 0.02113052372905341,
+          "sample_sd": 0.01679699210547197
+        },
+        "neutral": {
+          "mean": 0.13968990302898668,
+          "sample_sd": 0.04972066024051886
+        },
+        "affect_reliability": {
+          "mean": 0.4810661050406369,
+          "sample_sd": 0.033734087098295444
+        }
+      }
+    },
+    "M04": {
+      "class": "mid",
+      "clips": 7,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.4504714608192444,
+          "sample_sd": 0.06799750857960571
+        },
+        "lowered_head_ratio": {
+          "mean": 0.38481960552079336,
+          "sample_sd": 0.06344847918451767
+        },
+        "head_turned_ratio": {
+          "mean": 0.58976811170578,
+          "sample_sd": 0.08331534193202819
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7187711426189968,
+          "sample_sd": 0.04301445203957736
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.718187860080174,
+          "sample_sd": 0.1258407288059421
+        },
+        "std_orientation_score": {
+          "mean": 0.11412838527134486,
+          "sample_sd": 0.0296500712321456
+        },
+        "min_orientation_score": {
+          "mean": 0.490493186882564,
+          "sample_sd": 0.11405850578077366
+        },
+        "max_orientation_score": {
+          "mean": 0.8514244897024972,
+          "sample_sd": 0.020299768208779035
+        },
+        "upright_ratio": {
+          "mean": 0.6794102702822004,
+          "sample_sd": 0.05780764758058997
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.28031195274421145,
+          "sample_sd": 0.05250215257469246
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.03985260733004127,
+          "sample_sd": 0.04521338447307879
+        },
+        "mean_posture_elevation": {
+          "mean": 0.14514601230621338,
+          "sample_sd": 0.00974236030777031
+        },
+        "min_posture_elevation": {
+          "mean": 0.06930744049272367,
+          "sample_sd": 0.027349631083891667
+        },
+        "std_posture_elevation": {
+          "mean": 0.04571483337453434,
+          "sample_sd": 0.005503120015351476
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.39401159967694965,
+          "sample_sd": 0.03391631698907221
+        },
+        "posture_symmetry": {
+          "mean": 0.15600793276514327,
+          "sample_sd": 0.025601639836244885
+        },
+        "student_count_norm": {
+          "mean": 0.6023809569222587,
+          "sample_sd": 0.05563486241088969
+        },
+        "mean_face_visibility": {
+          "mean": 0.7505225624356952,
+          "sample_sd": 0.029746093874354534
+        },
+        "hidden_face_ratio": {
+          "mean": 0.0168214723733919,
+          "sample_sd": 0.03035674794353394
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7407813583101545,
+          "sample_sd": 0.0876600377375483
+        },
+        "single_eye_ratio": {
+          "mean": 0.24264520406723022,
+          "sample_sd": 0.08935331307959701
+        },
+        "median_face_visibility": {
+          "mean": 0.8009310279573713,
+          "sample_sd": 0.041645218074687955
+        },
+        "face_visibility_iqr": {
+          "mean": 0.221002995967865,
+          "sample_sd": 0.04897230457528356
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9897604840142387,
+          "sample_sd": 0.018379254778746263
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.1966652955327715,
+          "sample_sd": 0.08055771798632393
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.24134652316570282,
+          "sample_sd": 0.08162620037273378
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.46014354058674406,
+          "sample_sd": 0.10404550815761478
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.11024144611188344,
+          "sample_sd": 0.08723007334451244
+        },
+        "speaker_in_zone": {
+          "mean": 0.8571428571428571,
+          "sample_sd": 0.27413283189689175
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.1904851347208023,
+          "sample_sd": 0.048935039189447485
+        },
+        "orientation_alignment": {
+          "mean": 0.9661180206707546,
+          "sample_sd": 0.021352028572074504
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04571483337453434,
+          "sample_sd": 0.005503120015351476
+        },
+        "anger": {
+          "mean": 0.0508576753948416,
+          "sample_sd": 0.012737228788276753
+        },
+        "disgust": {
+          "mean": 0.004501485099483814,
+          "sample_sd": 0.00187547524310983
+        },
+        "fear": {
+          "mean": 0.10609602502414159,
+          "sample_sd": 0.02688724875881237
+        },
+        "happiness": {
+          "mean": 0.0593756160565785,
+          "sample_sd": 0.01752868119124926
+        },
+        "sadness": {
+          "mean": 0.6145475421633039,
+          "sample_sd": 0.05167801440947907
+        },
+        "surprise": {
+          "mean": 0.026265416560428485,
+          "sample_sd": 0.015880561486622615
+        },
+        "neutral": {
+          "mean": 0.1383562535047531,
+          "sample_sd": 0.03919694668146529
+        },
+        "affect_reliability": {
+          "mean": 0.5331155104296548,
+          "sample_sd": 0.06558165699960594
+        }
+      }
+    },
+    "M05": {
+      "class": "mid",
+      "clips": 4,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.37101147323846817,
+          "sample_sd": 0.1110325479587471
+        },
+        "lowered_head_ratio": {
+          "mean": 0.41916488111019135,
+          "sample_sd": 0.09964202245798291
+        },
+        "head_turned_ratio": {
+          "mean": 0.4004769027233124,
+          "sample_sd": 0.02783095919400229
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6990896612405777,
+          "sample_sd": 0.04986927210042372
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.6419383659958839,
+          "sample_sd": 0.18403894312142982
+        },
+        "std_orientation_score": {
+          "mean": 0.14569411799311638,
+          "sample_sd": 0.0580254003482702
+        },
+        "min_orientation_score": {
+          "mean": 0.433937169611454,
+          "sample_sd": 0.15575720460803857
+        },
+        "max_orientation_score": {
+          "mean": 0.8700128793716431,
+          "sample_sd": 0.04588633760263638
+        },
+        "upright_ratio": {
+          "mean": 0.6625113040208817,
+          "sample_sd": 0.12117184046743548
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.27616680040955544,
+          "sample_sd": 0.09148884828296029
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.055977183394134045,
+          "sample_sd": 0.049173211420413344
+        },
+        "mean_posture_elevation": {
+          "mean": 0.13585262186825275,
+          "sample_sd": 0.015438685793905362
+        },
+        "min_posture_elevation": {
+          "mean": 0.060269024688750505,
+          "sample_sd": 0.03069841088266896
+        },
+        "std_posture_elevation": {
+          "mean": 0.04479122068732977,
+          "sample_sd": 0.012035146751062644
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.34978510439395905,
+          "sample_sd": 0.07561820753092773
+        },
+        "posture_symmetry": {
+          "mean": 0.22284565679728985,
+          "sample_sd": 0.11499392665978656
+        },
+        "student_count_norm": {
+          "mean": 0.533333346247673,
+          "sample_sd": 0.058134580716638865
+        },
+        "mean_face_visibility": {
+          "mean": 0.7203110009431839,
+          "sample_sd": 0.10417957585889892
+        },
+        "hidden_face_ratio": {
+          "mean": 0.10494792019017041,
+          "sample_sd": 0.11844443778994722
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7139249742031097,
+          "sample_sd": 0.16108575445830617
+        },
+        "single_eye_ratio": {
+          "mean": 0.19163060002028942,
+          "sample_sd": 0.08240191208295043
+        },
+        "median_face_visibility": {
+          "mean": 0.8073055297136307,
+          "sample_sd": 0.08117080460247483
+        },
+        "face_visibility_iqr": {
+          "mean": 0.3186250627040863,
+          "sample_sd": 0.20071868041617982
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9176091402769089,
+          "sample_sd": 0.09132673813263745
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.20617080107331276,
+          "sample_sd": 0.08835575826420627
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.2312868945300579,
+          "sample_sd": 0.1054145678026166
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.4678199514746666,
+          "sample_sd": 0.056861652118354006
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.1306671667844057,
+          "sample_sd": 0.07544762566627443
+        },
+        "speaker_in_zone": {
+          "mean": 0.90625,
+          "sample_sd": 0.11967838846954226
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.14519031764939427,
+          "sample_sd": 0.11602442042352511
+        },
+        "orientation_alignment": {
+          "mean": 0.9127034246921539,
+          "sample_sd": 0.06948027790689973
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04479122068732977,
+          "sample_sd": 0.012035146751062644
+        },
+        "anger": {
+          "mean": 0.04235608782619238,
+          "sample_sd": 0.013974412420666837
+        },
+        "disgust": {
+          "mean": 0.003082315204665065,
+          "sample_sd": 0.0015326994660114976
+        },
+        "fear": {
+          "mean": 0.08696866966784,
+          "sample_sd": 0.004204496064753914
+        },
+        "happiness": {
+          "mean": 0.05947031173855066,
+          "sample_sd": 0.018846116693735725
+        },
+        "sadness": {
+          "mean": 0.6779527515172958,
+          "sample_sd": 0.021581782784764893
+        },
+        "surprise": {
+          "mean": 0.017070132889784873,
+          "sample_sd": 0.008575706388960144
+        },
+        "neutral": {
+          "mean": 0.11309973150491714,
+          "sample_sd": 0.02021604197501313
+        },
+        "affect_reliability": {
+          "mean": 0.44305935502052307,
+          "sample_sd": 0.1259897455975923
+        }
+      }
+    },
+    "L01": {
+      "class": "low",
+      "clips": 28,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.34764562493988443,
+          "sample_sd": 0.13200182550334713
+        },
+        "lowered_head_ratio": {
+          "mean": 0.4305821332548346,
+          "sample_sd": 0.1262685354311062
+        },
+        "head_turned_ratio": {
+          "mean": 0.33094111563903944,
+          "sample_sd": 0.12731557323459602
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6473301436219897,
+          "sample_sd": 0.04116084940197002
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.5258337631821632,
+          "sample_sd": 0.11521583993889874
+        },
+        "std_orientation_score": {
+          "mean": 0.1555996611714363,
+          "sample_sd": 0.02592533228990862
+        },
+        "min_orientation_score": {
+          "mean": 0.3903166191386325,
+          "sample_sd": 0.0734440645962907
+        },
+        "max_orientation_score": {
+          "mean": 0.8375595148120608,
+          "sample_sd": 0.037668234841352906
+        },
+        "upright_ratio": {
+          "mean": 0.6352501511573792,
+          "sample_sd": 0.1151129154391394
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.21911849054907048,
+          "sample_sd": 0.1236464368380632
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.1274432818006192,
+          "sample_sd": 0.05620912531478725
+        },
+        "mean_posture_elevation": {
+          "mean": 0.13252737479550497,
+          "sample_sd": 0.013055606879057375
+        },
+        "min_posture_elevation": {
+          "mean": 0.04229748982990194,
+          "sample_sd": 0.027291044746881092
+        },
+        "std_posture_elevation": {
+          "mean": 0.056156854411321025,
+          "sample_sd": 0.010765415721684508
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.21341048181056976,
+          "sample_sd": 0.04972693283656069
+        },
+        "posture_symmetry": {
+          "mean": 0.3395901074899094,
+          "sample_sd": 0.1266996784769929
+        },
+        "student_count_norm": {
+          "mean": 0.43541668568338665,
+          "sample_sd": 0.04809246930432391
+        },
+        "mean_face_visibility": {
+          "mean": 0.7081888445786068,
+          "sample_sd": 0.07544222607415917
+        },
+        "hidden_face_ratio": {
+          "mean": 0.14516321130629098,
+          "sample_sd": 0.07975340608419068
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7259302373443332,
+          "sample_sd": 0.11973986980036311
+        },
+        "single_eye_ratio": {
+          "mean": 0.12936540546693973,
+          "sample_sd": 0.08827495118263745
+        },
+        "median_face_visibility": {
+          "mean": 0.8016928072486605,
+          "sample_sd": 0.0739011221106395
+        },
+        "face_visibility_iqr": {
+          "mean": 0.2667804014469896,
+          "sample_sd": 0.14108101937960696
+        },
+        "posture_observation_ratio": {
+          "mean": 0.869009154183524,
+          "sample_sd": 0.07190740372600346
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.17322382836469583,
+          "sample_sd": 0.08793495101824049
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.20458607748150826,
+          "sample_sd": 0.10939243939584978
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5436419418879918,
+          "sample_sd": 0.11778229522364468
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.08511727755623204,
+          "sample_sd": 0.06140813014094189
+        },
+        "speaker_in_zone": {
+          "mean": 0.875,
+          "sample_sd": 0.28867513459481287
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.06704527289340538,
+          "sample_sd": 0.062184370945526514
+        },
+        "orientation_alignment": {
+          "mean": 0.956749364733696,
+          "sample_sd": 0.020287397391987264
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.056156854411321025,
+          "sample_sd": 0.010765415721684508
+        },
+        "anger": {
+          "mean": 0.09666804783046246,
+          "sample_sd": 0.03509041624986378
+        },
+        "disgust": {
+          "mean": 0.004342849894393501,
+          "sample_sd": 0.002447445476834305
+        },
+        "fear": {
+          "mean": 0.08254723916096347,
+          "sample_sd": 0.024553759110721024
+        },
+        "happiness": {
+          "mean": 0.15175884177110024,
+          "sample_sd": 0.09329358535618872
+        },
+        "sadness": {
+          "mean": 0.5777722831283297,
+          "sample_sd": 0.08901154363535821
+        },
+        "surprise": {
+          "mean": 0.02295741906190025,
+          "sample_sd": 0.018459238804427514
+        },
+        "neutral": {
+          "mean": 0.0639533292768257,
+          "sample_sd": 0.0229320097170831
+        },
+        "affect_reliability": {
+          "mean": 0.35550066402980257,
+          "sample_sd": 0.06285813877299634
+        }
+      }
+    },
+    "L02": {
+      "class": "low",
+      "clips": 49,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.21919495840461886,
+          "sample_sd": 0.14945134662414936
+        },
+        "lowered_head_ratio": {
+          "mean": 0.6080760329353566,
+          "sample_sd": 0.18677464552840098
+        },
+        "head_turned_ratio": {
+          "mean": 0.4973304569721222,
+          "sample_sd": 0.10421082924473819
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6834073468130462,
+          "sample_sd": 0.05620027345223112
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.578643221027997,
+          "sample_sd": 0.17135511066872097
+        },
+        "std_orientation_score": {
+          "mean": 0.14471663412999133,
+          "sample_sd": 0.027773244735809534
+        },
+        "min_orientation_score": {
+          "mean": 0.45063450020186757,
+          "sample_sd": 0.09239361295275483
+        },
+        "max_orientation_score": {
+          "mean": 0.8790486649591096,
+          "sample_sd": 0.04551413489349865
+        },
+        "upright_ratio": {
+          "mean": 0.47074822093151053,
+          "sample_sd": 0.20615313643024863
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.3344799190075422,
+          "sample_sd": 0.17668086967849916
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.18809183740190097,
+          "sample_sd": 0.10705054013662045
+        },
+        "mean_posture_elevation": {
+          "mean": 0.10869878633137868,
+          "sample_sd": 0.023175284501337517
+        },
+        "min_posture_elevation": {
+          "mean": 0.01945312877128623,
+          "sample_sd": 0.040560523065048704
+        },
+        "std_posture_elevation": {
+          "mean": 0.05018188108747103,
+          "sample_sd": 0.015762473794970578
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.3272287313427244,
+          "sample_sd": 0.08965510763803385
+        },
+        "posture_symmetry": {
+          "mean": 0.23498082708339302,
+          "sample_sd": 0.0645288746252144
+        },
+        "student_count_norm": {
+          "mean": 0.5414966022481724,
+          "sample_sd": 0.07700801332138675
+        },
+        "mean_face_visibility": {
+          "mean": 0.7153031059673854,
+          "sample_sd": 0.062060496856471054
+        },
+        "hidden_face_ratio": {
+          "mean": 0.04453868175647697,
+          "sample_sd": 0.050199131362717045
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7033378615671274,
+          "sample_sd": 0.1170283630194517
+        },
+        "single_eye_ratio": {
+          "mean": 0.25883820432485366,
+          "sample_sd": 0.09715660443982503
+        },
+        "median_face_visibility": {
+          "mean": 0.7526794355742785,
+          "sample_sd": 0.07035712502071834
+        },
+        "face_visibility_iqr": {
+          "mean": 0.26616684636291194,
+          "sample_sd": 0.09357443953043929
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9633320253722522,
+          "sample_sd": 0.042121726698027016
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.11234725293304239,
+          "sample_sd": 0.06321041278760395
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.15299844924284486,
+          "sample_sd": 0.09292036843604869
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.6730416435368207,
+          "sample_sd": 0.11222279864183486
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.04822293686091292,
+          "sample_sd": 0.04185804046786377
+        },
+        "speaker_in_zone": {
+          "mean": 0.9387755102040817,
+          "sample_sd": 0.17139601625403988
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.09026807307132653,
+          "sample_sd": 0.05743376384554915
+        },
+        "orientation_alignment": {
+          "mean": 0.9334552713802883,
+          "sample_sd": 0.08172370235154265
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.05018188108747103,
+          "sample_sd": 0.015762473794970578
+        },
+        "anger": {
+          "mean": 0.06223761218086797,
+          "sample_sd": 0.02611012917084595
+        },
+        "disgust": {
+          "mean": 0.0037159244339837103,
+          "sample_sd": 0.0013284451320856642
+        },
+        "fear": {
+          "mean": 0.07525189167686872,
+          "sample_sd": 0.024348915229343605
+        },
+        "happiness": {
+          "mean": 0.11986677371421639,
+          "sample_sd": 0.06424495585444501
+        },
+        "sadness": {
+          "mean": 0.6239608447162472,
+          "sample_sd": 0.08099220285418342
+        },
+        "surprise": {
+          "mean": 0.02396255186093705,
+          "sample_sd": 0.012792921447074846
+        },
+        "neutral": {
+          "mean": 0.0910044115949042,
+          "sample_sd": 0.042730476172391764
+        },
+        "affect_reliability": {
+          "mean": 0.3578367780665962,
+          "sample_sd": 0.07039520792796679
+        }
+      }
+    },
+    "L03": {
+      "class": "low",
+      "clips": 16,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.33346354123204947,
+          "sample_sd": 0.14843286573215983
+        },
+        "lowered_head_ratio": {
+          "mean": 0.5027405805885792,
+          "sample_sd": 0.12277571369311985
+        },
+        "head_turned_ratio": {
+          "mean": 0.5009125946089625,
+          "sample_sd": 0.14060627122055364
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6854023896157742,
+          "sample_sd": 0.08180662499764833
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.6254112217575312,
+          "sample_sd": 0.2311756361782782
+        },
+        "std_orientation_score": {
+          "mean": 0.12627730472013354,
+          "sample_sd": 0.02854823196387134
+        },
+        "min_orientation_score": {
+          "mean": 0.4732358083128929,
+          "sample_sd": 0.11300924235104698
+        },
+        "max_orientation_score": {
+          "mean": 0.8497983887791634,
+          "sample_sd": 0.0722904013338159
+        },
+        "upright_ratio": {
+          "mean": 0.5833116360008717,
+          "sample_sd": 0.13138834898049961
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.3652343852445483,
+          "sample_sd": 0.09742424348087184
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.04799727234058082,
+          "sample_sd": 0.06504121708612304
+        },
+        "mean_posture_elevation": {
+          "mean": 0.13595440750941634,
+          "sample_sd": 0.022971998901465302
+        },
+        "min_posture_elevation": {
+          "mean": 0.07226232084212825,
+          "sample_sd": 0.03955473258241753
+        },
+        "std_posture_elevation": {
+          "mean": 0.04387526563368738,
+          "sample_sd": 0.010344418311245811
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.306043834425509,
+          "sample_sd": 0.06051059013975429
+        },
+        "posture_symmetry": {
+          "mean": 0.22030094952788204,
+          "sample_sd": 0.09958749361313084
+        },
+        "student_count_norm": {
+          "mean": 0.4755208417773247,
+          "sample_sd": 0.07640466819093401
+        },
+        "mean_face_visibility": {
+          "mean": 0.7381347119808197,
+          "sample_sd": 0.02980716597091236
+        },
+        "hidden_face_ratio": {
+          "mean": 0.05662230687448755,
+          "sample_sd": 0.036557837718344796
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7873351313173771,
+          "sample_sd": 0.05378560488689888
+        },
+        "single_eye_ratio": {
+          "mean": 0.15910246572457254,
+          "sample_sd": 0.07256852983676425
+        },
+        "median_face_visibility": {
+          "mean": 0.8106126226484776,
+          "sample_sd": 0.04262321945289511
+        },
+        "face_visibility_iqr": {
+          "mean": 0.20813532453030348,
+          "sample_sd": 0.03725752184681
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9489425644278526,
+          "sample_sd": 0.03857670579560544
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.19548900751397014,
+          "sample_sd": 0.0862379024444258
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.20885961968451738,
+          "sample_sd": 0.0944614123921122
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.47197730001062155,
+          "sample_sd": 0.1133212265132134
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.1189763150177896,
+          "sample_sd": 0.06473447727954143
+        },
+        "speaker_in_zone": {
+          "mean": 0.71875,
+          "sample_sd": 0.4095220791768538
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.10120394604746252,
+          "sample_sd": 0.08480040146159991
+        },
+        "orientation_alignment": {
+          "mean": 0.922849390655756,
+          "sample_sd": 0.06205437781852247
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04387526563368738,
+          "sample_sd": 0.010344418311245811
+        },
+        "anger": {
+          "mean": 0.0796387666487135,
+          "sample_sd": 0.06044402839123172
+        },
+        "disgust": {
+          "mean": 0.0037556792012765072,
+          "sample_sd": 0.0013021199456343113
+        },
+        "fear": {
+          "mean": 0.07103561901021749,
+          "sample_sd": 0.027762048967680093
+        },
+        "happiness": {
+          "mean": 0.10487787867896259,
+          "sample_sd": 0.057401604821330124
+        },
+        "sadness": {
+          "mean": 0.6554566491395235,
+          "sample_sd": 0.10612035324951367
+        },
+        "surprise": {
+          "mean": 0.019247899414040148,
+          "sample_sd": 0.01043565399589891
+        },
+        "neutral": {
+          "mean": 0.06598753086291254,
+          "sample_sd": 0.01834277936192184
+        },
+        "affect_reliability": {
+          "mean": 0.32106004003435373,
+          "sample_sd": 0.08770932569151227
+        }
+      }
+    },
+    "L04": {
+      "class": "low",
+      "clips": 22,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.27666622163219884,
+          "sample_sd": 0.09972947954742742
+        },
+        "lowered_head_ratio": {
+          "mean": 0.5077696645801718,
+          "sample_sd": 0.16089127514595802
+        },
+        "head_turned_ratio": {
+          "mean": 0.4243100793524222,
+          "sample_sd": 0.12861379135262643
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6436785053123127,
+          "sample_sd": 0.06526813365294494
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.5071812014688145,
+          "sample_sd": 0.14992962742135293
+        },
+        "std_orientation_score": {
+          "mean": 0.14191710576415062,
+          "sample_sd": 0.038088372466531774
+        },
+        "min_orientation_score": {
+          "mean": 0.4214758155020801,
+          "sample_sd": 0.09961910324434198
+        },
+        "max_orientation_score": {
+          "mean": 0.8522029952569441,
+          "sample_sd": 0.06319580913410394
+        },
+        "upright_ratio": {
+          "mean": 0.564763717353344,
+          "sample_sd": 0.17605537347037212
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.3233563375066627,
+          "sample_sd": 0.1392060029153971
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.10565025266259909,
+          "sample_sd": 0.07398541570031862
+        },
+        "mean_posture_elevation": {
+          "mean": 0.12284317646514285,
+          "sample_sd": 0.01928383562822593
+        },
+        "min_posture_elevation": {
+          "mean": 0.038127866687401285,
+          "sample_sd": 0.03315649449031367
+        },
+        "std_posture_elevation": {
+          "mean": 0.049430519342422485,
+          "sample_sd": 0.010417901142162643
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.30511878024448047,
+          "sample_sd": 0.05509036825381504
+        },
+        "posture_symmetry": {
+          "mean": 0.29857954992489383,
+          "sample_sd": 0.062115434075286156
+        },
+        "student_count_norm": {
+          "mean": 0.49166667596860364,
+          "sample_sd": 0.04762896599583827
+        },
+        "mean_face_visibility": {
+          "mean": 0.7287349213253368,
+          "sample_sd": 0.08559089259147114
+        },
+        "hidden_face_ratio": {
+          "mean": 0.06712662394751202,
+          "sample_sd": 0.08051588300391163
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7568249580535021,
+          "sample_sd": 0.14773466995022527
+        },
+        "single_eye_ratio": {
+          "mean": 0.1857999706302177,
+          "sample_sd": 0.10884601850483058
+        },
+        "median_face_visibility": {
+          "mean": 0.788216542113911,
+          "sample_sd": 0.09668719653885233
+        },
+        "face_visibility_iqr": {
+          "mean": 0.24766533652489836,
+          "sample_sd": 0.12047470558497078
+        },
+        "posture_observation_ratio": {
+          "mean": 0.940108678557656,
+          "sample_sd": 0.07577822863441461
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.2066207372329452,
+          "sample_sd": 0.09049766618535804
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.24219284308227626,
+          "sample_sd": 0.11121261182301484
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.49625046144832263,
+          "sample_sd": 0.10981804365112757
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.11422709595750678,
+          "sample_sd": 0.07306916795487658
+        },
+        "speaker_in_zone": {
+          "mean": 0.8920454545454546,
+          "sample_sd": 0.28424779218018104
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.07699702447280288,
+          "sample_sd": 0.055117604528628156
+        },
+        "orientation_alignment": {
+          "mean": 0.9384751943024722,
+          "sample_sd": 0.046184918818809706
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.049430519342422485,
+          "sample_sd": 0.010417901142162643
+        },
+        "anger": {
+          "mean": 0.05941463304175572,
+          "sample_sd": 0.02902488032739302
+        },
+        "disgust": {
+          "mean": 0.004473140367984094,
+          "sample_sd": 0.002780106888664352
+        },
+        "fear": {
+          "mean": 0.08922305737029422,
+          "sample_sd": 0.04073897033251199
+        },
+        "happiness": {
+          "mean": 0.0936040836809711,
+          "sample_sd": 0.04250121779780047
+        },
+        "sadness": {
+          "mean": 0.6201381019570611,
+          "sample_sd": 0.08704056251017142
+        },
+        "surprise": {
+          "mean": 0.020500042412260718,
+          "sample_sd": 0.014599941232374644
+        },
+        "neutral": {
+          "mean": 0.10128331946378405,
+          "sample_sd": 0.02847263123177683
+        },
+        "affect_reliability": {
+          "mean": 0.32545161044055765,
+          "sample_sd": 0.09485413112161253
+        }
+      }
+    },
+    "L05": {
+      "class": "low",
+      "clips": 6,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.2581101233760516,
+          "sample_sd": 0.10972998510607992
+        },
+        "lowered_head_ratio": {
+          "mean": 0.465137243270874,
+          "sample_sd": 0.08275348819968238
+        },
+        "head_turned_ratio": {
+          "mean": 0.49463458359241486,
+          "sample_sd": 0.0882574453629431
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7129962742328644,
+          "sample_sd": 0.03347095950897773
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.7477099994818369,
+          "sample_sd": 0.09112573884021022
+        },
+        "std_orientation_score": {
+          "mean": 0.11334803824623425,
+          "sample_sd": 0.02138579857969055
+        },
+        "min_orientation_score": {
+          "mean": 0.4817129224538803,
+          "sample_sd": 0.0383266791244617
+        },
+        "max_orientation_score": {
+          "mean": 0.8378016451994578,
+          "sample_sd": 0.04321520920221566
+        },
+        "upright_ratio": {
+          "mean": 0.6437582870324453,
+          "sample_sd": 0.09299442796923013
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.28537534177303314,
+          "sample_sd": 0.11242589386278469
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.07049437891691923,
+          "sample_sd": 0.060101573447763526
+        },
+        "mean_posture_elevation": {
+          "mean": 0.1310619736711184,
+          "sample_sd": 0.004528018954020012
+        },
+        "min_posture_elevation": {
+          "mean": 0.06624046557893355,
+          "sample_sd": 0.027119915632584497
+        },
+        "std_posture_elevation": {
+          "mean": 0.03794831161697706,
+          "sample_sd": 0.011552716486640854
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.3057133952776591,
+          "sample_sd": 0.04715732886763885
+        },
+        "posture_symmetry": {
+          "mean": 0.2542080109318097,
+          "sample_sd": 0.08446720154325063
+        },
+        "student_count_norm": {
+          "mean": 0.483333354194959,
+          "sample_sd": 0.05137011701371512
+        },
+        "mean_face_visibility": {
+          "mean": 0.7371161977450053,
+          "sample_sd": 0.023518374561775877
+        },
+        "hidden_face_ratio": {
+          "mean": 0.036416998133063316,
+          "sample_sd": 0.024365924837876248
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.8072751462459564,
+          "sample_sd": 0.06387081712023228
+        },
+        "single_eye_ratio": {
+          "mean": 0.18156415720780691,
+          "sample_sd": 0.06109981750406141
+        },
+        "median_face_visibility": {
+          "mean": 0.7754562894503275,
+          "sample_sd": 0.02078823906017392
+        },
+        "face_visibility_iqr": {
+          "mean": 0.19302446643511453,
+          "sample_sd": 0.07656518385690138
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9745783706506094,
+          "sample_sd": 0.020551963886857528
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.1233695497115453,
+          "sample_sd": 0.03736491201667363
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.12681874011953673,
+          "sample_sd": 0.04766605742476883
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5553075472513834,
+          "sample_sd": 0.09851562438498287
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.05729166821887096,
+          "sample_sd": 0.031391403411448325
+        },
+        "speaker_in_zone": {
+          "mean": 1.0,
+          "sample_sd": 0.0
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.10174233466386795,
+          "sample_sd": 0.06730740586162895
+        },
+        "orientation_alignment": {
+          "mean": 0.9446157316366831,
+          "sample_sd": 0.02064865217227838
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.03794831161697706,
+          "sample_sd": 0.011552716486640854
+        },
+        "anger": {
+          "mean": 0.055678442430992924,
+          "sample_sd": 0.018645929206775932
+        },
+        "disgust": {
+          "mean": 0.0035232779337093234,
+          "sample_sd": 0.001178804275919865
+        },
+        "fear": {
+          "mean": 0.10268975545962651,
+          "sample_sd": 0.028951697681860202
+        },
+        "happiness": {
+          "mean": 0.05783953362454971,
+          "sample_sd": 0.03330788720928355
+        },
+        "sadness": {
+          "mean": 0.6524534126122793,
+          "sample_sd": 0.10784834410720114
+        },
+        "surprise": {
+          "mean": 0.03180012246593833,
+          "sample_sd": 0.02572010478884916
+        },
+        "neutral": {
+          "mean": 0.09601546575625737,
+          "sample_sd": 0.07119369314988662
+        },
+        "affect_reliability": {
+          "mean": 0.3948395798603694,
+          "sample_sd": 0.0442067418231474
+        }
+      }
+    },
+    "L06": {
+      "class": "low",
+      "clips": 11,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.21544094823978163,
+          "sample_sd": 0.14627542330554708
+        },
+        "lowered_head_ratio": {
+          "mean": 0.6426521729339253,
+          "sample_sd": 0.17792342808189845
+        },
+        "head_turned_ratio": {
+          "mean": 0.4220844967798753,
+          "sample_sd": 0.1068136565070992
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.5945663235404275,
+          "sample_sd": 0.04714870040821246
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.387231089852073,
+          "sample_sd": 0.11361704741423682
+        },
+        "std_orientation_score": {
+          "mean": 0.14524492824619467,
+          "sample_sd": 0.02903721213011959
+        },
+        "min_orientation_score": {
+          "mean": 0.36225500160997565,
+          "sample_sd": 0.10577104726236056
+        },
+        "max_orientation_score": {
+          "mean": 0.7920562679117377,
+          "sample_sd": 0.031859847561587815
+        },
+        "upright_ratio": {
+          "mean": 0.4219947118650783,
+          "sample_sd": 0.2061789945463124
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.3672627318989147,
+          "sample_sd": 0.1514912539572373
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.19500484131276608,
+          "sample_sd": 0.11434786339341826
+        },
+        "mean_posture_elevation": {
+          "mean": 0.09840552102435719,
+          "sample_sd": 0.02858860266455748
+        },
+        "min_posture_elevation": {
+          "mean": -0.016460989009250294,
+          "sample_sd": 0.07593114577797554
+        },
+        "std_posture_elevation": {
+          "mean": 0.06260757453062317,
+          "sample_sd": 0.023107664990166903
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.37547233971682464,
+          "sample_sd": 0.0974007945217134
+        },
+        "posture_symmetry": {
+          "mean": 0.24313919313929297,
+          "sample_sd": 0.12924489986459364
+        },
+        "student_count_norm": {
+          "mean": 0.4575757682323456,
+          "sample_sd": 0.06966730330196627
+        },
+        "mean_face_visibility": {
+          "mean": 0.66076183590022,
+          "sample_sd": 0.08872809587107804
+        },
+        "hidden_face_ratio": {
+          "mean": 0.10587121614001015,
+          "sample_sd": 0.108640221261995
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.6339630132371729,
+          "sample_sd": 0.1428611101878825
+        },
+        "single_eye_ratio": {
+          "mean": 0.2716376496986909,
+          "sample_sd": 0.11016090273820718
+        },
+        "median_face_visibility": {
+          "mean": 0.7170797207138755,
+          "sample_sd": 0.11544900185064196
+        },
+        "face_visibility_iqr": {
+          "mean": 0.3028848171234131,
+          "sample_sd": 0.10405275195924457
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9105519543994557,
+          "sample_sd": 0.10350518295636647
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.17989059334451502,
+          "sample_sd": 0.07986325019669191
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.1919989680702036,
+          "sample_sd": 0.09010223067002794
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.47296176986260846,
+          "sample_sd": 0.14972373814708187
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.08115981468422846,
+          "sample_sd": 0.047983193819186594
+        },
+        "speaker_in_zone": {
+          "mean": 0.9772727272727273,
+          "sample_sd": 0.07537783614444091
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.185444320298054,
+          "sample_sd": 0.09643034260570267
+        },
+        "orientation_alignment": {
+          "mean": 0.8705337535251271,
+          "sample_sd": 0.09506745545453787
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.06260757453062317,
+          "sample_sd": 0.023107664990166903
+        },
+        "anger": {
+          "mean": 0.04288461584259163,
+          "sample_sd": 0.023827564331352555
+        },
+        "disgust": {
+          "mean": 0.004507393893701109,
+          "sample_sd": 0.0032946341353640627
+        },
+        "fear": {
+          "mean": 0.07609657164324414,
+          "sample_sd": 0.024603176692095118
+        },
+        "happiness": {
+          "mean": 0.06730560043996031,
+          "sample_sd": 0.0366791372236048
+        },
+        "sadness": {
+          "mean": 0.6914426955309781,
+          "sample_sd": 0.09550105119586759
+        },
+        "surprise": {
+          "mean": 0.022376206280155617,
+          "sample_sd": 0.015441443208611795
+        },
+        "neutral": {
+          "mean": 0.0953869027170268,
+          "sample_sd": 0.044826080125647066
+        },
+        "affect_reliability": {
+          "mean": 0.2694984715093266,
+          "sample_sd": 0.08039294431201624
+        }
+      }
+    },
+    "L07": {
+      "class": "low",
+      "clips": 3,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.2706845353047053,
+          "sample_sd": 0.16214933945386562
+        },
+        "lowered_head_ratio": {
+          "mean": 0.6206845641136169,
+          "sample_sd": 0.1397843035642812
+        },
+        "head_turned_ratio": {
+          "mean": 0.37212303280830383,
+          "sample_sd": 0.07204120389493757
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6085237463315328,
+          "sample_sd": 0.031732187167539894
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.4154762128988902,
+          "sample_sd": 0.06946853716780999
+        },
+        "std_orientation_score": {
+          "mean": 0.13812288890282312,
+          "sample_sd": 0.015994156726017287
+        },
+        "min_orientation_score": {
+          "mean": 0.4023448129494985,
+          "sample_sd": 0.030108424648847568
+        },
+        "max_orientation_score": {
+          "mean": 0.7861703236897787,
+          "sample_sd": 0.03520150377893211
+        },
+        "upright_ratio": {
+          "mean": 0.41309523582458496,
+          "sample_sd": 0.11425471362879475
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.32400794327259064,
+          "sample_sd": 0.08787443462783909
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.2519841343164444,
+          "sample_sd": 0.062228258711062565
+        },
+        "mean_posture_elevation": {
+          "mean": 0.09274693826834361,
+          "sample_sd": 0.014150705032210767
+        },
+        "min_posture_elevation": {
+          "mean": -0.04750691757847866,
+          "sample_sd": 0.0409852231450364
+        },
+        "std_posture_elevation": {
+          "mean": 0.08321644614140193,
+          "sample_sd": 0.012454153591736745
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.32264163096745807,
+          "sample_sd": 0.03741057501129784
+        },
+        "posture_symmetry": {
+          "mean": 0.2540674606959025,
+          "sample_sd": 0.056016525888191566
+        },
+        "student_count_norm": {
+          "mean": 0.42500002185503644,
+          "sample_sd": 0.025000005960470396
+        },
+        "mean_face_visibility": {
+          "mean": 0.7509106596310934,
+          "sample_sd": 0.07265175672869185
+        },
+        "hidden_face_ratio": {
+          "mean": 0.05183532151083151,
+          "sample_sd": 0.030860792805126366
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7587301929791769,
+          "sample_sd": 0.11301858165885996
+        },
+        "single_eye_ratio": {
+          "mean": 0.19637896617253622,
+          "sample_sd": 0.10765444690745093
+        },
+        "median_face_visibility": {
+          "mean": 0.8149884939193726,
+          "sample_sd": 0.08704262948968149
+        },
+        "face_visibility_iqr": {
+          "mean": 0.20245064298311868,
+          "sample_sd": 0.08740478342005001
+        },
+        "posture_observation_ratio": {
+          "mean": 0.948164681593577,
+          "sample_sd": 0.030860795686724757
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.14890931298335394,
+          "sample_sd": 0.05477245098809759
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.16623874505360922,
+          "sample_sd": 0.07575168557064356
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5279761950174967,
+          "sample_sd": 0.1068895820052279
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.07619048096239567,
+          "sample_sd": 0.05215386883176145
+        },
+        "speaker_in_zone": {
+          "mean": 0.8333333333333334,
+          "sample_sd": 0.19094065395649332
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.24711200594902039,
+          "sample_sd": 0.07681631495398321
+        },
+        "orientation_alignment": {
+          "mean": 0.8818194071451823,
+          "sample_sd": 0.043057068619429505
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.08321644614140193,
+          "sample_sd": 0.012454153591736745
+        },
+        "anger": {
+          "mean": 0.04785463338096937,
+          "sample_sd": 0.0260582734500022
+        },
+        "disgust": {
+          "mean": 0.003608541485543052,
+          "sample_sd": 0.0008712818647642415
+        },
+        "fear": {
+          "mean": 0.05852289249499639,
+          "sample_sd": 0.03264499803268288
+        },
+        "happiness": {
+          "mean": 0.0648526797691981,
+          "sample_sd": 0.0379450094336181
+        },
+        "sadness": {
+          "mean": 0.7083693146705627,
+          "sample_sd": 0.05708451840356119
+        },
+        "surprise": {
+          "mean": 0.027419821980098884,
+          "sample_sd": 0.026879310823561178
+        },
+        "neutral": {
+          "mean": 0.08937211831410725,
+          "sample_sd": 0.03543696808561245
+        },
+        "affect_reliability": {
+          "mean": 0.28835366169611615,
+          "sample_sd": 0.07054432514931297
+        }
+      }
+    },
+    "L08": {
+      "class": "low",
+      "clips": 2,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.28420141339302063,
+          "sample_sd": 0.11613248005813019
+        },
+        "lowered_head_ratio": {
+          "mean": 0.5947916507720947,
+          "sample_sd": 0.1492780682794011
+        },
+        "head_turned_ratio": {
+          "mean": 0.4739583283662796,
+          "sample_sd": 0.023079171702656207
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6813424229621887,
+          "sample_sd": 0.06984297566025187
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.6555555313825607,
+          "sample_sd": 0.2317738861108357
+        },
+        "std_orientation_score": {
+          "mean": 0.10964812710881233,
+          "sample_sd": 0.026617183632547142
+        },
+        "min_orientation_score": {
+          "mean": 0.47116783261299133,
+          "sample_sd": 0.11308205975030572
+        },
+        "max_orientation_score": {
+          "mean": 0.8199478983879089,
+          "sample_sd": 0.03642827981123891
+        },
+        "upright_ratio": {
+          "mean": 0.4409722238779068,
+          "sample_sd": 0.13601982877620789
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.4020833373069763,
+          "sample_sd": 0.015222430157770663
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.15173611789941788,
+          "sample_sd": 0.11343172054226422
+        },
+        "mean_posture_elevation": {
+          "mean": 0.1146361492574215,
+          "sample_sd": 0.025187278039830167
+        },
+        "min_posture_elevation": {
+          "mean": 0.02069409191608429,
+          "sample_sd": 0.06084581415164643
+        },
+        "std_posture_elevation": {
+          "mean": 0.051948659121990204,
+          "sample_sd": 0.012595385479950255
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.3517255485057831,
+          "sample_sd": 0.03089958266412536
+        },
+        "posture_symmetry": {
+          "mean": 0.237847238779068,
+          "sample_sd": 0.06334498529108479
+        },
+        "student_count_norm": {
+          "mean": 0.6041666269302368,
+          "sample_sd": 0.0058925508903080945
+        },
+        "mean_face_visibility": {
+          "mean": 0.8050395548343658,
+          "sample_sd": 0.011446789027619243
+        },
+        "hidden_face_ratio": {
+          "mean": 0.02083333395421505,
+          "sample_sd": 0.029462783427498824
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.8420138955116272,
+          "sample_sd": 0.06727336660023968
+        },
+        "single_eye_ratio": {
+          "mean": 0.1440972276031971,
+          "sample_sd": 0.04763149693295763
+        },
+        "median_face_visibility": {
+          "mean": 0.875972181558609,
+          "sample_sd": 0.0011835256530344153
+        },
+        "face_visibility_iqr": {
+          "mean": 0.1520649492740631,
+          "sample_sd": 0.013464906574866382
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9791666567325592,
+          "sample_sd": 0.029462796598388984
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.1180838868021965,
+          "sample_sd": 0.0027204631675448046
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.11732592433691025,
+          "sample_sd": 0.03231071183583073
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5047122836112976,
+          "sample_sd": 0.11118692670701337
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.03559027798473835,
+          "sample_sd": 0.028235166902565948
+        },
+        "speaker_in_zone": {
+          "mean": 1.0,
+          "sample_sd": 0.0
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.22405561432242393,
+          "sample_sd": 0.2430749576780846
+        },
+        "orientation_alignment": {
+          "mean": 0.9292173981666565,
+          "sample_sd": 0.06373395855599183
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.051948659121990204,
+          "sample_sd": 0.012595385479950255
+        },
+        "anger": {
+          "mean": 0.0721837468445301,
+          "sample_sd": 0.00036336378608060904
+        },
+        "disgust": {
+          "mean": 0.004302237881347537,
+          "sample_sd": 0.0008053528473305449
+        },
+        "fear": {
+          "mean": 0.08701283857226372,
+          "sample_sd": 0.0029194437077207994
+        },
+        "happiness": {
+          "mean": 0.0655986238270998,
+          "sample_sd": 0.03839513361980664
+        },
+        "sadness": {
+          "mean": 0.6557899415493011,
+          "sample_sd": 0.04181679654020522
+        },
+        "surprise": {
+          "mean": 0.01965222228318453,
+          "sample_sd": 0.0024635162226871554
+        },
+        "neutral": {
+          "mean": 0.0954604223370552,
+          "sample_sd": 0.0034356635766382934
+        },
+        "affect_reliability": {
+          "mean": 0.44304080307483673,
+          "sample_sd": 0.08383646693571763
+        }
+      }
+    },
+    "L09": {
+      "class": "low",
+      "clips": 22,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.2770486982031302,
+          "sample_sd": 0.13518660286017287
+        },
+        "lowered_head_ratio": {
+          "mean": 0.530439552935687,
+          "sample_sd": 0.1636596516136181
+        },
+        "head_turned_ratio": {
+          "mean": 0.44395354051481595,
+          "sample_sd": 0.11160828581720965
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6671740141781893,
+          "sample_sd": 0.05558911290395184
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.5431830503723838,
+          "sample_sd": 0.14529302447838577
+        },
+        "std_orientation_score": {
+          "mean": 0.1510660390962254,
+          "sample_sd": 0.017433253566979424
+        },
+        "min_orientation_score": {
+          "mean": 0.42153349925171246,
+          "sample_sd": 0.0742742120858021
+        },
+        "max_orientation_score": {
+          "mean": 0.8612644591114738,
+          "sample_sd": 0.05610357280530894
+        },
+        "upright_ratio": {
+          "mean": 0.5364667373624715,
+          "sample_sd": 0.18038894026879768
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.28086629476059566,
+          "sample_sd": 0.1553802743136495
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.1711748211898587,
+          "sample_sd": 0.09983418784575004
+        },
+        "mean_posture_elevation": {
+          "mean": 0.1154061190106652,
+          "sample_sd": 0.020137031175794348
+        },
+        "min_posture_elevation": {
+          "mean": 0.023713709257373757,
+          "sample_sd": 0.0372589021658731
+        },
+        "std_posture_elevation": {
+          "mean": 0.054053769785572185,
+          "sample_sd": 0.013837146827278993
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.2922592020847581,
+          "sample_sd": 0.07579872000730419
+        },
+        "posture_symmetry": {
+          "mean": 0.2526502859863368,
+          "sample_sd": 0.0882340816288316
+        },
+        "student_count_norm": {
+          "mean": 0.4662878851998936,
+          "sample_sd": 0.0849633056382657
+        },
+        "mean_face_visibility": {
+          "mean": 0.7103774547576904,
+          "sample_sd": 0.04734918497346437
+        },
+        "hidden_face_ratio": {
+          "mean": 0.07624233471737667,
+          "sample_sd": 0.058647390843655486
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.6950403235175393,
+          "sample_sd": 0.08967293518220892
+        },
+        "single_eye_ratio": {
+          "mean": 0.23834940570999275,
+          "sample_sd": 0.10050192012986692
+        },
+        "median_face_visibility": {
+          "mean": 0.7713331444696947,
+          "sample_sd": 0.05982668746552326
+        },
+        "face_visibility_iqr": {
+          "mean": 0.27335850217125635,
+          "sample_sd": 0.07662365037487161
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9346049888567491,
+          "sample_sd": 0.05742516931955692
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.23566130684180694,
+          "sample_sd": 0.07429916838024272
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.26614064249125396,
+          "sample_sd": 0.09049038978739457
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.44647551802071656,
+          "sample_sd": 0.10893824295302276
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.15285894952037118,
+          "sample_sd": 0.0692550838649143
+        },
+        "speaker_in_zone": {
+          "mean": 0.8636363636363636,
+          "sample_sd": 0.2556186790727726
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.2224790235473351,
+          "sample_sd": 0.12747622644747997
+        },
+        "orientation_alignment": {
+          "mean": 0.9449222006581046,
+          "sample_sd": 0.03241229872798512
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.054053769785572185,
+          "sample_sd": 0.013837146827278993
+        },
+        "anger": {
+          "mean": 0.0754568109458143,
+          "sample_sd": 0.03189716044088562
+        },
+        "disgust": {
+          "mean": 0.004280549257104708,
+          "sample_sd": 0.001344220529052771
+        },
+        "fear": {
+          "mean": 0.0753488169813698,
+          "sample_sd": 0.025153813486144073
+        },
+        "happiness": {
+          "mean": 0.11879124102944677,
+          "sample_sd": 0.045837864466996225
+        },
+        "sadness": {
+          "mean": 0.6305554454976862,
+          "sample_sd": 0.07497937486468403
+        },
+        "surprise": {
+          "mean": 0.01940401033921675,
+          "sample_sd": 0.008562608373081692
+        },
+        "neutral": {
+          "mean": 0.07616314342753454,
+          "sample_sd": 0.02262897370532235
+        },
+        "affect_reliability": {
+          "mean": 0.3464098640463569,
+          "sample_sd": 0.0456694764248472
+        }
+      }
+    },
+    "H01": {
+      "class": "high",
+      "clips": 13,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.6613650413659903,
+          "sample_sd": 0.05950277708259486
+        },
+        "lowered_head_ratio": {
+          "mean": 0.19267087085888937,
+          "sample_sd": 0.05528951947787036
+        },
+        "head_turned_ratio": {
+          "mean": 0.5541337178303645,
+          "sample_sd": 0.09348607199111487
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7379834239299481,
+          "sample_sd": 0.0449084540665188
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.8160051932701697,
+          "sample_sd": 0.13418927586333826
+        },
+        "std_orientation_score": {
+          "mean": 0.09960056497500493,
+          "sample_sd": 0.02900213341374408
+        },
+        "min_orientation_score": {
+          "mean": 0.5499056187959818,
+          "sample_sd": 0.10925212409370753
+        },
+        "max_orientation_score": {
+          "mean": 0.8619024799420283,
+          "sample_sd": 0.03147283662642129
+        },
+        "upright_ratio": {
+          "mean": 0.8841953323437617,
+          "sample_sd": 0.056966703206377985
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.11580468399020341,
+          "sample_sd": 0.056966701388681436
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "mean_posture_elevation": {
+          "mean": 0.173367175918359,
+          "sample_sd": 0.008190034782778261
+        },
+        "min_posture_elevation": {
+          "mean": 0.11300575675872657,
+          "sample_sd": 0.008671424759472699
+        },
+        "std_posture_elevation": {
+          "mean": 0.04018797696782993,
+          "sample_sd": 0.004947882980231556
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.34890971733973575,
+          "sample_sd": 0.06467508288271843
+        },
+        "posture_symmetry": {
+          "mean": 0.18890520185232162,
+          "sample_sd": 0.061978530056322464
+        },
+        "student_count_norm": {
+          "mean": 0.5243589901007139,
+          "sample_sd": 0.034268400708319866
+        },
+        "mean_face_visibility": {
+          "mean": 0.7758194987590497,
+          "sample_sd": 0.03649548805917445
+        },
+        "hidden_face_ratio": {
+          "mean": 0.020597111577024825,
+          "sample_sd": 0.025777634932804914
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.8081869712242713,
+          "sample_sd": 0.07158633982958344
+        },
+        "single_eye_ratio": {
+          "mean": 0.17605797545267984,
+          "sample_sd": 0.06298644423702777
+        },
+        "median_face_visibility": {
+          "mean": 0.8232775697341332,
+          "sample_sd": 0.04330090085750995
+        },
+        "face_visibility_iqr": {
+          "mean": 0.18072413481198824,
+          "sample_sd": 0.04564070241839186
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9831116841389582,
+          "sample_sd": 0.021055621335524403
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.1993886467355948,
+          "sample_sd": 0.07167475355597028
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.21878021439680687,
+          "sample_sd": 0.075642339171862
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.4435287026258615,
+          "sample_sd": 0.10345407901509251
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.11417887732386589,
+          "sample_sd": 0.04567832969240263
+        },
+        "speaker_in_zone": {
+          "mean": 1.0,
+          "sample_sd": 0.0
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.09241970356267232,
+          "sample_sd": 0.054263932605694815
+        },
+        "orientation_alignment": {
+          "mean": 0.9525447166883029,
+          "sample_sd": 0.030163960763881423
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04018797696782993,
+          "sample_sd": 0.004947882980231556
+        },
+        "anger": {
+          "mean": 0.09183789159242924,
+          "sample_sd": 0.0178458272363071
+        },
+        "disgust": {
+          "mean": 0.0074315156715993695,
+          "sample_sd": 0.0045840383165856305
+        },
+        "fear": {
+          "mean": 0.08329547282594901,
+          "sample_sd": 0.01575503611511914
+        },
+        "happiness": {
+          "mean": 0.13516422017262533,
+          "sample_sd": 0.07092099795653647
+        },
+        "sadness": {
+          "mean": 0.5274197184122525,
+          "sample_sd": 0.08494168101385312
+        },
+        "surprise": {
+          "mean": 0.04772436489852575,
+          "sample_sd": 0.0165783164215764
+        },
+        "neutral": {
+          "mean": 0.10712682713682835,
+          "sample_sd": 0.02501129994798606
+        },
+        "affect_reliability": {
+          "mean": 0.5677471390137305,
+          "sample_sd": 0.05559228783625199
+        }
+      }
+    },
+    "H02": {
+      "class": "high",
+      "clips": 5,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.24195437133312225,
+          "sample_sd": 0.12482658655892487
+        },
+        "lowered_head_ratio": {
+          "mean": 0.5477182507514954,
+          "sample_sd": 0.18891630017151848
+        },
+        "head_turned_ratio": {
+          "mean": 0.5545634984970093,
+          "sample_sd": 0.017977300505347113
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.6734381794929505,
+          "sample_sd": 0.040667564203393625
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.5582738220691681,
+          "sample_sd": 0.11193265485596415
+        },
+        "std_orientation_score": {
+          "mean": 0.13841146230697632,
+          "sample_sd": 0.004366201735614091
+        },
+        "min_orientation_score": {
+          "mean": 0.45790268778800963,
+          "sample_sd": 0.04632144351823061
+        },
+        "max_orientation_score": {
+          "mean": 0.8525729894638061,
+          "sample_sd": 0.032889554476884374
+        },
+        "upright_ratio": {
+          "mean": 0.5282738149166107,
+          "sample_sd": 0.21521749237926865
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.2709821477532387,
+          "sample_sd": 0.11706778289708167
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.19781746119260787,
+          "sample_sd": 0.12890487609724297
+        },
+        "mean_posture_elevation": {
+          "mean": 0.10969912409782409,
+          "sample_sd": 0.029149910028521638
+        },
+        "min_posture_elevation": {
+          "mean": 0.010812811926007271,
+          "sample_sd": 0.05973776905324288
+        },
+        "std_posture_elevation": {
+          "mean": 0.05483255125582218,
+          "sample_sd": 0.016887151209916716
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.37833245992660525,
+          "sample_sd": 0.036015524300343875
+        },
+        "posture_symmetry": {
+          "mean": 0.1502380922436714,
+          "sample_sd": 0.06491323928860657
+        },
+        "student_count_norm": {
+          "mean": 0.5283333599567414,
+          "sample_sd": 0.04472132995072089
+        },
+        "mean_face_visibility": {
+          "mean": 0.7577561140060425,
+          "sample_sd": 0.015546077222302628
+        },
+        "hidden_face_ratio": {
+          "mean": 0.028224206157028676,
+          "sample_sd": 0.02141743064016905
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7871031880378723,
+          "sample_sd": 0.03787852401285078
+        },
+        "single_eye_ratio": {
+          "mean": 0.19300595223903655,
+          "sample_sd": 0.0501714099818041
+        },
+        "median_face_visibility": {
+          "mean": 0.8137237548828125,
+          "sample_sd": 0.03322786350443789
+        },
+        "face_visibility_iqr": {
+          "mean": 0.20105697214603424,
+          "sample_sd": 0.04198997146830157
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9745535731315613,
+          "sample_sd": 0.01811500577434027
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.16227824687957765,
+          "sample_sd": 0.026508278414618006
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.1728070557117462,
+          "sample_sd": 0.03536768518712357
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.4701884865760803,
+          "sample_sd": 0.10399266868483995
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.09568452388048172,
+          "sample_sd": 0.04017757532929867
+        },
+        "speaker_in_zone": {
+          "mean": 0.775,
+          "sample_sd": 0.33541019662496846
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.12008377611637115,
+          "sample_sd": 0.0704252192366512
+        },
+        "orientation_alignment": {
+          "mean": 0.9668933272361755,
+          "sample_sd": 0.011157961065008914
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.05483255125582218,
+          "sample_sd": 0.016887151209916716
+        },
+        "anger": {
+          "mean": 0.06976562142372131,
+          "sample_sd": 0.03026364605712588
+        },
+        "disgust": {
+          "mean": 0.0036935496143996717,
+          "sample_sd": 0.0022913582544312502
+        },
+        "fear": {
+          "mean": 0.0632297471165657,
+          "sample_sd": 0.008990932307107048
+        },
+        "happiness": {
+          "mean": 0.06761288046836852,
+          "sample_sd": 0.020093944385358872
+        },
+        "sadness": {
+          "mean": 0.6982786417007446,
+          "sample_sd": 0.03749376434323189
+        },
+        "surprise": {
+          "mean": 0.01615722440183163,
+          "sample_sd": 0.009662839347117041
+        },
+        "neutral": {
+          "mean": 0.08126234710216522,
+          "sample_sd": 0.014885185475811845
+        },
+        "affect_reliability": {
+          "mean": 0.37326291799545286,
+          "sample_sd": 0.05841515398139406
+        }
+      }
+    },
+    "H03": {
+      "class": "high",
+      "clips": 5,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.6257151782512664,
+          "sample_sd": 0.11423787230564392
+        },
+        "lowered_head_ratio": {
+          "mean": 0.2008865475654602,
+          "sample_sd": 0.07173533374541072
+        },
+        "head_turned_ratio": {
+          "mean": 0.6242289066314697,
+          "sample_sd": 0.11141144930041799
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7380176305770874,
+          "sample_sd": 0.028308159109246205
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.8388636350631714,
+          "sample_sd": 0.06416502467172952
+        },
+        "std_orientation_score": {
+          "mean": 0.09129438549280167,
+          "sample_sd": 0.02215966337778916
+        },
+        "min_orientation_score": {
+          "mean": 0.5629047513008117,
+          "sample_sd": 0.08658809075872975
+        },
+        "max_orientation_score": {
+          "mean": 0.8528009414672851,
+          "sample_sd": 0.03395143323548861
+        },
+        "upright_ratio": {
+          "mean": 0.8666242718696594,
+          "sample_sd": 0.09709006717665598
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.13337572515010834,
+          "sample_sd": 0.09709007044234684
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.0,
+          "sample_sd": 0.0
+        },
+        "mean_posture_elevation": {
+          "mean": 0.17350807785987854,
+          "sample_sd": 0.013618089544228518
+        },
+        "min_posture_elevation": {
+          "mean": 0.10985249429941177,
+          "sample_sd": 0.01183154804793575
+        },
+        "std_posture_elevation": {
+          "mean": 0.04379639476537704,
+          "sample_sd": 0.005195870344904189
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.36152292490005494,
+          "sample_sd": 0.030222461542111896
+        },
+        "posture_symmetry": {
+          "mean": 0.15699495524168014,
+          "sample_sd": 0.07379710725871318
+        },
+        "student_count_norm": {
+          "mean": 0.5666666746139526,
+          "sample_sd": 0.03584300162124715
+        },
+        "mean_face_visibility": {
+          "mean": 0.7714303255081176,
+          "sample_sd": 0.026317830432016864
+        },
+        "hidden_face_ratio": {
+          "mean": 0.017876983806490897,
+          "sample_sd": 0.026075459101206438
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.849470579624176,
+          "sample_sd": 0.05562132294134802
+        },
+        "single_eye_ratio": {
+          "mean": 0.13577741980552674,
+          "sample_sd": 0.0528300803822224
+        },
+        "median_face_visibility": {
+          "mean": 0.8052054286003113,
+          "sample_sd": 0.03363057583613374
+        },
+        "face_visibility_iqr": {
+          "mean": 0.1412426307797432,
+          "sample_sd": 0.020976281111872982
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9888194441795349,
+          "sample_sd": 0.012198329870400143
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.15262989178299904,
+          "sample_sd": 0.09376299207109463
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.18137845918536186,
+          "sample_sd": 0.10784121752368905
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.5478670537471771,
+          "sample_sd": 0.14334189339109327
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.06797619313001632,
+          "sample_sd": 0.061469991958992616
+        },
+        "speaker_in_zone": {
+          "mean": 1.0,
+          "sample_sd": 0.0
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.05929171293973923,
+          "sample_sd": 0.027748946174442946
+        },
+        "orientation_alignment": {
+          "mean": 0.9661903500556945,
+          "sample_sd": 0.02333954606321278
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04379639476537704,
+          "sample_sd": 0.005195870344904189
+        },
+        "anger": {
+          "mean": 0.08068023920059204,
+          "sample_sd": 0.01448120164048697
+        },
+        "disgust": {
+          "mean": 0.0047915307339280845,
+          "sample_sd": 0.0012232321734456195
+        },
+        "fear": {
+          "mean": 0.0627798467874527,
+          "sample_sd": 0.008010119749329003
+        },
+        "happiness": {
+          "mean": 0.12917672097682953,
+          "sample_sd": 0.038386100074406924
+        },
+        "sadness": {
+          "mean": 0.6004870891571045,
+          "sample_sd": 0.05311702170036111
+        },
+        "surprise": {
+          "mean": 0.02341341581195593,
+          "sample_sd": 0.01219268394629618
+        },
+        "neutral": {
+          "mean": 0.0986711785197258,
+          "sample_sd": 0.020470353705145654
+        },
+        "affect_reliability": {
+          "mean": 0.5435772180557251,
+          "sample_sd": 0.02690655932622113
+        }
+      }
+    },
+    "H04": {
+      "class": "high",
+      "clips": 62,
+      "metrics": {
+        "raised_head_ratio": {
+          "mean": 0.4755659506716315,
+          "sample_sd": 0.2407866577563603
+        },
+        "lowered_head_ratio": {
+          "mean": 0.3064732605351075,
+          "sample_sd": 0.2931049757880759
+        },
+        "head_turned_ratio": {
+          "mean": 0.5850622360744784,
+          "sample_sd": 0.13757813952466344
+        },
+        "mean_orientation_to_target": {
+          "mean": 0.7171960511515217,
+          "sample_sd": 0.06208288690929717
+        },
+        "orientation_consensus_ratio": {
+          "mean": 0.7301857721421027,
+          "sample_sd": 0.19326837839842065
+        },
+        "std_orientation_score": {
+          "mean": 0.10494965825590395,
+          "sample_sd": 0.03480822423328554
+        },
+        "min_orientation_score": {
+          "mean": 0.5464244686788128,
+          "sample_sd": 0.09887919159336132
+        },
+        "max_orientation_score": {
+          "mean": 0.8537166570463488,
+          "sample_sd": 0.03510336464522397
+        },
+        "upright_ratio": {
+          "mean": 0.7430599550566366,
+          "sample_sd": 0.2781675988820555
+        },
+        "forward_lean_proxy_ratio": {
+          "mean": 0.15799096079483146,
+          "sample_sd": 0.1499671303213099
+        },
+        "very_low_head_proxy_ratio": {
+          "mean": 0.0960449118077034,
+          "sample_sd": 0.15463253975247923
+        },
+        "mean_posture_elevation": {
+          "mean": 0.14621558521063097,
+          "sample_sd": 0.03965133209012977
+        },
+        "min_posture_elevation": {
+          "mean": 0.08034918999539749,
+          "sample_sd": 0.06423429956268349
+        },
+        "std_posture_elevation": {
+          "mean": 0.04231197867662676,
+          "sample_sd": 0.012398402135174173
+        },
+        "shoulder_tilt_mean": {
+          "mean": 0.3347189825388693,
+          "sample_sd": 0.06280587875506678
+        },
+        "posture_symmetry": {
+          "mean": 0.15972275608369418,
+          "sample_sd": 0.08431223096150899
+        },
+        "student_count_norm": {
+          "mean": 0.5313172104858583,
+          "sample_sd": 0.061528145770166846
+        },
+        "mean_face_visibility": {
+          "mean": 0.7436501354940476,
+          "sample_sd": 0.07121333855634775
+        },
+        "hidden_face_ratio": {
+          "mean": 0.02401513721974146,
+          "sample_sd": 0.037802896291919935
+        },
+        "both_eyes_visible_ratio": {
+          "mean": 0.7636711169635096,
+          "sample_sd": 0.13974802851915893
+        },
+        "single_eye_ratio": {
+          "mean": 0.2137346466582629,
+          "sample_sd": 0.13534962949747611
+        },
+        "median_face_visibility": {
+          "mean": 0.7906299406482328,
+          "sample_sd": 0.07985649027217923
+        },
+        "face_visibility_iqr": {
+          "mean": 0.18907759807282878,
+          "sample_sd": 0.07035113140519393
+        },
+        "posture_observation_ratio": {
+          "mean": 0.9793210789080589,
+          "sample_sd": 0.03781593568876338
+        },
+        "matched_center_displacement_mean_x10": {
+          "mean": 0.11707916272984396,
+          "sample_sd": 0.07620817986097596
+        },
+        "matched_center_displacement_std_x10": {
+          "mean": 0.1312932399131598,
+          "sample_sd": 0.0911686520232784
+        },
+        "matched_stillness_ratio": {
+          "mean": 0.6160771841964414,
+          "sample_sd": 0.13649683883225594
+        },
+        "matched_high_motion_ratio": {
+          "mean": 0.055323105711009235,
+          "sample_sd": 0.0623763225563888
+        },
+        "speaker_in_zone": {
+          "mean": 0.9717741935483871,
+          "sample_sd": 0.1308456003325605
+        },
+        "matched_speaker_displacement_x10": {
+          "mean": 0.06438212069652734,
+          "sample_sd": 0.05616642298799432
+        },
+        "orientation_alignment": {
+          "mean": 0.9563467089206942,
+          "sample_sd": 0.03207419991419291
+        },
+        "head_elevation_dispersion": {
+          "mean": 0.04231197867662676,
+          "sample_sd": 0.012398402135174173
+        },
+        "anger": {
+          "mean": 0.08376815278203256,
+          "sample_sd": 0.03791756536268699
+        },
+        "disgust": {
+          "mean": 0.003672165854368359,
+          "sample_sd": 0.0014203352681237602
+        },
+        "fear": {
+          "mean": 0.08068548557498763,
+          "sample_sd": 0.032416926614025725
+        },
+        "happiness": {
+          "mean": 0.12058447499669367,
+          "sample_sd": 0.062208711504794394
+        },
+        "sadness": {
+          "mean": 0.5918751628168167,
+          "sample_sd": 0.09603012249552616
+        },
+        "surprise": {
+          "mean": 0.022801513963889693,
+          "sample_sd": 0.012375642977903726
+        },
+        "neutral": {
+          "mean": 0.08854853584160728,
+          "sample_sd": 0.03664776834365275
+        },
+        "affect_reliability": {
+          "mean": 0.46052506734286586,
+          "sample_sd": 0.17522852991363638
+        }
+      }
+    }
+  },
+  "h04_vs_other_high": [
+    {
+      "metric": "matched_stillness_ratio",
+      "h04_mean": 0.6160771841964414,
+      "other_high_mean": 0.47200655807619507,
+      "difference": 0.14407062612024635,
+      "cohens_d": 1.0977109720353397
+    },
+    {
+      "metric": "disgust",
+      "h04_mean": 0.003672165854368359,
+      "other_high_mean": 0.006045004585757852,
+      "difference": -0.0023728387313894928,
+      "cohens_d": -1.00498033006647
+    },
+    {
+      "metric": "surprise",
+      "h04_mean": 0.022801513963889693,
+      "other_high_mean": 0.035576954119555325,
+      "difference": -0.012775440155665632,
+      "cohens_d": -0.8638683782822794
+    },
+    {
+      "metric": "matched_center_displacement_mean_x10",
+      "h04_mean": 0.11707916272984396,
+      "other_high_mean": 0.1811562217772007,
+      "difference": -0.06407705904735674,
+      "cohens_d": -0.8569435353918785
+    },
+    {
+      "metric": "matched_center_displacement_std_x10",
+      "h04_mean": 0.1312932399131598,
+      "other_high_mean": 0.2006552331149578,
+      "difference": -0.069361993201798,
+      "cohens_d": -0.7916278082484168
+    },
+    {
+      "metric": "matched_high_motion_ratio",
+      "h04_mean": 0.055323105711009235,
+      "other_high_mean": 0.10011430392446725,
+      "difference": -0.04479119821345802,
+      "cohens_d": -0.7554438146899786
+    },
+    {
+      "metric": "matched_speaker_displacement_x10",
+      "h04_mean": 0.06438212069652734,
+      "other_high_mean": 0.09123189528675182,
+      "difference": -0.026849774590224487,
+      "cohens_d": -0.47975358021875864
+    },
+    {
+      "metric": "mean_face_visibility",
+      "h04_mean": 0.7436501354940476,
+      "other_high_mean": 0.770938507888628,
+      "difference": -0.027288372394580485,
+      "cohens_d": -0.4326075397215612
+    },
+    {
+      "metric": "both_eyes_visible_ratio",
+      "h04_mean": 0.7636711169635096,
+      "other_high_mean": 0.8125782375750334,
+      "difference": -0.0489071206115238,
+      "cohens_d": -0.3936415468528604
+    },
+    {
+      "metric": "shoulder_tilt_mean",
+      "h04_mean": 0.3347189825388693,
+      "other_high_mean": 0.3580479673717333,
+      "difference": -0.023328984832863997,
+      "cohens_d": -0.3862021006761742
+    },
+    {
+      "metric": "raised_head_ratio",
+      "h04_mean": 0.4755659506716315,
+      "other_high_mean": 0.5624388385078182,
+      "difference": -0.08687288783618669,
+      "cohens_d": -0.37927581942802036
+    },
+    {
+      "metric": "affect_reliability",
+      "h04_mean": 0.46052506734286586,
+      "other_high_mean": 0.5202136298884517,
+      "difference": -0.0596885625455858,
+      "cohens_d": -0.3782597064413829
+    },
+    {
+      "metric": "median_face_visibility",
+      "h04_mean": 0.7906299406482328,
+      "other_high_mean": 0.8172719271286674,
+      "difference": -0.026641986480434587,
+      "cohens_d": -0.3737692810819344
+    },
+    {
+      "metric": "very_low_head_proxy_ratio",
+      "h04_mean": 0.0960449118077034,
+      "other_high_mean": 0.04300379591143649,
+      "difference": 0.05304111589626691,
+      "cohens_d": 0.37302085964826703
+    },
+    {
+      "metric": "single_eye_ratio",
+      "h04_mean": 0.2137346466582629,
+      "other_high_mean": 0.1709856757003328,
+      "difference": 0.042748970957930094,
+      "cohens_d": 0.35622828871625756
+    },
+    {
+      "metric": "mean_posture_elevation",
+      "h04_mean": 0.14621558521063097,
+      "other_high_mean": 0.15955692594466003,
+      "difference": -0.013341340734029067,
+      "cohens_d": -0.3557472348080479
+    },
+    {
+      "metric": "neutral",
+      "h04_mean": 0.08854853584160728,
+      "other_high_mean": 0.09966592960383582,
+      "difference": -0.011117393762228533,
+      "cohens_d": -0.3296210922395893
+    },
+    {
+      "metric": "upright_ratio",
+      "h04_mean": 0.7430599550566366,
+      "other_high_mean": 0.8030012936695762,
+      "difference": -0.0599413386129396,
+      "cohens_d": -0.2335933425476394
+    },
+    {
+      "metric": "fear",
+      "h04_mean": 0.08068548557498763,
+      "other_high_mean": 0.07447343983727953,
+      "difference": 0.006212045737708102,
+      "cohens_d": 0.21392440385024813
+    },
+    {
+      "metric": "face_visibility_iqr",
+      "h04_mean": 0.18907759807282878,
+      "other_high_mean": 0.17656138118194498,
+      "difference": 0.012516216890883808,
+      "cohens_d": 0.19408431071071106
+    },
+    {
+      "metric": "orientation_consensus_ratio",
+      "h04_mean": 0.7301857721421027,
+      "other_high_mean": 0.7649458607901698,
+      "difference": -0.03476008864806712,
+      "cohens_d": -0.18804864424809514
+    },
+    {
+      "metric": "posture_symmetry",
+      "h04_mean": 0.15972275608369418,
+      "other_high_mean": 0.17356229832638864,
+      "difference": -0.013839542242694458,
+      "cohens_d": -0.17392840149925445
+    },
+    {
+      "metric": "min_posture_elevation",
+      "h04_mean": 0.08034918999539749,
+      "other_high_mean": 0.0901044073474148,
+      "difference": -0.009755217352017315,
+      "cohens_d": -0.16023676179524762
+    },
+    {
+      "metric": "std_posture_elevation",
+      "h04_mean": 0.04231197867662676,
+      "other_high_mean": 0.04415601872555588,
+      "difference": -0.0018440400489291159,
+      "cohens_d": -0.15535134405206574
+    },
+    {
+      "metric": "head_elevation_dispersion",
+      "h04_mean": 0.04231197867662676,
+      "other_high_mean": 0.04415601872555588,
+      "difference": -0.0018440400489291159,
+      "cohens_d": -0.15535134405206574
+    },
+    {
+      "metric": "speaker_in_zone",
+      "h04_mean": 0.9717741935483871,
+      "other_high_mean": 0.9510869565217391,
+      "difference": 0.020687237026647987,
+      "cohens_d": 0.1448716048503167
+    },
+    {
+      "metric": "min_orientation_score",
+      "h04_mean": 0.5464244686788128,
+      "other_high_mean": 0.5327308799909509,
+      "difference": 0.013693588687861857,
+      "cohens_d": 0.13822497405733639
+    },
+    {
+      "metric": "lowered_head_ratio",
+      "h04_mean": 0.3064732605351075,
+      "other_high_mean": 0.2716411005543626,
+      "difference": 0.0348321599807449,
+      "cohens_d": 0.13033890135226883
+    },
+    {
+      "metric": "head_turned_ratio",
+      "h04_mean": 0.5850622360744784,
+      "other_high_mean": 0.5694652329320493,
+      "difference": 0.015597003142429067,
+      "cohens_d": 0.12323220860065184
+    },
+    {
+      "metric": "max_orientation_score",
+      "h04_mean": 0.8537166570463488,
+      "other_high_mean": 0.8578957345174707,
+      "difference": -0.004179077471121895,
+      "cohens_d": -0.12258020443104849
+    },
+    {
+      "metric": "sadness",
+      "h04_mean": 0.5918751628168167,
+      "other_high_mean": 0.5804471736368926,
+      "difference": 0.011427989179924158,
+      "cohens_d": 0.11834164241986654
+    },
+    {
+      "metric": "mean_orientation_to_target",
+      "h04_mean": 0.7171960511515217,
+      "other_high_mean": 0.7239592852799789,
+      "difference": -0.006763234128457141,
+      "cohens_d": -0.11532828081279009
+    },
+    {
+      "metric": "posture_observation_ratio",
+      "h04_mean": 0.9793210789080589,
+      "other_high_mean": 0.9824920426244321,
+      "difference": -0.003170963716373265,
+      "cohens_d": -0.09373724679374087
+    },
+    {
+      "metric": "orientation_alignment",
+      "h04_mean": 0.9563467089206942,
+      "other_high_mean": 0.9586304218872733,
+      "difference": -0.0022837129665791434,
+      "cohens_d": -0.07475626906116807
+    },
+    {
+      "metric": "hidden_face_ratio",
+      "h04_mean": 0.02401513721974146,
+      "other_high_mean": 0.021663843492126984,
+      "difference": 0.0023512937276144764,
+      "cohens_d": 0.06773921286278882
+    },
+    {
+      "metric": "student_count_norm",
+      "h04_mean": 0.5313172104858583,
+      "other_high_mean": 0.5344203062679457,
+      "difference": -0.0031030957820873395,
+      "cohens_d": -0.05493211941677484
+    },
+    {
+      "metric": "std_orientation_score",
+      "h04_mean": 0.10494965825590395,
+      "other_high_mean": 0.10623202537712843,
+      "difference": -0.0012823671212244814,
+      "cohens_d": -0.0383289249871219
+    },
+    {
+      "metric": "forward_lean_proxy_ratio",
+      "h04_mean": 0.15799096079483146,
+      "other_high_mean": 0.15335870679953825,
+      "difference": 0.004632253995293212,
+      "cohens_d": 0.03343803826855302
+    },
+    {
+      "metric": "anger",
+      "h04_mean": 0.08376815278203256,
+      "other_high_mean": 0.08461399538361508,
+      "difference": -0.0008458426015825193,
+      "cohens_d": -0.024630416339917877
+    },
+    {
+      "metric": "happiness",
+      "h04_mean": 0.12058447499669367,
+      "other_high_mean": 0.11917751606391824,
+      "difference": 0.0014069589327754262,
+      "cohens_d": 0.022622205660201157
+    }
+  ]
+}
