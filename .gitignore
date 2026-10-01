@@ -51,4 +51,10 @@ feature_matrices_behavioral_before_tracking/
 preprocessed_data.zip
 experiments/**/dataset/
 experiments/**/runs/
+experiments/**/folds/
+experiments/**/*.log
+
+# Generated reports, previews, and local scratch files
+output/
+tmp/
 experiments/**/.lecture-subset-*/

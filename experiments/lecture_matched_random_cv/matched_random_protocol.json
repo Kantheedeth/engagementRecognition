@@ -1,0 +1,2305 @@
+{
+  "format_version": 1,
+  "name": "lecture_size_matched_random_cv_v1",
+  "evaluation_protocol": "size_matched_random_clip_three_fold_control",
+  "grouping_name": "randomized single-clip groups",
+  "description": "Clip-randomized control with per-fold, per-class train/validation/test counts exactly matched to the conservative temporal-group protocol.",
+  "grouping_rule": "Every selected clip is its own split group.",
+  "grouping_assumption": "This deliberately permits temporally adjacent clips in different splits and is a leakage-sensitive control, not the main evaluation.",
+  "limitation": "All clips come from one fixed classroom recording and clip-level randomization permits strong temporal correlation across splits.",
+  "split_seed": 20260926,
+  "target_cv_manifest_sha256": "76aab2206a6c0adea28b03ff8fbd1c5cdfb542a24eb19bd2f7ca0474eaa7693d",
+  "target_class_counts": {
+    "1": {
+      "train": {
+        "low": 98,
+        "mid": 42,
+        "high": 18
+      },
+      "val": {
+        "low": 11,
+        "mid": 4,
+        "high": 5
+      },
+      "test": {
+        "low": 50,
+        "mid": 18,
+        "high": 62
+      }
+    },
+    "2": {
+      "train": {
+        "low": 94,
+        "mid": 27,
+        "high": 67
+      },
+      "val": {
+        "low": 11,
+        "mid": 11,
+        "high": 5
+      },
+      "test": {
+        "low": 54,
+        "mid": 26,
+        "high": 13
+      }
+    },
+    "3": {
+      "train": {
+        "low": 98,
+        "mid": 37,
+        "high": 62
+      },
+      "val": {
+        "low": 6,
+        "mid": 7,
+        "high": 13
+      },
+      "test": {
+        "low": 55,
+        "mid": 20,
+        "high": 10
+      }
+    }
+  },
+  "outer_folds": 3,
+  "validation_episodes": {
+    "1": [
+      "C-HIGH-2231",
+      "C-HIGH-2234",
+      "C-HIGH-2471",
+      "C-HIGH-2477",
+      "C-HIGH-2514",
+      "C-LOW-0797",
+      "C-LOW-0857",
+      "C-LOW-0860",
+      "C-LOW-0874",
+      "C-LOW-0877",
+      "C-LOW-0883",
+      "C-LOW-0884",
+      "C-LOW-1054",
+      "C-LOW-2626",
+      "C-LOW-2641",
+      "C-LOW-2642",
+      "C-MID-0071",
+      "C-MID-0193",
+      "C-MID-0202",
+      "C-MID-0696"
+    ],
+    "2": [
+      "C-HIGH-2236",
+      "C-HIGH-2302",
+      "C-HIGH-2472",
+      "C-HIGH-2483",
+      "C-HIGH-2487",
+      "C-LOW-0783",
+      "C-LOW-0787",
+      "C-LOW-0856",
+      "C-LOW-0863",
+      "C-LOW-0864",
+      "C-LOW-0866",
+      "C-LOW-0953",
+      "C-LOW-0962",
+      "C-LOW-1057",
+      "C-LOW-2019",
+      "C-LOW-2636",
+      "C-MID-0014",
+      "C-MID-0019",
+      "C-MID-0020",
+      "C-MID-0025",
+      "C-MID-0027",
+      "C-MID-0065",
+      "C-MID-0069",
+      "C-MID-0073",
+      "C-MID-0087",
+      "C-MID-0198",
+      "C-MID-0199"
+    ],
+    "3": [
+      "C-HIGH-2229",
+      "C-HIGH-2234",
+      "C-HIGH-2351",
+      "C-HIGH-2485",
+      "C-HIGH-2486",
+      "C-HIGH-2493",
+      "C-HIGH-2494",
+      "C-HIGH-2498",
+      "C-HIGH-2499",
+      "C-HIGH-2502",
+      "C-HIGH-2511",
+      "C-HIGH-2514",
+      "C-HIGH-2530",
+      "C-LOW-0773",
+      "C-LOW-0775",
+      "C-LOW-0890",
+      "C-LOW-2020",
+      "C-LOW-2028",
+      "C-LOW-2632",
+      "C-MID-0068",
+      "C-MID-0073",
+      "C-MID-0074",
+      "C-MID-0078",
+      "C-MID-0079",
+      "C-MID-0194",
+      "C-MID-0196"
+    ]
+  },
+  "episodes": [
+    {
+      "episode_id": "C-HIGH-2227",
+      "class": "high",
+      "start_view": 2227,
+      "end_view": 2227,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2228",
+      "class": "high",
+      "start_view": 2228,
+      "end_view": 2228,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2229",
+      "class": "high",
+      "start_view": 2229,
+      "end_view": 2229,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2230",
+      "class": "high",
+      "start_view": 2230,
+      "end_view": 2230,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2231",
+      "class": "high",
+      "start_view": 2231,
+      "end_view": 2231,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2232",
+      "class": "high",
+      "start_view": 2232,
+      "end_view": 2232,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2233",
+      "class": "high",
+      "start_view": 2233,
+      "end_view": 2233,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2234",
+      "class": "high",
+      "start_view": 2234,
+      "end_view": 2234,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2235",
+      "class": "high",
+      "start_view": 2235,
+      "end_view": 2235,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2236",
+      "class": "high",
+      "start_view": 2236,
+      "end_view": 2236,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2237",
+      "class": "high",
+      "start_view": 2237,
+      "end_view": 2237,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2238",
+      "class": "high",
+      "start_view": 2238,
+      "end_view": 2238,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2239",
+      "class": "high",
+      "start_view": 2239,
+      "end_view": 2239,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2299",
+      "class": "high",
+      "start_view": 2299,
+      "end_view": 2299,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2300",
+      "class": "high",
+      "start_view": 2300,
+      "end_view": 2300,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2301",
+      "class": "high",
+      "start_view": 2301,
+      "end_view": 2301,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2302",
+      "class": "high",
+      "start_view": 2302,
+      "end_view": 2302,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2303",
+      "class": "high",
+      "start_view": 2303,
+      "end_view": 2303,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2348",
+      "class": "high",
+      "start_view": 2348,
+      "end_view": 2348,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2349",
+      "class": "high",
+      "start_view": 2349,
+      "end_view": 2349,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2350",
+      "class": "high",
+      "start_view": 2350,
+      "end_view": 2350,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2351",
+      "class": "high",
+      "start_view": 2351,
+      "end_view": 2351,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2352",
+      "class": "high",
+      "start_view": 2352,
+      "end_view": 2352,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2470",
+      "class": "high",
+      "start_view": 2470,
+      "end_view": 2470,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2471",
+      "class": "high",
+      "start_view": 2471,
+      "end_view": 2471,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2472",
+      "class": "high",
+      "start_view": 2472,
+      "end_view": 2472,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2473",
+      "class": "high",
+      "start_view": 2473,
+      "end_view": 2473,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2474",
+      "class": "high",
+      "start_view": 2474,
+      "end_view": 2474,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2475",
+      "class": "high",
+      "start_view": 2475,
+      "end_view": 2475,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2476",
+      "class": "high",
+      "start_view": 2476,
+      "end_view": 2476,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2477",
+      "class": "high",
+      "start_view": 2477,
+      "end_view": 2477,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2478",
+      "class": "high",
+      "start_view": 2478,
+      "end_view": 2478,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2479",
+      "class": "high",
+      "start_view": 2479,
+      "end_view": 2479,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2480",
+      "class": "high",
+      "start_view": 2480,
+      "end_view": 2480,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2481",
+      "class": "high",
+      "start_view": 2481,
+      "end_view": 2481,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2482",
+      "class": "high",
+      "start_view": 2482,
+      "end_view": 2482,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2483",
+      "class": "high",
+      "start_view": 2483,
+      "end_view": 2483,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2484",
+      "class": "high",
+      "start_view": 2484,
+      "end_view": 2484,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2485",
+      "class": "high",
+      "start_view": 2485,
+      "end_view": 2485,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2486",
+      "class": "high",
+      "start_view": 2486,
+      "end_view": 2486,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2487",
+      "class": "high",
+      "start_view": 2487,
+      "end_view": 2487,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2488",
+      "class": "high",
+      "start_view": 2488,
+      "end_view": 2488,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2489",
+      "class": "high",
+      "start_view": 2489,
+      "end_view": 2489,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2490",
+      "class": "high",
+      "start_view": 2490,
+      "end_view": 2490,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2491",
+      "class": "high",
+      "start_view": 2491,
+      "end_view": 2491,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2492",
+      "class": "high",
+      "start_view": 2492,
+      "end_view": 2492,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2493",
+      "class": "high",
+      "start_view": 2493,
+      "end_view": 2493,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2494",
+      "class": "high",
+      "start_view": 2494,
+      "end_view": 2494,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2495",
+      "class": "high",
+      "start_view": 2495,
+      "end_view": 2495,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2496",
+      "class": "high",
+      "start_view": 2496,
+      "end_view": 2496,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2497",
+      "class": "high",
+      "start_view": 2497,
+      "end_view": 2497,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2498",
+      "class": "high",
+      "start_view": 2498,
+      "end_view": 2498,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2499",
+      "class": "high",
+      "start_view": 2499,
+      "end_view": 2499,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2500",
+      "class": "high",
+      "start_view": 2500,
+      "end_view": 2500,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2501",
+      "class": "high",
+      "start_view": 2501,
+      "end_view": 2501,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2502",
+      "class": "high",
+      "start_view": 2502,
+      "end_view": 2502,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2503",
+      "class": "high",
+      "start_view": 2503,
+      "end_view": 2503,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2504",
+      "class": "high",
+      "start_view": 2504,
+      "end_view": 2504,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2505",
+      "class": "high",
+      "start_view": 2505,
+      "end_view": 2505,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2506",
+      "class": "high",
+      "start_view": 2506,
+      "end_view": 2506,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2507",
+      "class": "high",
+      "start_view": 2507,
+      "end_view": 2507,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2508",
+      "class": "high",
+      "start_view": 2508,
+      "end_view": 2508,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2509",
+      "class": "high",
+      "start_view": 2509,
+      "end_view": 2509,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2510",
+      "class": "high",
+      "start_view": 2510,
+      "end_view": 2510,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2511",
+      "class": "high",
+      "start_view": 2511,
+      "end_view": 2511,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2512",
+      "class": "high",
+      "start_view": 2512,
+      "end_view": 2512,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2513",
+      "class": "high",
+      "start_view": 2513,
+      "end_view": 2513,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2514",
+      "class": "high",
+      "start_view": 2514,
+      "end_view": 2514,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2515",
+      "class": "high",
+      "start_view": 2515,
+      "end_view": 2515,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2516",
+      "class": "high",
+      "start_view": 2516,
+      "end_view": 2516,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2517",
+      "class": "high",
+      "start_view": 2517,
+      "end_view": 2517,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-HIGH-2518",
+      "class": "high",
+      "start_view": 2518,
+      "end_view": 2518,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2519",
+      "class": "high",
+      "start_view": 2519,
+      "end_view": 2519,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2520",
+      "class": "high",
+      "start_view": 2520,
+      "end_view": 2520,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2522",
+      "class": "high",
+      "start_view": 2522,
+      "end_view": 2522,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2523",
+      "class": "high",
+      "start_view": 2523,
+      "end_view": 2523,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2524",
+      "class": "high",
+      "start_view": 2524,
+      "end_view": 2524,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2525",
+      "class": "high",
+      "start_view": 2525,
+      "end_view": 2525,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2526",
+      "class": "high",
+      "start_view": 2526,
+      "end_view": 2526,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2527",
+      "class": "high",
+      "start_view": 2527,
+      "end_view": 2527,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2528",
+      "class": "high",
+      "start_view": 2528,
+      "end_view": 2528,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2529",
+      "class": "high",
+      "start_view": 2529,
+      "end_view": 2529,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2530",
+      "class": "high",
+      "start_view": 2530,
+      "end_view": 2530,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-HIGH-2531",
+      "class": "high",
+      "start_view": 2531,
+      "end_view": 2531,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-HIGH-2532",
+      "class": "high",
+      "start_view": 2532,
+      "end_view": 2532,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1015",
+      "class": "low",
+      "start_view": 1015,
+      "end_view": 1015,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1016",
+      "class": "low",
+      "start_view": 1016,
+      "end_view": 1016,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1017",
+      "class": "low",
+      "start_view": 1017,
+      "end_view": 1017,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1018",
+      "class": "low",
+      "start_view": 1018,
+      "end_view": 1018,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1019",
+      "class": "low",
+      "start_view": 1019,
+      "end_view": 1019,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1020",
+      "class": "low",
+      "start_view": 1020,
+      "end_view": 1020,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1021",
+      "class": "low",
+      "start_view": 1021,
+      "end_view": 1021,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1022",
+      "class": "low",
+      "start_view": 1022,
+      "end_view": 1022,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1023",
+      "class": "low",
+      "start_view": 1023,
+      "end_view": 1023,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1024",
+      "class": "low",
+      "start_view": 1024,
+      "end_view": 1024,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1025",
+      "class": "low",
+      "start_view": 1025,
+      "end_view": 1025,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1026",
+      "class": "low",
+      "start_view": 1026,
+      "end_view": 1026,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1027",
+      "class": "low",
+      "start_view": 1027,
+      "end_view": 1027,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1028",
+      "class": "low",
+      "start_view": 1028,
+      "end_view": 1028,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1029",
+      "class": "low",
+      "start_view": 1029,
+      "end_view": 1029,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1030",
+      "class": "low",
+      "start_view": 1030,
+      "end_view": 1030,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1031",
+      "class": "low",
+      "start_view": 1031,
+      "end_view": 1031,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1032",
+      "class": "low",
+      "start_view": 1032,
+      "end_view": 1032,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1033",
+      "class": "low",
+      "start_view": 1033,
+      "end_view": 1033,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1034",
+      "class": "low",
+      "start_view": 1034,
+      "end_view": 1034,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1035",
+      "class": "low",
+      "start_view": 1035,
+      "end_view": 1035,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1036",
+      "class": "low",
+      "start_view": 1036,
+      "end_view": 1036,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1054",
+      "class": "low",
+      "start_view": 1054,
+      "end_view": 1054,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-1055",
+      "class": "low",
+      "start_view": 1055,
+      "end_view": 1055,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1056",
+      "class": "low",
+      "start_view": 1056,
+      "end_view": 1056,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-1057",
+      "class": "low",
+      "start_view": 1057,
+      "end_view": 1057,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1058",
+      "class": "low",
+      "start_view": 1058,
+      "end_view": 1058,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-1059",
+      "class": "low",
+      "start_view": 1059,
+      "end_view": 1059,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2018",
+      "class": "low",
+      "start_view": 2018,
+      "end_view": 2018,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2019",
+      "class": "low",
+      "start_view": 2019,
+      "end_view": 2019,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2020",
+      "class": "low",
+      "start_view": 2020,
+      "end_view": 2020,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2021",
+      "class": "low",
+      "start_view": 2021,
+      "end_view": 2021,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2022",
+      "class": "low",
+      "start_view": 2022,
+      "end_view": 2022,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2023",
+      "class": "low",
+      "start_view": 2023,
+      "end_view": 2023,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2024",
+      "class": "low",
+      "start_view": 2024,
+      "end_view": 2024,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2025",
+      "class": "low",
+      "start_view": 2025,
+      "end_view": 2025,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2026",
+      "class": "low",
+      "start_view": 2026,
+      "end_view": 2026,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2027",
+      "class": "low",
+      "start_view": 2027,
+      "end_view": 2027,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2028",
+      "class": "low",
+      "start_view": 2028,
+      "end_view": 2028,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2105",
+      "class": "low",
+      "start_view": 2105,
+      "end_view": 2105,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2106",
+      "class": "low",
+      "start_view": 2106,
+      "end_view": 2106,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2107",
+      "class": "low",
+      "start_view": 2107,
+      "end_view": 2107,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2398",
+      "class": "low",
+      "start_view": 2398,
+      "end_view": 2398,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2399",
+      "class": "low",
+      "start_view": 2399,
+      "end_view": 2399,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2623",
+      "class": "low",
+      "start_view": 2623,
+      "end_view": 2623,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2624",
+      "class": "low",
+      "start_view": 2624,
+      "end_view": 2624,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2625",
+      "class": "low",
+      "start_view": 2625,
+      "end_view": 2625,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2626",
+      "class": "low",
+      "start_view": 2626,
+      "end_view": 2626,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2627",
+      "class": "low",
+      "start_view": 2627,
+      "end_view": 2627,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2628",
+      "class": "low",
+      "start_view": 2628,
+      "end_view": 2628,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2629",
+      "class": "low",
+      "start_view": 2629,
+      "end_view": 2629,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2630",
+      "class": "low",
+      "start_view": 2630,
+      "end_view": 2630,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2631",
+      "class": "low",
+      "start_view": 2631,
+      "end_view": 2631,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2632",
+      "class": "low",
+      "start_view": 2632,
+      "end_view": 2632,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2633",
+      "class": "low",
+      "start_view": 2633,
+      "end_view": 2633,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2634",
+      "class": "low",
+      "start_view": 2634,
+      "end_view": 2634,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2635",
+      "class": "low",
+      "start_view": 2635,
+      "end_view": 2635,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2636",
+      "class": "low",
+      "start_view": 2636,
+      "end_view": 2636,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2637",
+      "class": "low",
+      "start_view": 2637,
+      "end_view": 2637,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2638",
+      "class": "low",
+      "start_view": 2638,
+      "end_view": 2638,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2639",
+      "class": "low",
+      "start_view": 2639,
+      "end_view": 2639,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-2640",
+      "class": "low",
+      "start_view": 2640,
+      "end_view": 2640,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2641",
+      "class": "low",
+      "start_view": 2641,
+      "end_view": 2641,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-2642",
+      "class": "low",
+      "start_view": 2642,
+      "end_view": 2642,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2643",
+      "class": "low",
+      "start_view": 2643,
+      "end_view": 2643,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-2644",
+      "class": "low",
+      "start_view": 2644,
+      "end_view": 2644,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0772",
+      "class": "low",
+      "start_view": 772,
+      "end_view": 772,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0773",
+      "class": "low",
+      "start_view": 773,
+      "end_view": 773,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0774",
+      "class": "low",
+      "start_view": 774,
+      "end_view": 774,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0775",
+      "class": "low",
+      "start_view": 775,
+      "end_view": 775,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0776",
+      "class": "low",
+      "start_view": 776,
+      "end_view": 776,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0777",
+      "class": "low",
+      "start_view": 777,
+      "end_view": 777,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0778",
+      "class": "low",
+      "start_view": 778,
+      "end_view": 778,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0779",
+      "class": "low",
+      "start_view": 779,
+      "end_view": 779,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0780",
+      "class": "low",
+      "start_view": 780,
+      "end_view": 780,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0781",
+      "class": "low",
+      "start_view": 781,
+      "end_view": 781,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0782",
+      "class": "low",
+      "start_view": 782,
+      "end_view": 782,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0783",
+      "class": "low",
+      "start_view": 783,
+      "end_view": 783,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0784",
+      "class": "low",
+      "start_view": 784,
+      "end_view": 784,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0785",
+      "class": "low",
+      "start_view": 785,
+      "end_view": 785,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0786",
+      "class": "low",
+      "start_view": 786,
+      "end_view": 786,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0787",
+      "class": "low",
+      "start_view": 787,
+      "end_view": 787,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0788",
+      "class": "low",
+      "start_view": 788,
+      "end_view": 788,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0789",
+      "class": "low",
+      "start_view": 789,
+      "end_view": 789,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0790",
+      "class": "low",
+      "start_view": 790,
+      "end_view": 790,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0791",
+      "class": "low",
+      "start_view": 791,
+      "end_view": 791,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0792",
+      "class": "low",
+      "start_view": 792,
+      "end_view": 792,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0793",
+      "class": "low",
+      "start_view": 793,
+      "end_view": 793,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0794",
+      "class": "low",
+      "start_view": 794,
+      "end_view": 794,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0795",
+      "class": "low",
+      "start_view": 795,
+      "end_view": 795,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0796",
+      "class": "low",
+      "start_view": 796,
+      "end_view": 796,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0797",
+      "class": "low",
+      "start_view": 797,
+      "end_view": 797,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0798",
+      "class": "low",
+      "start_view": 798,
+      "end_view": 798,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0799",
+      "class": "low",
+      "start_view": 799,
+      "end_view": 799,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0846",
+      "class": "low",
+      "start_view": 846,
+      "end_view": 846,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0847",
+      "class": "low",
+      "start_view": 847,
+      "end_view": 847,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0848",
+      "class": "low",
+      "start_view": 848,
+      "end_view": 848,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0849",
+      "class": "low",
+      "start_view": 849,
+      "end_view": 849,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0850",
+      "class": "low",
+      "start_view": 850,
+      "end_view": 850,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0851",
+      "class": "low",
+      "start_view": 851,
+      "end_view": 851,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0852",
+      "class": "low",
+      "start_view": 852,
+      "end_view": 852,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0853",
+      "class": "low",
+      "start_view": 853,
+      "end_view": 853,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0854",
+      "class": "low",
+      "start_view": 854,
+      "end_view": 854,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0855",
+      "class": "low",
+      "start_view": 855,
+      "end_view": 855,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0856",
+      "class": "low",
+      "start_view": 856,
+      "end_view": 856,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0857",
+      "class": "low",
+      "start_view": 857,
+      "end_view": 857,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0858",
+      "class": "low",
+      "start_view": 858,
+      "end_view": 858,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0859",
+      "class": "low",
+      "start_view": 859,
+      "end_view": 859,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0860",
+      "class": "low",
+      "start_view": 860,
+      "end_view": 860,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0861",
+      "class": "low",
+      "start_view": 861,
+      "end_view": 861,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0862",
+      "class": "low",
+      "start_view": 862,
+      "end_view": 862,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0863",
+      "class": "low",
+      "start_view": 863,
+      "end_view": 863,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0864",
+      "class": "low",
+      "start_view": 864,
+      "end_view": 864,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0865",
+      "class": "low",
+      "start_view": 865,
+      "end_view": 865,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0866",
+      "class": "low",
+      "start_view": 866,
+      "end_view": 866,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0867",
+      "class": "low",
+      "start_view": 867,
+      "end_view": 867,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0868",
+      "class": "low",
+      "start_view": 868,
+      "end_view": 868,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0869",
+      "class": "low",
+      "start_view": 869,
+      "end_view": 869,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0870",
+      "class": "low",
+      "start_view": 870,
+      "end_view": 870,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0871",
+      "class": "low",
+      "start_view": 871,
+      "end_view": 871,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0872",
+      "class": "low",
+      "start_view": 872,
+      "end_view": 872,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0873",
+      "class": "low",
+      "start_view": 873,
+      "end_view": 873,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0874",
+      "class": "low",
+      "start_view": 874,
+      "end_view": 874,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0875",
+      "class": "low",
+      "start_view": 875,
+      "end_view": 875,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0876",
+      "class": "low",
+      "start_view": 876,
+      "end_view": 876,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0877",
+      "class": "low",
+      "start_view": 877,
+      "end_view": 877,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0878",
+      "class": "low",
+      "start_view": 878,
+      "end_view": 878,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0879",
+      "class": "low",
+      "start_view": 879,
+      "end_view": 879,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0880",
+      "class": "low",
+      "start_view": 880,
+      "end_view": 880,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0882",
+      "class": "low",
+      "start_view": 882,
+      "end_view": 882,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0883",
+      "class": "low",
+      "start_view": 883,
+      "end_view": 883,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0884",
+      "class": "low",
+      "start_view": 884,
+      "end_view": 884,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0885",
+      "class": "low",
+      "start_view": 885,
+      "end_view": 885,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0886",
+      "class": "low",
+      "start_view": 886,
+      "end_view": 886,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0887",
+      "class": "low",
+      "start_view": 887,
+      "end_view": 887,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0888",
+      "class": "low",
+      "start_view": 888,
+      "end_view": 888,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0889",
+      "class": "low",
+      "start_view": 889,
+      "end_view": 889,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0890",
+      "class": "low",
+      "start_view": 890,
+      "end_view": 890,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0891",
+      "class": "low",
+      "start_view": 891,
+      "end_view": 891,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0892",
+      "class": "low",
+      "start_view": 892,
+      "end_view": 892,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0893",
+      "class": "low",
+      "start_view": 893,
+      "end_view": 893,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0894",
+      "class": "low",
+      "start_view": 894,
+      "end_view": 894,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0895",
+      "class": "low",
+      "start_view": 895,
+      "end_view": 895,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0947",
+      "class": "low",
+      "start_view": 947,
+      "end_view": 947,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0948",
+      "class": "low",
+      "start_view": 948,
+      "end_view": 948,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0949",
+      "class": "low",
+      "start_view": 949,
+      "end_view": 949,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0950",
+      "class": "low",
+      "start_view": 950,
+      "end_view": 950,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0951",
+      "class": "low",
+      "start_view": 951,
+      "end_view": 951,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0952",
+      "class": "low",
+      "start_view": 952,
+      "end_view": 952,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0953",
+      "class": "low",
+      "start_view": 953,
+      "end_view": 953,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0954",
+      "class": "low",
+      "start_view": 954,
+      "end_view": 954,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0955",
+      "class": "low",
+      "start_view": 955,
+      "end_view": 955,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0956",
+      "class": "low",
+      "start_view": 956,
+      "end_view": 956,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-LOW-0957",
+      "class": "low",
+      "start_view": 957,
+      "end_view": 957,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0958",
+      "class": "low",
+      "start_view": 958,
+      "end_view": 958,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0959",
+      "class": "low",
+      "start_view": 959,
+      "end_view": 959,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0960",
+      "class": "low",
+      "start_view": 960,
+      "end_view": 960,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-LOW-0961",
+      "class": "low",
+      "start_view": 961,
+      "end_view": 961,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-LOW-0962",
+      "class": "low",
+      "start_view": 962,
+      "end_view": 962,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-1196",
+      "class": "mid",
+      "start_view": 1196,
+      "end_view": 1196,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-1197",
+      "class": "mid",
+      "start_view": 1197,
+      "end_view": 1197,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-1199",
+      "class": "mid",
+      "start_view": 1199,
+      "end_view": 1199,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0012",
+      "class": "mid",
+      "start_view": 12,
+      "end_view": 12,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-1201",
+      "class": "mid",
+      "start_view": 1201,
+      "end_view": 1201,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0013",
+      "class": "mid",
+      "start_view": 13,
+      "end_view": 13,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0014",
+      "class": "mid",
+      "start_view": 14,
+      "end_view": 14,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0015",
+      "class": "mid",
+      "start_view": 15,
+      "end_view": 15,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0016",
+      "class": "mid",
+      "start_view": 16,
+      "end_view": 16,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0017",
+      "class": "mid",
+      "start_view": 17,
+      "end_view": 17,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0018",
+      "class": "mid",
+      "start_view": 18,
+      "end_view": 18,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0019",
+      "class": "mid",
+      "start_view": 19,
+      "end_view": 19,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0193",
+      "class": "mid",
+      "start_view": 193,
+      "end_view": 193,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0194",
+      "class": "mid",
+      "start_view": 194,
+      "end_view": 194,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0195",
+      "class": "mid",
+      "start_view": 195,
+      "end_view": 195,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0196",
+      "class": "mid",
+      "start_view": 196,
+      "end_view": 196,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0197",
+      "class": "mid",
+      "start_view": 197,
+      "end_view": 197,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0198",
+      "class": "mid",
+      "start_view": 198,
+      "end_view": 198,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0199",
+      "class": "mid",
+      "start_view": 199,
+      "end_view": 199,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0020",
+      "class": "mid",
+      "start_view": 20,
+      "end_view": 20,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0200",
+      "class": "mid",
+      "start_view": 200,
+      "end_view": 200,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0201",
+      "class": "mid",
+      "start_view": 201,
+      "end_view": 201,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0202",
+      "class": "mid",
+      "start_view": 202,
+      "end_view": 202,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0203",
+      "class": "mid",
+      "start_view": 203,
+      "end_view": 203,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0021",
+      "class": "mid",
+      "start_view": 21,
+      "end_view": 21,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0022",
+      "class": "mid",
+      "start_view": 22,
+      "end_view": 22,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0023",
+      "class": "mid",
+      "start_view": 23,
+      "end_view": 23,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0024",
+      "class": "mid",
+      "start_view": 24,
+      "end_view": 24,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0025",
+      "class": "mid",
+      "start_view": 25,
+      "end_view": 25,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0026",
+      "class": "mid",
+      "start_view": 26,
+      "end_view": 26,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0027",
+      "class": "mid",
+      "start_view": 27,
+      "end_view": 27,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0065",
+      "class": "mid",
+      "start_view": 65,
+      "end_view": 65,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0066",
+      "class": "mid",
+      "start_view": 66,
+      "end_view": 66,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0067",
+      "class": "mid",
+      "start_view": 67,
+      "end_view": 67,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0068",
+      "class": "mid",
+      "start_view": 68,
+      "end_view": 68,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0069",
+      "class": "mid",
+      "start_view": 69,
+      "end_view": 69,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0695",
+      "class": "mid",
+      "start_view": 695,
+      "end_view": 695,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0696",
+      "class": "mid",
+      "start_view": 696,
+      "end_view": 696,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0698",
+      "class": "mid",
+      "start_view": 698,
+      "end_view": 698,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0699",
+      "class": "mid",
+      "start_view": 699,
+      "end_view": 699,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0070",
+      "class": "mid",
+      "start_view": 70,
+      "end_view": 70,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0700",
+      "class": "mid",
+      "start_view": 700,
+      "end_view": 700,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0701",
+      "class": "mid",
+      "start_view": 701,
+      "end_view": 701,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0702",
+      "class": "mid",
+      "start_view": 702,
+      "end_view": 702,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0071",
+      "class": "mid",
+      "start_view": 71,
+      "end_view": 71,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0072",
+      "class": "mid",
+      "start_view": 72,
+      "end_view": 72,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0073",
+      "class": "mid",
+      "start_view": 73,
+      "end_view": 73,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0074",
+      "class": "mid",
+      "start_view": 74,
+      "end_view": 74,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0075",
+      "class": "mid",
+      "start_view": 75,
+      "end_view": 75,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0076",
+      "class": "mid",
+      "start_view": 76,
+      "end_view": 76,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0077",
+      "class": "mid",
+      "start_view": 77,
+      "end_view": 77,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0078",
+      "class": "mid",
+      "start_view": 78,
+      "end_view": 78,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0079",
+      "class": "mid",
+      "start_view": 79,
+      "end_view": 79,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0080",
+      "class": "mid",
+      "start_view": 80,
+      "end_view": 80,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0081",
+      "class": "mid",
+      "start_view": 81,
+      "end_view": 81,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0082",
+      "class": "mid",
+      "start_view": 82,
+      "end_view": 82,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0083",
+      "class": "mid",
+      "start_view": 83,
+      "end_view": 83,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0084",
+      "class": "mid",
+      "start_view": 84,
+      "end_view": 84,
+      "outer_fold": 2
+    },
+    {
+      "episode_id": "C-MID-0085",
+      "class": "mid",
+      "start_view": 85,
+      "end_view": 85,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0086",
+      "class": "mid",
+      "start_view": 86,
+      "end_view": 86,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0087",
+      "class": "mid",
+      "start_view": 87,
+      "end_view": 87,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0088",
+      "class": "mid",
+      "start_view": 88,
+      "end_view": 88,
+      "outer_fold": 1
+    },
+    {
+      "episode_id": "C-MID-0089",
+      "class": "mid",
+      "start_view": 89,
+      "end_view": 89,
+      "outer_fold": 3
+    },
+    {
+      "episode_id": "C-MID-0090",
+      "class": "mid",
+      "start_view": 90,
+      "end_view": 90,
+      "outer_fold": 2
+    }
+  ]
+}

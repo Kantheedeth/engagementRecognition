@@ -1,0 +1,38 @@
+{
+  "format_version": 1,
+  "name": "lecture_temporal_group_cv_v1",
+  "evaluation_protocol": "temporal_group_held_out_three_fold_cv",
+  "grouping_name": "conservative temporal groups",
+  "description": "Three-fold temporal-group-held-out evaluation over the 308 activity-reviewed lecture clips.",
+  "grouping_rule": "Start from contiguous selected lecture ranges, then merge ranges separated by only one excluded source clip. Excluded clips remain absent.",
+  "grouping_assumption": "A ten-second excluded activity does not make the immediately surrounding lecture clips statistically independent.",
+  "limitation": "All temporal groups come from one fixed classroom recording. This tests unseen temporal lecture periods, not new classrooms, cameras, participants, or recording sessions.",
+  "outer_folds": 3,
+  "validation_episodes": {
+    "1": ["M05", "L06", "H02"],
+    "2": ["M03", "L06", "H02"],
+    "3": ["M04", "L05", "H01"]
+  },
+  "episodes": [
+    {"episode_id": "M01", "class": "mid",  "start_view": 12,   "end_view": 27,   "outer_fold": 3},
+    {"episode_id": "M02", "class": "mid",  "start_view": 65,   "end_view": 90,   "outer_fold": 2},
+    {"episode_id": "M03", "class": "mid",  "start_view": 193,  "end_view": 203,  "outer_fold": 1},
+    {"episode_id": "M04", "class": "mid",  "start_view": 695,  "end_view": 702,  "outer_fold": 1},
+    {"episode_id": "M05", "class": "mid",  "start_view": 1196, "end_view": 1201, "outer_fold": 3},
+
+    {"episode_id": "L01", "class": "low",  "start_view": 772,  "end_view": 799,  "outer_fold": 3},
+    {"episode_id": "L02", "class": "low",  "start_view": 846,  "end_view": 895,  "outer_fold": 2},
+    {"episode_id": "L03", "class": "low",  "start_view": 947,  "end_view": 962,  "outer_fold": 3},
+    {"episode_id": "L04", "class": "low",  "start_view": 1015, "end_view": 1036, "outer_fold": 1},
+    {"episode_id": "L05", "class": "low",  "start_view": 1054, "end_view": 1059, "outer_fold": 1},
+    {"episode_id": "L06", "class": "low",  "start_view": 2018, "end_view": 2028, "outer_fold": 3},
+    {"episode_id": "L07", "class": "low",  "start_view": 2105, "end_view": 2107, "outer_fold": 2},
+    {"episode_id": "L08", "class": "low",  "start_view": 2398, "end_view": 2399, "outer_fold": 2},
+    {"episode_id": "L09", "class": "low",  "start_view": 2623, "end_view": 2644, "outer_fold": 1},
+
+    {"episode_id": "H01", "class": "high", "start_view": 2227, "end_view": 2239, "outer_fold": 2},
+    {"episode_id": "H02", "class": "high", "start_view": 2299, "end_view": 2303, "outer_fold": 3},
+    {"episode_id": "H03", "class": "high", "start_view": 2348, "end_view": 2352, "outer_fold": 3},
+    {"episode_id": "H04", "class": "high", "start_view": 2470, "end_view": 2532, "outer_fold": 1}
+  ]
+}
