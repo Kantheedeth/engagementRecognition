@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>High-group visual audit</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef2f5;color:#17232d;font:15px/1.45 system-ui,sans-serif}header,main{max-width:1540px;margin:auto;padding:18px}h1{font-size:25px;margin:0 0 5px}h2{font-size:19px;margin:0 0 10px}h3{font-size:16px;margin:14px 0 8px}.muted{color:#526574}.notice{padding:10px 12px;border-left:4px solid #ca8b18;background:#fff7df}.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}button,select,input,textarea{font:inherit;border:1px solid #b8c4cc;border-radius:5px;padding:7px;background:white}button{cursor:pointer}.primary{background:#176b92;color:white}.danger{background:#a74343;color:white}.status{min-height:22px;color:#315a70}.layout{display:grid;grid-template-columns:minmax(650px,1.4fr) minmax(370px,.7fr);gap:18px;align-items:start}.card{background:white;border:1px solid #d0d9df;border-radius:8px;padding:14px;margin-bottom:14px}.frames{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:7px}.frame{margin:0}.frame img{display:block;width:100%;border-radius:5px;border:2px solid transparent}.frame figcaption{font-size:12px;color:#526574}.frame img:hover{border-color:#176b92}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fields label{display:flex;flex-direction:column;gap:4px}.wide{grid-column:1/-1}textarea{width:100%;min-height:80px}.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px}.checks label{display:flex;align-items:center;gap:6px}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px}.speaker{background:#ffaf00}.listener{background:#3cbe5a}.arrow{background:#dc50dc}.target{background:#ffff00}.hidden{display:none}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font:13px ui-monospace,monospace}.metric-grid div{padding:5px;background:#f2f5f7;border-radius:4px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px;border:1px solid #ccd6dc;text-align:right}th:first-child,td:first-child{text-align:left}a{color:#176b92}.complete{color:#287745;font-weight:600}.incomplete{color:#9b6110;font-weight:600}@media(max-width:1050px){.layout{grid-template-columns:1fr}.frames{grid-template-columns:repeat(2,1fr)}}
+</style>
+<header>
+<h1>Blinded High-group extraction audit</h1>
+<p>Review all eight stored frames for each clip. Group identity and feature summaries stay hidden until you explicitly reveal them.</p>
+<p class="notice">Judge visible extraction quality—not internal attention. Purple arrows are pose-derived orientation proxies, not eye gaze. A lowered head may be writing or reading, and does not prove disengagement.</p>
+<div class="bar">
+  <label>Annotator <input id="annotator" placeholder="Name or initials"></label>
+  <button class="primary" id="csv">Download annotations CSV</button>
+  <button id="backup">Download progress JSON</button>
+  <label>Restore <input id="restore" type="file" accept="application/json,.json"></label>
+</div>
+<div class="bar">
+  <button id="prev">Previous</button><select id="jump"></select><button id="next">Next</button>
+  <span id="counter"></span><span id="completion"></span>
+  <label><input type="checkbox" id="raw"> Show raw frames</label>
+</div>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+</header>
+<main>
+<div class="layout">
+  <section>
+    <article class="card">
+      <h2 id="code"></h2><p id="clipState"></p>
+      <div class="legend"><span><i class="dot speaker"></i>speaker/known speaker</span><span><i class="dot listener"></i>listener IDs</span><span><i class="dot arrow"></i>pose orientation</span><span><i class="dot target"></i>interaction target</span></div>
+      <div id="frames" class="frames"></div>
+    </article>
+    <article class="card">
+      <h2>Clip-level review</h2>
+      <div id="fields" class="fields"></div>
+    </article>
+  </section>
+  <aside>
+    <article class="card">
+      <h2>How to review</h2>
+      <ol><li>Inspect the overlay across all eight frames.</li><li>Toggle raw frames when the overlay obscures behavior.</li><li>Record only what is visibly supportable.</li><li>Use <em>unclear</em> for occlusion or ambiguity.</li></ol>
+      <p><a href="ANNOTATION_GUIDE.md">Full annotation guide</a></p>
+    </article>
+    <article class="card">
+      <h2>Post-audit comparison</h2>
+      <p class="muted">Reveal this after completing annotations to reduce confirmation bias.</p>
+      <button class="danger" id="reveal">Reveal groups and comparison</button>
+      <div id="revealed" class="hidden"><h3 id="identity"></h3><div id="metrics" class="metric-grid"></div><h3>Annotation comparison</h3><div id="comparison"></div></div>
+    </article>
+  </aside>
+</div>
+</main>
+<script id="payload" type="application/json">__AUDIT_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('payload').textContent),$=id=>document.getElementById(id);
+const auditId=data.metadata.audit_id,storeKey='high-group-audit-'+auditId;
+const fields={
+  in_scope:{label:'Speaker-led lecture activity?',options:['yes','no','unclear']},
+  speaker_correct:{label:'Speaker identification across frames',options:['correct','mostly_correct','incorrect','unclear']},
+  listeners_correct:{label:'Listener detection coverage',options:['correct','mostly_correct','incorrect','unclear']},
+  tracking_continuity:{label:'Track-ID continuity',options:['good','minor_issues','major_issues','unclear']},
+  pose_quality:{label:'Pose keypoint placement',options:['good','mixed','poor','unclear']},
+  head_posture_validity:{label:'Head/posture proxy visually consistent',options:['consistent','mixed','inconsistent','unclear']},
+  orientation_validity:{label:'Purple orientation arrows visually reasonable',options:['consistent','mixed','inconsistent','unclear']},
+  visible_behavior:{label:'Dominant visible group behavior (descriptive only)',options:['facing_speaker','note_taking_or_reading','mixed','other','unclear']},
+  high_label_fit:{label:'Dataset High label visually',options:['plausible','ambiguous','implausible','unclear']}
+};
+const issueNames=['missed_person','false_person','speaker_role_error','id_switch','bad_keypoints','bad_orientation_arrow','heavy_occlusion'];
+let state={audit_id:auditId,annotator:'',rows:{}},index=0,revealed=false;
+try{const saved=JSON.parse(localStorage.getItem(storeKey)||'null');if(saved&&saved.audit_id===auditId&&saved.rows)state=saved;}catch(e){}
+$('annotator').value=state.annotator||'';
+function row(code){if(!state.rows[code])state.rows[code]={};return state.rows[code]}
+function complete(record){const r=state.rows[record.audit_code]||{};return ['in_scope','speaker_correct','listeners_correct','tracking_continuity','pose_quality','head_posture_validity','orientation_validity','high_label_fit'].every(k=>r[k])}
+function save(message='Progress saved in this browser.'){state.annotator=$('annotator').value;localStorage.setItem(storeKey,JSON.stringify(state));$('status').textContent=message;updateProgress()}
+function updateProgress(){const done=data.clips.filter(complete).length;$('completion').innerHTML=`<span class="${done===data.clips.length?'complete':'incomplete'}">${done}/${data.clips.length} complete</span>`}
+function selectField(key,definition,value){const label=document.createElement('label');label.textContent=definition.label;const select=document.createElement('select');select.dataset.key=key;select.innerHTML='<option value="">Choose…</option>'+definition.options.map(v=>`<option value="${v}">${v.replaceAll('_',' ')}</option>`).join('');select.value=value||'';select.onchange=()=>{row(data.clips[index].audit_code)[key]=select.value;save();renderState()};label.appendChild(select);return label}
+function render(){const clip=data.clips[index],r=row(clip.audit_code);$('code').textContent=`Audit ${clip.audit_code}`;$('counter').textContent=`${index+1} of ${data.clips.length}`;$('jump').value=String(index);$('prev').disabled=index===0;$('next').disabled=index===data.clips.length-1;
+  const frames=$('frames');frames.innerHTML='';for(const frame of clip.frames){const figure=document.createElement('figure');figure.className='frame';const img=document.createElement('img');img.src=$('raw').checked?frame.raw:frame.overlay;img.alt=`${clip.audit_code}, sampled frame ${frame.frame_index+1}`;img.onclick=()=>window.open(img.src,'_blank');figure.appendChild(img);const caption=document.createElement('figcaption');caption.textContent=`Frame ${frame.frame_index+1} · ${frame.people} detections · target ${frame.target_source}`;figure.appendChild(caption);frames.appendChild(figure)}
+  const container=$('fields');container.innerHTML='';for(const [key,definition] of Object.entries(fields))container.appendChild(selectField(key,definition,r[key]));
+  const issues=document.createElement('div');issues.className='wide';issues.innerHTML='<h3>Visible extraction issues</h3>';const checks=document.createElement('div');checks.className='checks';for(const issue of issueNames){const label=document.createElement('label');const input=document.createElement('input');input.type='checkbox';input.checked=(r.issues||[]).includes(issue);input.onchange=()=>{const values=new Set(r.issues||[]);input.checked?values.add(issue):values.delete(issue);r.issues=[...values];save()};label.append(input,document.createTextNode(issue.replaceAll('_',' ')));checks.appendChild(label)}issues.appendChild(checks);container.appendChild(issues);
+  const problem=document.createElement('label');problem.className='wide';problem.textContent='Problem frame numbers (optional)';const problemInput=document.createElement('input');problemInput.value=r.problem_frames||'';problemInput.placeholder='Example: 2, 5–6';problemInput.onchange=()=>{r.problem_frames=problemInput.value;save()};problem.appendChild(problemInput);container.appendChild(problem);
+  const notes=document.createElement('label');notes.className='wide';notes.textContent='Notes';const area=document.createElement('textarea');area.value=r.notes||'';area.placeholder='Describe visible evidence; avoid assuming internal attention.';area.onchange=()=>{r.notes=area.value;save()};notes.appendChild(area);container.appendChild(notes);renderState();if(revealed)renderReveal()}
+function renderState(){const clip=data.clips[index];$('clipState').innerHTML=complete(clip)?'<span class="complete">Review complete</span>':'<span class="incomplete">Incomplete</span>'}
+function download(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function csvEscape(value){const text=String(value??'');return /[",\n]/.test(text)?'"'+text.replaceAll('"','""')+'"':text}
+function exportCsv(){save();const columns=['audit_code','key','episode_id','comparison_group','annotator',...Object.keys(fields),'issues','problem_frames','notes'];const rows=[columns.join(',')];for(const clip of data.clips){const r=state.rows[clip.audit_code]||{};const values={audit_code:clip.audit_code,key:clip.key,episode_id:clip.episode_id,comparison_group:clip.comparison_group,annotator:state.annotator,...r,issues:(r.issues||[]).join('|')};rows.push(columns.map(k=>csvEscape(values[k])).join(','))}download('high_group_annotations.csv',rows.join('\n')+'\n','text/csv')}
+function mean(items,key){const values=items.map(c=>c.feature_means[key]);return values.reduce((a,b)=>a+b,0)/values.length}
+function rate(clips,key,accepted){const answered=clips.filter(c=>(state.rows[c.audit_code]||{})[key]);if(!answered.length)return '—';const hits=answered.filter(c=>accepted.includes(state.rows[c.audit_code][key])).length;return `${Math.round(100*hits/answered.length)}% (${hits}/${answered.length})`}
+function renderReveal(){const clip=data.clips[index];$('identity').textContent=`${clip.key} · ${clip.episode_id} · ${clip.comparison_group}`;$('metrics').innerHTML=Object.entries(clip.feature_means).map(([k,v])=>`<div>${k}<br><strong>${v.toFixed(3)}</strong></div>`).join('');const groups=[['H04',data.clips.filter(c=>c.comparison_group==='H04')],['Other High',data.clips.filter(c=>c.comparison_group==='Other High')]];let html='<table><thead><tr><th>Audit outcome</th>'+groups.map(g=>`<th>${g[0]}</th>`).join('')+'</tr></thead><tbody>';const rows=[['Completed',null,null],['Speaker correct/mostly','speaker_correct',['correct','mostly_correct']],['Tracking good/minor','tracking_continuity',['good','minor_issues']],['Pose good/mixed','pose_quality',['good','mixed']],['Head/posture consistent','head_posture_validity',['consistent']],['Orientation consistent','orientation_validity',['consistent']],['High plausible','high_label_fit',['plausible']],['High ambiguous/implausible','high_label_fit',['ambiguous','implausible']]];for(const item of rows){html+=`<tr><td>${item[0]}</td>`;for(const [,clips] of groups){html+=`<td>${item[1]?rate(clips,item[1],item[2]):clips.filter(complete).length+'/'+clips.length}</td>`}html+='</tr>'}html+='</tbody></table><h3>Saved-feature means</h3><table><thead><tr><th>Feature</th><th>H04</th><th>Other High</th></tr></thead><tbody>';for(const key of ['mean_face_visibility','posture_observation_ratio','mean_orientation_to_target','orientation_alignment','matched_stillness_ratio','matched_high_motion_ratio','speaker_in_zone']){html+=`<tr><td>${key}</td><td>${mean(groups[0][1],key).toFixed(3)}</td><td>${mean(groups[1][1],key).toFixed(3)}</td></tr>`}html+='</tbody></table>';$('comparison').innerHTML=html}
+$('jump').innerHTML=data.clips.map((c,i)=>`<option value="${i}">${c.audit_code}</option>`).join('');$('jump').onchange=()=>{index=Number($('jump').value);render()};$('prev').onclick=()=>{if(index>0){index--;render()}};$('next').onclick=()=>{if(index<data.clips.length-1){index++;render()}};$('raw').onchange=render;$('annotator').onchange=()=>save();$('csv').onclick=exportCsv;$('backup').onclick=()=>{save();download('high_group_progress.json',JSON.stringify(state,null,2)+'\n','application/json')};$('restore').onchange=event=>{const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const restored=JSON.parse(reader.result);if(restored.audit_id!==auditId||!restored.rows)throw new Error('Progress file belongs to another audit');state=restored;$('annotator').value=state.annotator||'';save('Progress restored.');render()};reader.readAsText(file)};$('reveal').onclick=()=>{if(!revealed&&!confirm('Reveal H04 membership and feature summaries? For the least biased audit, do this only after completing the reviews.'))return;revealed=true;$('revealed').classList.remove('hidden');$('reveal').disabled=true;renderReveal()};
+updateProgress();render();
+</script>
+</html>

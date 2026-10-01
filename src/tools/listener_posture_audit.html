@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Listener posture review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f4f6;color:#202d39;font:15px/1.5 system-ui,sans-serif}header,main{max-width:1500px;margin:auto;padding:20px}h1{font-size:25px;margin:0}p{margin:8px 0}button,select,input,textarea{font:inherit;padding:7px;border:1px solid #bcc6ce;border-radius:5px;background:white}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #237bb1}.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}.layout{display:grid;grid-template-columns:minmax(350px,1fr) minmax(360px,1fr);gap:22px}.visual{position:sticky;top:12px;align-self:start}img{width:100%;display:block;border-radius:6px}article{padding:16px;background:white;border:1px solid #d4dce2;margin-bottom:14px;border-radius:8px}h2{font-size:18px;margin:0 0 10px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:flex;flex-direction:column;gap:4px}textarea{width:100%;min-height:54px;margin-top:6px}.muted{color:#546776}.notice{background:#fff4d5;padding:10px;border-radius:6px}details{margin-top:12px;background:#f2f5f7;padding:10px}pre{white-space:pre-wrap;font:13px/1.6 ui-monospace,monospace}.check{display:flex;flex-direction:row;align-items:center}.export{background:#165f86;color:white}.status{min-height:24px}a{color:#165f86}@media(max-width:850px){.layout{grid-template-columns:1fr}.visual{position:static}}
+</style>
+<header>
+<h1>Listener posture review</h1>
+<p>Label what is visible for each numbered person. Leave uncertain observations as <em>unknown</em>. Person numbers apply only within the displayed frame.</p>
+<p class="muted">This is a training-data development audit. Labels start blank; no accuracy or behavioral validation has been established.</p>
+<div class="bar"><label>Annotator <input id="annotator" placeholder="Your name or initials"></label><button class="export" id="download">Download annotations CSV</button><button id="backup">Download progress JSON</button><label>Restore progress <input id="restore" type="file" accept="application/json,.json"></label></div>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<div class="bar"><button id="prev">Previous</button><select id="jump" aria-label="Choose frame"></select><button id="next">Next</button><span id="count"></span></div>
+<div class="bar"><label class="check"><input id="reveal" type="checkbox">Reveal current predictions after annotating</label><label class="check"><input id="raw" type="checkbox">Show original frame without boxes</label></div>
+</header>
+<main class="layout"><section class="visual"><img id="frame" alt="Classroom frame with numbered listener detections"><p id="caption"></p><p class="notice">Head lowered does not establish disengagement. Face occlusion does not establish sleep. Writing or device use may be visible, but whether it is on task may remain unknown.</p><label>Frame notes: missed people, incorrect boxes, or visibility problems<textarea id="frameNotes"></textarea></label><p><a href="ANNOTATION_GUIDE.md">Annotation guide</a> · <a href="annotations_blank.csv" download>Blank annotation sheet</a></p></section><section id="people"></section></main>
+<script id="payload" type="application/json">__AUDIT_DATA__</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById('payload').textContent), $=id=>document.getElementById(id);
+const storeKey='listener-audit-'+data.metadata.audit_id;
+const choices={manual_role:['listener','speaker','unclear'],manual_head:['up','level','down','unknown'],manual_posture:['upright','forward_lean','head_rest','other','unknown'],manual_facing:['toward_instruction_area','away','unknown'],manual_activity:['writing','reading','device_use','other','unknown']};
+const labels={manual_role:'Visible role',manual_head:'Head position',manual_posture:'Posture',manual_facing:'Orientation toward instruction area',manual_activity:'Visible activity (optional)'};
+let state={audit_id:data.metadata.audit_id,annotator:'',rows:{},frames:{}}, index=0;
+try{const saved=JSON.parse(localStorage.getItem(storeKey)||'null');if(saved&&saved.audit_id===state.audit_id&&saved.rows&&saved.frames)state=saved;}catch(e){$('status').textContent='Browser saving is unavailable. Download progress JSON before closing.';}
+$('annotator').value=state.annotator;
+function save(){state.annotator=$('annotator').value;try{localStorage.setItem(storeKey,JSON.stringify(state));$('status').textContent='Progress saved in this browser. Download CSV/JSON to keep a separate copy.';}catch(e){$('status').textContent='Browser saving unavailable. Download your progress before leaving.';}}
+function download(name,text,type){const link=document.createElement('a');const url=URL.createObjectURL(new Blob([text],{type}));link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function csvCell(v){let s=String(v??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
+function exportCsv(){save();const fields=['record_id','frame_id','listener_id','annotator',...Object.keys(choices),'notes','frame_notes'];const lines=[fields];for(const f of data.frames){for(const p of f.listeners){const row=state.rows[p.record_id]||{};const record={...row,record_id:p.record_id,frame_id:f.id,listener_id:p.listener_id,annotator:state.annotator,frame_notes:state.frames[f.id]||''};lines.push(fields.map(k=>record[k]||''));}if(!f.listeners.length){lines.push(fields.map(k=>({frame_id:f.id,annotator:state.annotator,frame_notes:state.frames[f.id]||''}[k]||'')));}}download('listener_annotations.csv',lines.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+for(let i=0;i<data.frames.length;i++){const option=document.createElement('option');option.value=i;option.textContent='Frame '+(i+1)+' / '+data.frames.length;$('jump').append(option);}
+function updateCount(){const n=Object.values(state.rows).filter(r=>r.manual_role&&r.manual_head&&r.manual_posture&&r.manual_facing).length;$('count').textContent=n+' / '+data.metadata.listener_count+' observations with four core labels';}
+function render(){
+ const f=data.frames[index],reveal=$('reveal').checked;
+ $('jump').value=index;$('prev').disabled=index===0;$('next').disabled=index===data.frames.length-1;
+ $('frame').src='images/'+f.id+($('raw').checked?'_raw.jpg':reveal?'_diagnostic.jpg':'_clean.jpg');
+ $('caption').textContent=f.id+' · sampled frame '+(f.frame_index+1)+' of 8'+(reveal?' · target: '+f.target_source+' · '+f.source:'');
+ $('frameNotes').value=state.frames[f.id]||'';updateCount();$('people').replaceChildren();
+ if(!f.listeners.length)$('people').textContent='No listeners detected. Use frame notes to record any visible people missed by detection.';
+ for(const p of f.listeners){
+  const row=state.rows[p.record_id]||{},card=document.createElement('article'),h=document.createElement('h2');
+  h.textContent=p.listener_id+' · '+p.record_id;card.append(h);
+  const crop=document.createElement('img');crop.src=p.crop_image;crop.alt='Unmarked crop for '+p.listener_id;
+  crop.style.cssText='width:auto;max-width:100%;height:170px;object-fit:contain;margin-bottom:12px';card.append(crop);
+  const fields=document.createElement('div');fields.className='fields';
+  for(const [key,options]of Object.entries(choices)){
+   const label=document.createElement('label');label.textContent=labels[key];const select=document.createElement('select');
+   const blank=document.createElement('option');blank.value='';blank.textContent='Unlabeled';select.append(blank);
+   for(const value of options){const o=document.createElement('option');o.value=value;o.textContent=value.replace(/_/g,' ');select.append(o);}
+   select.value=row[key]||'';select.onchange=()=>{state.rows[p.record_id]={...(state.rows[p.record_id]||{}),[key]:select.value};save();updateCount();};
+   label.append(select);fields.append(label);
+  }
+  card.append(fields);const notes=document.createElement('textarea');notes.placeholder='Record visible evidence or explain a mismatch.';
+  notes.setAttribute('aria-label','Notes for '+p.listener_id);notes.value=row.notes||'';
+  notes.oninput=()=>{state.rows[p.record_id]={...(state.rows[p.record_id]||{}),notes:notes.value};save();};card.append(notes);
+  if(reveal){
+   const d=document.createElement('details');d.open=true;const summary=document.createElement('summary');summary.textContent='Current rule outputs — not human labels';d.append(summary);
+   const pre=document.createElement('pre');const keys=['det_confidence','face_visibility','elevation_observed','posture_elevation_used','pitch_observed','pitch_used','head_up_flag','head_down_flag','upright_flag','slouching_flag','slumped_flag','orientation_score'];
+   pre.textContent=keys.map(k=>k+': '+(typeof p[k]==='number'?p[k].toFixed(3):p[k]??'unavailable')).join('\n')+'\n\n'+p.flags.join('\n');d.append(pre);card.append(d);
+  }
+  $('people').append(card);
+ }
+}
+$('prev').onclick=()=>{index--;render();};$('next').onclick=()=>{index++;render();};$('jump').onchange=()=>{index=Number($('jump').value);render();};$('reveal').onchange=render;$('raw').onchange=render;$('annotator').oninput=save;$('frameNotes').oninput=()=>{state.frames[data.frames[index].id]=$('frameNotes').value;save();};$('download').onclick=exportCsv;$('backup').onclick=()=>{save();download('listener_progress.json',JSON.stringify(state,null,2),'application/json');};$('restore').onchange=async()=>{try{const file=$('restore').files[0];if(!file)return;const restored=JSON.parse(await file.text());if(restored.audit_id!==state.audit_id||!restored.rows||!restored.frames)throw Error('Progress file belongs to a different audit or is invalid');state=restored;$('annotator').value=state.annotator||'';save();render();}catch(e){$('status').textContent=e.message;}};render();
+</script>
+</html>
